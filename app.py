@@ -19,6 +19,7 @@ Deploy:       uvicorn app:app --host 0.0.0.0 --port $PORT
 """
 import os
 import secrets
+from datetime import datetime, timedelta, timezone
 import requests
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -121,6 +122,98 @@ def cancel(_: str = Depends(auth)):
     return {"canceled": res}
 
 
+# ---------- signal computation (mirrors the bot's strategies, computed from live bars) ----------
+def _crypto_closes(symbols, days=70):
+    start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    r = requests.get(f"{DATA_BASE}/v1beta3/crypto/us/bars",
+                     params={"symbols": ",".join(symbols), "timeframe": "1D", "start": start, "limit": 1000},
+                     headers=HEADERS, timeout=20)
+    r.raise_for_status()
+    bars = r.json().get("bars", {})
+    return {s: [b["c"] for b in bars.get(s, [])] for s in symbols}
+
+
+def _stock_closes(symbols, days=400):
+    start = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    r = requests.get(f"{DATA_BASE}/v2/stocks/bars",
+                     params={"symbols": ",".join(symbols), "timeframe": "1Day", "start": start,
+                             "limit": 10000, "feed": "iex", "adjustment": "split"},
+                     headers=HEADERS, timeout=25)
+    r.raise_for_status()
+    bars = r.json().get("bars", {})
+    return {s: [b["c"] for b in bars.get(s, [])] for s in symbols}
+
+
+def donchian_sig(c):
+    if len(c) < 21:
+        return "hold", "not enough data yet"
+    last, hi20, lo10 = c[-1], max(c[-21:-1]), min(c[-11:-1])
+    if last > hi20:
+        return "buy", f"price ${last:,.0f} broke above the 20-day high ${hi20:,.0f}"
+    if last < lo10:
+        return "sell", f"price ${last:,.0f} fell below the 10-day low ${lo10:,.0f}"
+    return "hold", f"price ${last:,.0f} ranging inside ${lo10:,.0f}–${hi20:,.0f} — wait for a breakout"
+
+
+def rsi_sig(c, n=14):
+    if len(c) < n + 2:
+        return "hold", "not enough data yet"
+    d = [c[i] - c[i - 1] for i in range(1, len(c))]
+    def rsi_at(end):
+        w = d[end - n:end]
+        g = sum(x for x in w if x > 0) / n
+        l = sum(-x for x in w if x < 0) / n
+        return 100.0 if l == 0 else 100 - 100 / (1 + g / l)
+    last, prev = rsi_at(len(d)), rsi_at(len(d) - 1)
+    if prev < 30 <= last:
+        return "buy", f"RSI bounced up through 30 ({prev:.0f}→{last:.0f}) — oversold bounce"
+    if prev < 60 <= last:
+        return "sell", f"RSI crossed up through 60 ({prev:.0f}→{last:.0f}) — exit target"
+    return "hold", f"RSI {last:.0f} — no entry/exit cross"
+
+
+def sma_sig(c):
+    if len(c) < 200:
+        return "hold", f"only {len(c)} days of data, need 200 for the trend"
+    fast, slow = sum(c[-50:]) / 50, sum(c[-200:]) / 200
+    if fast > slow:
+        return "buy", f"50-day avg ${fast:,.0f} above 200-day ${slow:,.0f} — uptrend, hold it"
+    return "sell", f"50-day avg ${fast:,.0f} below 200-day ${slow:,.0f} — downtrend, stay out"
+
+
+@app.get("/api/signals")
+def signals(_: str = Depends(auth)):
+    held = {p["symbol"] for p in alpaca("GET", "/v2/positions")}
+    def is_held(s):
+        return s in held or s.replace("/", "") in held
+    out = []
+    try:
+        cc = _crypto_closes(["BTC/USD", "ETH/USD"])
+    except Exception:
+        cc = {}
+    for sym, fn, strat in [("BTC/USD", donchian_sig, "Donchian-20"), ("ETH/USD", rsi_sig, "RSI(14)")]:
+        cl = cc.get(sym, [])
+        sig, why = fn(cl) if cl else ("hold", "price feed unavailable")
+        out.append({"symbol": sym, "sleeve": "crypto", "strategy": strat, "signal": sig,
+                    "reason": why, "price": cl[-1] if cl else None, "holding": is_held(sym)})
+    try:
+        sc = _stock_closes(["SMH", "GRID", "COPX", "SPY"])
+    except Exception:
+        sc = {}
+    for sym in ["SMH", "GRID", "COPX", "SPY"]:
+        cl = sc.get(sym, [])
+        sig, why = sma_sig(cl) if cl else ("hold", "price feed unavailable")
+        out.append({"symbol": sym, "sleeve": "equity", "strategy": "SMA 50/200", "signal": sig,
+                    "reason": why, "price": cl[-1] if cl else None, "holding": is_held(sym)})
+    regime = None
+    try:
+        fg = requests.get("https://api.alternative.me/fng/?limit=1", timeout=10).json()["data"][0]
+        regime = {"value": int(fg["value"]), "label": fg["value_classification"]}
+    except Exception:
+        pass
+    return {"signals": out, "regime": regime}
+
+
 @app.get("/", response_class=HTMLResponse)
 def index(_: str = Depends(auth)):
     return PAGE
@@ -156,6 +249,7 @@ canvas{max-height:260px}
 <div class=bar><div><h1>Trading Bot Dashboard</h1><div class=sub id=acct>loading…</div></div>
 <span class=upd id=upd></span></div>
 <div class=cards id=cards></div>
+<div class=panel><h2>What the bot is thinking today</h2><div id=regime class=sub></div><div id=signals></div></div>
 <div class=panel><h2>Equity — last 30 days</h2><canvas id=chart></canvas></div>
 <div class=panel><h2>How the bot decides — flow</h2>
 <pre class="mermaid">
@@ -205,6 +299,12 @@ async function loadAll(){try{
   ["Today's P/L",sign(s.day_pl),cls(s.day_pl)],
   ["Today %",(s.day_pl_pct>=0?'+':'')+s.day_pl_pct.toFixed(2)+'%',cls(s.day_pl)],
  ].map(([k,v,c])=>`<div class=card><div class=k>${k}</div><div class="v ${c}">${v}</div></div>`).join('');
+ const sg=await j('/api/signals');
+ $('regime').textContent=sg.regime?`Market regime — Fear & Greed ${sg.regime.value} (${sg.regime.label}). The bot vetoes new crypto buys while bearish.`:'';
+ const badge=s=>`<span class="tag ${s==='buy'?'grn':s==='sell'?'red':''}">${s.toUpperCase()}</span>`;
+ $('signals').innerHTML=`<table><tr><th>Symbol</th><th>Sleeve</th><th>Strategy</th><th>Signal</th><th style=text-align:left>What it sees</th><th>Holding</th></tr>`+
+  sg.signals.map(s=>`<tr><td>${s.symbol}</td><td>${s.sleeve}</td><td>${s.strategy}</td><td>${badge(s.signal)}</td>
+   <td style=text-align:left>${s.reason}</td><td>${s.holding?'✓':'—'}</td></tr>`).join('')+'</table>';
  const h=await j('/api/history');
  const labels=h.points.map(p=>new Date(p.t).toLocaleDateString(undefined,{month:'short',day:'numeric'}));
  const vals=h.points.map(p=>p.equity);
