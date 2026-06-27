@@ -130,6 +130,7 @@ PAGE = """<!doctype html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Trading Bot Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
 :root{--bg:#0b0e14;--card:#151a23;--line:#222b38;--txt:#e6edf3;--mut:#8b98a9;--grn:#3fb950;--red:#f85149;--acc:#388bfd}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
@@ -156,6 +157,31 @@ canvas{max-height:260px}
 <span class=upd id=upd></span></div>
 <div class=cards id=cards></div>
 <div class=panel><h2>Equity — last 30 days</h2><canvas id=chart></canvas></div>
+<div class=panel><h2>How the bot decides — flow</h2>
+<pre class="mermaid">
+flowchart TD
+  S([Daily run 9AM]) --> ACC[Read account:<br/>equity, cash, positions]
+  ACC --> CR[Crypto sleeve<br/>BTC and ETH]
+  ACC --> EQ[Equities sleeve<br/>SMH GRID COPX SPY]
+  CR --> CH{Holding?}
+  CH -- yes --> ST{Down 5% or<br/>30d underwater?}
+  ST -- yes --> SELL1[Stop-loss sell]
+  ST -- no --> HOLD1[Hold]
+  CH -- no --> SIG{Buy signal?<br/>Donchian / RSI}
+  SIG -- no --> WAIT1[Stay in cash]
+  SIG -- yes --> VETO{Regime bearish<br/>or stale?}
+  VETO -- yes --> BLOCK[Veto - stay cash]
+  VETO -- no --> CAP1[Size caps:<br/>25%/pos, 75% total]
+  CAP1 --> BUY1[Buy]
+  EQ --> EH{Holding?}
+  EH -- yes --> TR{50d above 200d?}
+  TR -- yes --> HOLD2[Hold the trend]
+  TR -- no --> SELL2[Sell - trend broke]
+  EH -- no --> UP{50d above 200d?<br/>uptrend}
+  UP -- no --> WAIT2[Stay in cash]
+  UP -- yes --> CAP2[Size caps]
+  CAP2 --> BUY2[Buy]
+</pre></div>
 <div class=panel><h2>Open Positions</h2><div id=pos></div></div>
 <div class=panel><h2>Recent Orders</h2><div id=ord></div></div>
 <div class=panel><h2>Controls</h2><div class=bar>
@@ -164,6 +190,7 @@ canvas{max-height:260px}
 <button onclick=loadAll()>Refresh</button>
 <span class=upd>auto-refresh 30s</span></div></div>
 </div><script>
+mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{fontSize:'12px'}});
 const $=id=>document.getElementById(id);
 const money=n=>'$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 const cls=n=>n>0?'grn':n<0?'red':'';const sign=n=>(n>=0?'+':'')+money(n);
@@ -179,11 +206,16 @@ async function loadAll(){try{
   ["Today %",(s.day_pl_pct>=0?'+':'')+s.day_pl_pct.toFixed(2)+'%',cls(s.day_pl)],
  ].map(([k,v,c])=>`<div class=card><div class=k>${k}</div><div class="v ${c}">${v}</div></div>`).join('');
  const h=await j('/api/history');
- const pts=h.points.map(p=>({x:p.t,y:p.equity}));
+ const labels=h.points.map(p=>new Date(p.t).toLocaleDateString(undefined,{month:'short',day:'numeric'}));
+ const vals=h.points.map(p=>p.equity);
+ $('chart').parentElement.querySelector('.cnote')?.remove();
+ if(!vals.length){const n=document.createElement('div');n.className='cnote empty';
+   n.textContent='No equity history yet — it fills in as the account runs.';$('chart').after(n);}
  if(chart)chart.destroy();
- chart=new Chart($('chart'),{type:'line',data:{datasets:[{data:pts,borderColor:'#388bfd',
+ chart=new Chart($('chart'),{type:'line',data:{labels,datasets:[{data:vals,borderColor:'#388bfd',
    backgroundColor:'rgba(56,139,253,.1)',fill:true,tension:.25,pointRadius:0,borderWidth:2}]},
-   options:{plugins:{legend:{display:false}},scales:{x:{type:'time',time:{unit:'day'},grid:{color:'#1c2430'},ticks:{color:'#8b98a9'}},
+   options:{plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>money(c.parsed.y)}}},
+   scales:{x:{grid:{color:'#1c2430'},ticks:{color:'#8b98a9',maxTicksLimit:8}},
    y:{grid:{color:'#1c2430'},ticks:{color:'#8b98a9',callback:v=>'$'+(v/1000).toFixed(0)+'k'}}}}});
  const ps=await j('/api/positions');
  $('pos').innerHTML=ps.length?`<table><tr><th>Symbol</th><th>Qty</th><th>Avg</th><th>Price</th><th>Value</th><th>Unrl P/L</th><th>%</th></tr>`+
