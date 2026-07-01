@@ -10,8 +10,10 @@ services:
         sync: false
       - key: APCA_API_SECRET_KEY
         sync: false
-      - key: APCA_BASE_URL
-        value: https://paper-api.alpaca.markets
+      # paper | live  — selects the Alpaca account. Remember to also swap the
+      # API key/secret above to the matching account's keys when going live.
+      - key: ALPACA_ENV
+        value: paper
       - key: DASHBOARD_USER
         sync: false
       - key: DASHBOARD_PASS

@@ -30,7 +30,13 @@ load_dotenv()
 
 KEY = os.getenv("APCA_API_KEY_ID")
 SECRET = os.getenv("APCA_API_SECRET_KEY")
-BASE = os.getenv("APCA_BASE_URL", "https://paper-api.alpaca.markets")
+# Pick the account by env: ALPACA_ENV=paper|live selects the right trading URL.
+# APCA_BASE_URL still wins if set, so nothing breaks for existing deploys.
+_ENVS = {"paper": "https://paper-api.alpaca.markets", "live": "https://api.alpaca.markets"}
+ALPACA_ENV = os.getenv("ALPACA_ENV", "paper").strip().lower()
+if ALPACA_ENV not in _ENVS:
+    raise SystemExit(f"ALPACA_ENV must be 'paper' or 'live', got {ALPACA_ENV!r}")
+BASE = os.getenv("APCA_BASE_URL") or _ENVS[ALPACA_ENV]
 DATA_BASE = "https://data.alpaca.markets"
 # Dashboard login (override in prod via env). Defaults are obvious on purpose for local use.
 DASH_USER = os.getenv("DASHBOARD_USER", "admin")
