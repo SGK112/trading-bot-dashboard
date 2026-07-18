@@ -1608,11 +1608,17 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(gw,gd),new THREE.MeshLambertMaterial({color:WCOL[wi]}));
  ground.rotation.x=-Math.PI/2;ground.position.set(mx,0,mz);worldGroup.add(ground);
  // each room is its own biome: tinted floor + its own flora
- roomCells.forEach(rc=>{
+ roomCells.forEach((rc,ri)=>{
   const f=new THREE.Mesh(new THREE.PlaneGeometry(ROOM-2,ROOM-2),new THREE.MeshLambertMaterial({color:rc.sub.g}));
   f.rotation.x=-Math.PI/2;f.position.set(rc.x,0.03,rc.z);worldGroup.add(f);
-  for(let k=0;k<10;k++){const a=Math.random()*6.283,d=6.5+Math.random()*(HR-5);
-   rc.sub.f(rc.x+Math.cos(a)*d,rc.z+Math.sin(a)*d,worldGroup)}});
+  for(let k=0;k<6;k++){const a=Math.random()*6.283,d=8+Math.random()*(HR-6);
+   rc.sub.f(rc.x+Math.cos(a)*d,rc.z+Math.sin(a)*d,worldGroup)}
+  // furniture that says what this place IS
+  for(let k=0;k<5;k++){
+   const a=(k/5)*6.283+Math.random()*0.7,d=HR-4.5-Math.random()*2.5;
+   const px=rc.x+Math.cos(a)*d,pz=rc.z+Math.sin(a)*d;
+   if(nearGateSpot(px,pz,7))continue;
+   vProp(wi,px,pz,worldGroup,k+ri)}});
  // EVERY room is a real room: 4 walls, each with a doorway.
  // the doorway onto the next room is the locked one; the other three stay open,
  // so you can always wander out a side door and go the long way round.
@@ -1925,6 +1931,68 @@ const VENUE=[
  {v:'Bank',   rooms:['Teller Line','Vault','Trading Floor','Board Room','Archive','Atrium','Executive Suite']},
  {v:'Studio', rooms:['Bootcamp','Code Lab','Design Studio','Security Lab','AI Lab','Launch Pad','Server Room']},
 ];
+// ============ WHAT EACH PLACE LOOKS LIKE ============
+// The rooms were named Classroom and Trading Floor and then all looked
+// identical. Now a school has desks and a blackboard, a store has aisles and
+// checkouts, an office has cubicles. You should know where you are.
+function vProp(wi,x,z,par,k){
+ const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=Math.random()*6.283;
+ const add=(w,h,d,c,px,py,pz)=>{const m=box(w,h,d,c);m.position.set(px||0,py||0,pz||0);g.add(m);return m};
+ if(wi===0){                                   // HOME
+  if(k%4===0){add(2.6,0.7,1.1,0x8a5a3a,0,0.55,0);add(2.6,0.9,0.3,0x9a6a45,0,1.1,-0.45);      // sofa
+              add(0.3,0.7,1.1,0x9a6a45,-1.3,0.9,0);add(0.3,0.7,1.1,0x9a6a45,1.3,0.9,0)}
+  else if(k%4===1){add(1.5,2.1,0.9,0xdfe7f2,0,1.05,0);add(1.35,0.1,0.05,0x9aa3b0,0,1.3,0.48)} // fridge
+  else if(k%4===2){add(2.1,0.14,1.2,0x9a7a52,0,0.95,0);                                       // table
+                   [[-0.85,-0.45],[0.85,-0.45],[-0.85,0.45],[0.85,0.45]].forEach(p=>add(0.14,0.95,0.14,0x6b5030,p[0],0.47,p[1]))}
+  else {add(2.2,0.5,0.5,0x4a3a2a,0,0.3,0);add(3,1.7,0.14,0x11151c,0,1.5,0);add(2.7,1.4,0.04,0x2b4a7a,0,1.5,0.09)} // tv
+ } else if(wi===1){                             // SCHOOL
+  if(k%4===0){add(1.5,0.1,0.8,0xc8a86a,0,0.85,0);add(1.5,0.5,0.1,0xc8a86a,0,0.6,-0.4);        // desk
+              [[-0.6,-0.3],[0.6,-0.3],[-0.6,0.3],[0.6,0.3]].forEach(p=>add(0.09,0.85,0.09,0x6a6a72,p[0],0.42,p[1]));
+              add(0.8,0.1,0.8,0x3d8bff,0,0.5,0.9);add(0.8,0.8,0.1,0x3d8bff,0,0.9,1.3)}        // chair
+  else if(k%4===1){add(4.2,2.2,0.2,0x2a4a3a,0,1.9,0);add(4.4,0.2,0.3,0xc8a86a,0,0.75,0.1)}    // blackboard
+  else if(k%4===2){[0,1,2].forEach(n=>{add(0.9,2.2,0.7,0x3a6a8a,(n-1)*0.95,1.1,0);add(0.1,0.1,0.1,0xf0b429,(n-1)*0.95,1.3,0.37)})} // lockers
+  else {add(0.14,3.2,0.14,0x9aa3b0,0,1.6,0);add(1.3,0.14,1.3,0xd8dee8,0,3.1,0.5);add(0.9,0.5,0.9,0xf0803a,0,2.8,0.5)} // hoop
+ } else if(wi===2){                             // STORE
+  if(k%4===0){[0,1,2].forEach(n=>{add(3.2,0.12,1,0x9aa3b0,0,0.6+n*0.75,0);                    // shelving
+     for(let q=0;q<4;q++)add(0.4,0.5,0.4,[0xd64f6a,0x3fb950,0xf0b429,0x3d8bff][q],-1.2+q*0.8,0.9+n*0.75,0)});
+     add(3.2,0.14,1,0x6a7280,0,2.9,0)}
+  else if(k%4===1){add(2.6,1.0,1.1,0xdfe7f2,0,0.5,0);add(2.6,0.14,1.3,0x9aa3b0,0,1.05,0);      // checkout
+                   add(0.5,0.4,0.4,0x22303a,0.9,1.25,0)}
+  else if(k%4===2){add(1.1,0.9,1.4,0xb8c0cc,0,0.85,0);                                        // trolley
+     [[-0.45,-0.55],[0.45,-0.55],[-0.45,0.55],[0.45,0.55]].forEach(p=>add(0.16,0.16,0.16,0x1b1f26,p[0],0.16,p[1]))}
+  else {add(1.8,0.6,1.2,0x8a6a44,0,0.35,0);[0,1,2,3,4].forEach(q=>add(0.42,0.42,0.42,[0xf0803a,0xd6453f,0x3fb950][q%3],-0.6+q*0.3,0.85,0))} // produce
+ } else if(wi===3){                             // OFFICE
+  if(k%4===0){add(2.4,1.3,0.12,0x8a95a8,0,0.95,-0.7);add(0.12,1.3,1.4,0x8a95a8,-1.2,0.95,0);  // cubicle
+              add(1.9,0.1,0.9,0x9a9a9a,0,1.05,0);add(0.9,0.6,0.08,0x11151c,0,1.4,-0.3);
+              add(0.8,0.5,0.03,0x3d8bff,0,1.4,-0.25)}
+  else if(k%4===1){add(0.5,1.3,0.5,0x9aa3b0,0,0.65,0);add(0.55,0.7,0.55,0x66c7d6,0,1.6,0)}     // water cooler
+  else if(k%4===2){add(3.4,1.9,0.12,0xf4f7fb,0,1.9,0);add(0.7,0.06,0.03,0xd6453f,-0.8,1.9,0.09);
+                   add(0.9,0.06,0.03,0x3d8bff,0.4,1.6,0.09)}                                  // whiteboard
+  else {add(2.6,0.12,1.2,0x6a5a48,0,1.05,0);[[-1,-0.45],[1,-0.45],[-1,0.45],[1,0.45]].forEach(p=>add(0.12,1.05,0.12,0x4a4a52,p[0],0.52,p[1]));
+        [0,1,2].forEach(q=>add(0.8,0.1,0.8,0x2a3a5a,-0.9+q*0.9,0.55,1.1))}                    // meeting table
+ } else if(wi===4){                             // BANK
+  if(k%4===0){add(3.4,1.2,0.9,0x6a5a48,0,0.6,0);add(3.4,0.14,1.1,0x2a2a32,0,1.25,0);          // teller counter
+              add(3.4,1.4,0.06,0xbfe0ff,0,2.05,0);add(0.7,0.5,0.06,0x9a9a9a,0,1.5,-0.1)}
+  else if(k%4===1){const d=add(2.4,2.4,0.4,0x9aa3b0,0,1.3,0);                                  // vault door
+              add(0.9,0.9,0.5,0x6a7280,0,1.3,0.2);add(0.16,1.4,0.16,0xf0b429,0,1.3,0.45);
+              add(1.4,0.16,0.16,0xf0b429,0,1.3,0.45)}
+  else if(k%4===2){[0,1].forEach(n=>add(0.14,1.0,0.14,0xf0b429,n*1.8-0.9,0.5,0));
+              add(1.8,0.06,0.06,0xd6453f,0,0.95,0)}                                            // velvet rope
+  else {add(0.9,1.9,0.7,0x2a3a5a,0,0.95,0);add(0.6,0.45,0.05,0x66c7d6,0,1.45,0.38);
+        add(0.5,0.1,0.05,0x9aa3b0,0,1.05,0.38)}                                                // ATM
+ } else {                                       // DEV STUDIO
+  if(k%4===0){add(2.4,0.1,1.1,0x2b3a5c,0,1.0,0);[[-1,-0.45],[1,-0.45],[-1,0.45],[1,0.45]].forEach(p=>add(0.1,1.0,0.1,0x4a5a80,p[0],0.5,p[1]));
+     add(1.1,0.7,0.06,0x11151c,-0.5,1.42,-0.2);add(1.0,0.6,0.02,0x3fb950,-0.5,1.42,-0.16);
+     add(1.1,0.7,0.06,0x11151c,0.65,1.42,-0.2);add(1.0,0.6,0.02,0x3d8bff,0.65,1.42,-0.16)}    // dual monitors
+  else if(k%4===1){add(1.1,2.6,0.9,0x1b2740,0,1.3,0);                                          // server rack
+     for(let n=0;n<7;n++){add(0.95,0.22,0.05,0x2b3654,0,0.35+n*0.33,0.46);
+       add(0.08,0.08,0.05,[0x3fb950,0xf0b429][n%2],0.35,0.35+n*0.33,0.49)}}
+  else if(k%4===2){const bb=new THREE.Mesh(new THREE.SphereGeometry(0.85,12,10),
+     new THREE.MeshLambertMaterial({color:0xa371f7}));bb.scale.set(1,0.62,1);bb.position.y=0.5;g.add(bb)} // beanbag
+  else {add(3.2,1.8,0.1,0xf4f7fb,0,1.8,0);add(1.2,0.05,0.03,0xa371f7,-0.6,2.0,0.08);
+        add(0.8,0.05,0.03,0x3fb950,0.5,1.6,0.08)}                                              // whiteboard
+ }
+ par.add(g);return g}
 // a doorway you can see through — posts + lintel, no collision
 function doorFrame(x,z,dir,WT,GAP){const H=6,col=0x6b5238;
  const l=(dir==='v')?box(WT+0.3,0.9,GAP+0.4,col):box(GAP+0.4,0.9,WT+0.3,col);
