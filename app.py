@@ -19,14 +19,20 @@ Deploy:       uvicorn app:app --host 0.0.0.0 --port $PORT
 """
 import os
 import json
+import base64
+import hashlib
+import hmac
 import pathlib
+import re as _re
 import secrets
 import threading
+import time
 from datetime import datetime, timedelta, timezone
 import requests
 from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import Response, Cookie
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -60,6 +66,228 @@ def auth(creds: HTTPBasicCredentials = Depends(security)):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Bad credentials",
                             {"WWW-Authenticate": "Basic"})
     return creds.username
+
+
+# ============================================================================
+# PLAYER ACCOUNTS
+# Deliberately separate from the HTTP-Basic owner login. The dashboard shows a
+# real brokerage account and can liquidate positions; the game must never be a
+# door into it. Players get cookies, the owner keeps Basic auth, and no game
+# route touches the trading endpoints.
+# We ask for a username and a password. No email, no real name, no date of
+# birth - children play this, and the safest personal data is the kind you
+# never collect.
+# ============================================================================
+PLAYER_COOKIE = "mw_session"
+SESSION_TTL = 60 * 60 * 24 * 30          # 30 days
+_USER_RE = _re.compile(r"^[A-Za-z0-9_-]{3,20}$")
+_attempts: dict = {}
+
+
+def _session_secret() -> bytes:
+    s = os.getenv("SESSION_SECRET")
+    if s:
+        return s.encode()
+    f = pathlib.Path(__file__).resolve().parent / ".session_secret"
+    if f.exists():
+        return f.read_bytes()
+    b = secrets.token_bytes(32)
+    f.write_bytes(b)
+    try:
+        f.chmod(0o600)
+    except Exception:
+        pass
+    return b
+
+
+def _hash_pw(pw: str, salt: bytes) -> str:
+    return base64.b64encode(
+        hashlib.pbkdf2_hmac("sha256", pw.encode(), salt, 210_000)
+    ).decode()
+
+
+def _sign(uid: str) -> str:
+    exp = int(time.time()) + SESSION_TTL
+    msg = f"{uid}.{exp}"
+    sig = hmac.new(_session_secret(), msg.encode(), hashlib.sha256).hexdigest()[:32]
+    return f"{msg}.{sig}"
+
+
+def _verify(tok: str):
+    try:
+        uid, exp, sig = tok.rsplit(".", 2)
+        if int(exp) < time.time():
+            return None
+        good = hmac.new(_session_secret(), f"{uid}.{exp}".encode(),
+                        hashlib.sha256).hexdigest()[:32]
+        return uid if hmac.compare_digest(good, sig) else None
+    except Exception:
+        return None
+
+
+def _players_col():
+    col = _profiles()
+    return None if col is None else col.database["players"]
+
+
+def _players_file() -> pathlib.Path:
+    return SAVE_DIR / "_players.json"
+
+
+def _load_players_file() -> dict:
+    p = _players_file()
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text())
+    except Exception:
+        return {}
+
+
+def _find_player(uname: str):
+    col = _players_col()
+    if col is not None:
+        try:
+            return col.find_one({"user": uname})
+        except Exception:
+            pass
+    return _load_players_file().get(uname)
+
+
+def _create_player(uname: str, display: str, pw: str):
+    salt = secrets.token_bytes(16)
+    doc = {"user": uname, "display": display,
+           "salt": base64.b64encode(salt).decode(),
+           "pw": _hash_pw(pw, salt), "created": int(time.time())}
+    col = _players_col()
+    if col is not None:
+        try:
+            col.create_index("user", unique=True)
+            col.insert_one(dict(doc))
+            return doc
+        except Exception:
+            pass
+    SAVE_DIR.mkdir(parents=True, exist_ok=True)
+    all_p = _load_players_file()
+    all_p[uname] = doc
+    _players_file().write_text(json.dumps(all_p))
+    return doc
+
+
+def _check_pw(doc, pw: str) -> bool:
+    try:
+        salt = base64.b64decode(doc["salt"])
+        return hmac.compare_digest(_hash_pw(pw, salt), doc["pw"])
+    except Exception:
+        return False
+
+
+def _throttle(key: str) -> bool:
+    """Crude but real: 8 tries per 10 minutes per username."""
+    now = time.time()
+    tries = [t for t in _attempts.get(key, []) if now - t < 600]
+    tries.append(now)
+    _attempts[key] = tries
+    return len(tries) > 8
+
+
+def player(mw_session: str = Cookie(default=None)) -> str:
+    """Game routes only. Never grants access to anything trading-related."""
+    uid = _verify(mw_session) if mw_session else None
+    if not uid:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "sign in to play")
+    return uid
+
+
+def _set_cookie(resp: Response, uid: str):
+    resp.set_cookie(PLAYER_COOKIE, _sign(uid), max_age=SESSION_TTL,
+                    httponly=True, samesite="lax", path="/")
+
+
+@app.post("/api/auth/signup")
+async def auth_signup(req: Request, resp: Response):
+    d = await req.json()
+    uname = str(d.get("username", "")).strip()
+    pw = str(d.get("password", ""))
+    if not _USER_RE.match(uname):
+        raise HTTPException(400, "Pick a name 3-20 characters: letters, numbers, - and _ only.")
+    if len(pw) < 6:
+        raise HTTPException(400, "Password needs at least 6 characters.")
+    key = uname.lower()
+    if _find_player(key):
+        raise HTTPException(409, "That name is taken — try another.")
+    _create_player(key, uname, pw)
+    _set_cookie(resp, key)
+    return {"ok": True, "player": uname}
+
+
+@app.post("/api/auth/login")
+async def auth_login(req: Request, resp: Response):
+    d = await req.json()
+    uname = str(d.get("username", "")).strip().lower()
+    pw = str(d.get("password", ""))
+    if _throttle(uname):
+        raise HTTPException(429, "Too many tries. Wait a few minutes.")
+    doc = _find_player(uname)
+    if not doc or not _check_pw(doc, pw):
+        raise HTTPException(401, "Wrong name or password.")
+    _set_cookie(resp, uname)
+    return {"ok": True, "player": doc.get("display", uname)}
+
+
+@app.post("/api/auth/logout")
+def auth_logout(resp: Response):
+    resp.delete_cookie(PLAYER_COOKIE, path="/")
+    return {"ok": True}
+
+
+@app.get("/api/auth/me")
+def auth_me(mw_session: str = Cookie(default=None)):
+    uid = _verify(mw_session) if mw_session else None
+    if not uid:
+        return {"player": None}
+    doc = _find_player(uid) or {}
+    return {"player": doc.get("display", uid)}
+
+GAME_DB_NAME = os.getenv("GAME_DB_NAME", "money_world")
+_mongo_lock = threading.Lock()
+_mongo_col = None
+_mongo_tried = False
+
+
+def _profiles():
+    """Mongo collection for player profiles, or None if unreachable.
+
+    Connected lazily and only once: a dead network must never stop the game
+    loading, so every caller falls back to a local file if this returns None.
+    """
+    global _mongo_col, _mongo_tried
+    if _mongo_col is not None or _mongo_tried:
+        return _mongo_col
+    with _mongo_lock:
+        if _mongo_tried:
+            return _mongo_col
+        _mongo_tried = True
+        uri = os.getenv("MONGODB_URI")
+        if not uri:
+            return None
+        try:
+            import certifi
+            from pymongo import MongoClient
+            # macOS python ships without a usable CA bundle, so point TLS at certifi.
+            # (Never disable verification here - that would expose the connection.)
+            cli = MongoClient(uri, serverSelectionTimeoutMS=6000,
+                              connectTimeoutMS=6000, socketTimeoutMS=8000,
+                              tlsCAFile=certifi.where())
+            cli.admin.command("ping")
+            col = cli[GAME_DB_NAME]["profiles"]
+            col.create_index("user", unique=True)
+            _mongo_col = col
+            print(f"[game] profiles -> mongo {GAME_DB_NAME}.profiles")
+        except Exception as e:
+            print(f"[game] mongo unavailable ({type(e).__name__}), using local files")
+            _mongo_col = None
+        return _mongo_col
 
 
 def alpaca(method, path, base=BASE, **kw):
@@ -345,7 +573,7 @@ def _latest_prices(symbols):
 
 
 @app.get("/api/game/catalog")
-def game_catalog(_: str = Depends(auth)):
+def game_catalog(_: str = Depends(player)):
     prices = _latest_prices([a["symbol"] for a in GAME_CATALOG])
     assets = [{**a, "kind": ASSET_CLASSES[a["cls"]]["kind"],
                "icon": ASSET_CLASSES[a["cls"]]["icon"],
@@ -355,52 +583,12 @@ def game_catalog(_: str = Depends(auth)):
 
 
 @app.get("/api/game/quotes")
-def game_quotes(_: str = Depends(auth)):
+def game_quotes(_: str = Depends(player)):
     """Current prices used by the browser to resolve pending predictions."""
     return _latest_prices([a["symbol"] for a in GAME_CATALOG])
 
 
 SAVE_DIR = pathlib.Path(__file__).resolve().parent / "game_saves"
-GAME_DB_NAME = os.getenv("GAME_DB_NAME", "money_world")
-_mongo_lock = threading.Lock()
-_mongo_col = None
-_mongo_tried = False
-
-
-def _profiles():
-    """Mongo collection for player profiles, or None if unreachable.
-
-    Connected lazily and only once: a dead network must never stop the game
-    loading, so every caller falls back to a local file if this returns None.
-    """
-    global _mongo_col, _mongo_tried
-    if _mongo_col is not None or _mongo_tried:
-        return _mongo_col
-    with _mongo_lock:
-        if _mongo_tried:
-            return _mongo_col
-        _mongo_tried = True
-        uri = os.getenv("MONGODB_URI")
-        if not uri:
-            return None
-        try:
-            import certifi
-            from pymongo import MongoClient
-            # macOS python ships without a usable CA bundle, so point TLS at certifi.
-            # (Never disable verification here - that would expose the connection.)
-            cli = MongoClient(uri, serverSelectionTimeoutMS=6000,
-                              connectTimeoutMS=6000, socketTimeoutMS=8000,
-                              tlsCAFile=certifi.where())
-            cli.admin.command("ping")
-            col = cli[GAME_DB_NAME]["profiles"]
-            col.create_index("user", unique=True)
-            _mongo_col = col
-            print(f"[game] profiles -> mongo {GAME_DB_NAME}.profiles")
-        except Exception as e:
-            print(f"[game] mongo unavailable ({type(e).__name__}), using local files")
-            _mongo_col = None
-        return _mongo_col
-
 
 def _save_path(user: str) -> pathlib.Path:
     """One save file per dashboard user. Name is sanitised, never user-controlled path."""
@@ -427,7 +615,7 @@ def _file_save(user: str, data: dict) -> None:
 
 
 @app.get("/api/game/profile")
-def game_profile_get(user: str = Depends(auth)):
+def game_profile_get(user: str = Depends(player)):
     """The player's whole profile: progress, wealth, badges, vault, purchases."""
     col = _profiles()
     if col is not None:
@@ -441,7 +629,7 @@ def game_profile_get(user: str = Depends(auth)):
 
 
 @app.post("/api/game/profile")
-async def game_profile_post(req: Request, user: str = Depends(auth)):
+async def game_profile_post(req: Request, user: str = Depends(player)):
     """Last-writer-wins by revision number, so a stale tab can't clobber progress."""
     try:
         data = await req.json()
@@ -469,14 +657,80 @@ async def game_profile_post(req: Request, user: str = Depends(auth)):
     return {"ok": True, "rev": rev, "store": "file"}
 
 
+LOGIN_PAGE = """<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Money World \u2014 Sign in</title><style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 50% 12%,#2b4a7e,#0b1220 70%);
+ font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#eaf1ff;padding:18px}
+.card{width:100%;max-width:380px;background:linear-gradient(180deg,#16223a,#0e1626);
+ border:1px solid #2b3654;border-radius:20px;padding:26px 22px;box-shadow:0 18px 50px rgba(0,0,0,.55);text-align:center}
+.pig{font-size:62px;line-height:1}
+h1{margin:6px 0 2px;font-size:30px}
+.sub{color:#8fa6c6;font-size:14px;margin-bottom:18px}
+input{width:100%;padding:14px;margin:7px 0;border-radius:12px;border:1px solid #2b3654;
+ background:#0d1420;color:#eaf1ff;font-size:17px}
+input:focus{outline:none;border-color:#3d8bff}
+button{width:100%;padding:15px;margin-top:10px;border:0;border-radius:12px;background:#3d8bff;
+ color:#fff;font-size:18px;font-weight:800;cursor:pointer}
+button:hover{background:#5a9dff}
+button.alt{background:#1b2740;border:1px solid #2b3654}
+.msg{min-height:20px;margin-top:10px;font-size:14px;font-weight:700}
+.err{color:#f85149}.ok{color:#3fb950}
+.note{color:#6b7c96;font-size:12px;margin-top:14px;line-height:1.5}
+</style></head><body>
+<div class=card>
+ <div class=pig>\U0001f437</div>
+ <h1>Money World</h1>
+ <div class=sub id=sub>Make a player to start</div>
+ <input id=u placeholder="Player name" autocomplete=username autocapitalize=off spellcheck=false>
+ <input id=p type=password placeholder="Password" autocomplete=current-password>
+ <button id=go>Start playing</button>
+ <button class=alt id=sw>I already have a player</button>
+ <div class="msg" id=msg></div>
+ <div class=note>Just a name and a password \u2014 no email, no real name.<br>Nothing about you is collected.</div>
+</div>
+<script>
+let mode='signup';
+const $=i=>document.getElementById(i);
+function setMode(m){mode=m;
+ $('sub').textContent=m==='signup'?'Make a player to start':'Welcome back';
+ $('go').textContent=m==='signup'?'Start playing':'Sign in';
+ $('sw').textContent=m==='signup'?'I already have a player':'Make a new player';
+ $('p').autocomplete=m==='signup'?'new-password':'current-password';
+ $('msg').textContent='';}
+$('sw').onclick=()=>setMode(mode==='signup'?'login':'signup');
+async function go(){
+ const u=$('u').value.trim(),p=$('p').value;
+ if(!u||!p){$('msg').className='msg err';$('msg').textContent='Fill in both boxes.';return}
+ $('go').disabled=true;$('msg').className='msg';$('msg').textContent='...';
+ try{
+  const r=await fetch('/api/auth/'+mode,{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({username:u,password:p})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.detail||'Something went wrong');
+  $('msg').className='msg ok';$('msg').textContent='Loading your world...';
+  location.href='/game';
+ }catch(e){$('msg').className='msg err';$('msg').textContent=e.message;$('go').disabled=false}}
+$('go').onclick=go;
+$('p').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+$('u').addEventListener('keydown',e=>{if(e.key==='Enter')$('p').focus()});
+$('u').focus();
+</script></body></html>"""
+
+_NOCACHE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache", "Expires": "0"}
+
+
 @app.get("/game", response_class=HTMLResponse)
-def game(_: str = Depends(auth)):
-    # never cache the game page - a stale tab silently hides every new build
-    return HTMLResponse(GAME_PAGE, headers={
-        "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-        "Pragma": "no-cache",
-        "Expires": "0",
-    })
+def game(mw_session: str = Cookie(default=None)):
+    # No owner password here on purpose: a kid should be able to play without
+    # holding the key to a live brokerage account.
+    uid = _verify(mw_session) if mw_session else None
+    if not uid:
+        return HTMLResponse(LOGIN_PAGE, headers=_NOCACHE)
+    return HTMLResponse(GAME_PAGE, headers=_NOCACHE)
 
 
 @app.get("/", response_class=HTMLResponse)

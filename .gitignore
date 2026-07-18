@@ -7,3 +7,4 @@ __pycache__/
 app.py.bak-*
 app_v15.py
 game_saves/
+.session_secret
