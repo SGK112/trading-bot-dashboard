@@ -1030,7 +1030,7 @@ body.bigtext .helpbox{font-size:17px}
 <div id=wbanner><div class=wt id=wbt>LEVEL 1</div><div class=wn id=wbn>Piggy Bank Park</div></div>
 <div id=pad>
  <div class=dpad><button class="gbtn dU" id=bU>▲</button><button class="gbtn dL" id=bL>◀</button><button class="gbtn dR" id=bR>▶</button><button class="gbtn dD" id=bD>▼</button></div>
- <button class=gbtn id=bJ2 style=margin-right:8px>⤴</button><button class="gbtn enter" id=bE>↵ ENTER</button></div>
+ <button class=gbtn id=bTNT style=margin-right:8px title="Throw dynamite (B)">🧨</button><button class=gbtn id=bJ2 style=margin-right:8px>⤴</button><button class="gbtn enter" id=bE>↵ ENTER</button></div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
@@ -1309,6 +1309,7 @@ let paused=false,nearGate=-1,shownWorld=-1;
 let blocks=[],curSecrets=[],coins=[],tempts=[],walls=[],npcs=[],dayT=0,nearNPC=null,curTempt=null,curWi=0;
 let BND={x0:-42,x1:42,z0:-42,z1:42},roomCells=[],gateSpots=[],mines=[],opps=[],ambLight=null,sunLight=null,lampLight=null;
 let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0,homeSmash=null,_pigCool=0;
+let heroHand=null,heroMouth=null,bombs=[],_blink=0;
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
@@ -1368,7 +1369,7 @@ function firstOpen(){let i=0;while(i<STAGES.length&&G.done[i])i++;return Math.mi
 function doorState(d){return G.done[d.i]?'done':unlocked(d.i)?'open':'lock'}
 function bestTool(){let b=TOOLS[0];for(const t of TOOLS)if(G.tools.includes(t.id)&&t.dmg>b.dmg)b=t;return b}
 function toolDmg(){return bestTool().dmg}
-function updateTool(){const t=bestTool();$('htool').textContent=t.e+' '+t.n}
+function updateTool(){const t=bestTool();$('htool').textContent=t.e+' '+t.n;if(typeof refreshHandTool==='function')refreshHandTool()}
 function grantToolFor(s){if(!s.isBoss)return;const nt=TOOLS[s.level+1];if(nt&&!G.tools.includes(nt.id)){G.tools.push(nt.id);save();updateTool();setTimeout(()=>{sfx('tool');toast('🎁 TOOL UNLOCKED: '+nt.e+' '+nt.n+' — blocks break faster now!')},950)}}
 function updateVaultCount(){$('hvn').textContent=Object.keys(G.secrets).length+SHOP.filter(i=>i.url&&owns(i.id)).length}
 let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);const now=actx.currentTime;
@@ -1418,7 +1419,40 @@ function buildHero(){const g=new THREE.Group();
  const legR=legL.clone();legR.position.x=0.28;g.add(legR);heroLegs.push(legR);
  const armL=box(0.32,1.15,0.45,0x2f6fd0);armL.position.set(-0.73,1.75,0);g.add(armL);heroArms.push(armL);
  const armR=armL.clone();armR.position.x=0.73;g.add(armR);heroArms.push(armR);
- possSprite=makeLabel('','');possSprite.position.y=4.1;possSprite.scale.set(1.4,1.4,1);g.add(possSprite);return g}
+ // the tool lives in the right fist and swings with the arm
+ heroHand=new THREE.Group();heroHand.position.set(0,-0.62,0.1);armR.add(heroHand);
+ // a few details that make him read as a person and not a stack of boxes
+ const brow=box(0.5,0.07,0.06,0x2a1d12);brow.position.set(0,3.05,0.42);g.add(brow);
+ const nose=box(0.13,0.15,0.13,0xe8b894);nose.position.set(0,2.78,0.45);g.add(nose);
+ heroMouth=box(0.26,0.06,0.05,0x8a4a3a);heroMouth.position.set(0,2.6,0.44);g.add(heroMouth);
+ const brim=box(0.94,0.09,0.44,0x2a6a32);brim.position.set(0,3.16,0.42);g.add(brim);
+ const belt=box(1.14,0.2,0.63,0x1b2740);belt.position.y=1.16;g.add(belt);
+ const buckle=box(0.24,0.2,0.05,0xf0b429);buckle.position.set(0,1.16,0.33);g.add(buckle);
+ const shoeL=box(0.46,0.22,0.62,0x22303a);shoeL.position.set(-0.28,0.1,0.06);g.add(shoeL);
+ const shoeR=shoeL.clone();shoeR.position.x=0.28;g.add(shoeR);
+ possSprite=makeLabel('','');possSprite.position.y=4.1;possSprite.scale.set(1.4,1.4,1);g.add(possSprite);
+ refreshHandTool();return g}
+function refreshHandTool(){
+ if(!heroHand)return;
+ while(heroHand.children.length)heroHand.remove(heroHand.children[0]);
+ const id=bestTool().id;
+ if(id==='fist')return;
+ if(id==='tnt'){
+  const st=box(0.3,0.66,0.3,0xd6453f);st.position.y=-0.5;heroHand.add(st);
+  const band=box(0.33,0.12,0.33,0xf0e0c0);band.position.y=-0.5;heroHand.add(band);
+  const fuse=box(0.05,0.26,0.05,0x8a7a5a);fuse.position.y=-0.12;heroHand.add(fuse);return}
+ const shaft=box(0.11,1.15,0.11,0x8a6a44);shaft.position.y=-0.25;heroHand.add(shaft);
+ if(id==='pick'){
+  const h=box(1.25,0.16,0.16,0x9aa3b0);h.position.y=-0.85;heroHand.add(h);
+  const t1=box(0.22,0.16,0.16,0xd8dee8);t1.position.set(0.62,-0.85,0);heroHand.add(t1);
+  const t2=t1.clone();t2.position.x=-0.62;heroHand.add(t2);
+ } else if(id==='hammer'){
+  const hd=box(0.62,0.46,0.46,0x6a7280);hd.position.y=-0.86;heroHand.add(hd);
+  const face=box(0.12,0.5,0.5,0xc8d0dc);face.position.set(0.33,-0.86,0);heroHand.add(face);
+ } else if(id==='drill'){
+  const body=box(0.42,0.5,0.62,0xf0b429);body.position.y=-0.7;heroHand.add(body);
+  const bit=box(0.13,0.13,0.8,0x9aa3b0);bit.position.set(0,-0.7,0.6);heroHand.add(bit);
+ }}
 function updatePoss(){const tp=topPoss();const face=tp.min>0?tp.e:'';if(possSprite._f===face)return;possSprite._f=face;
  const c=document.createElement('canvas');c.width=128;c.height=128;const g=c.getContext('2d');if(face){g.font='90px serif';g.textAlign='center';g.fillText(face,64,86)}
  if(possSprite.material.map)possSprite.material.map.dispose();possSprite.material.map=new THREE.CanvasTexture(c);possSprite.material.needsUpdate=true}
@@ -1453,10 +1487,11 @@ function spawnSecret(s,par){const o=new THREE.Mesh(new THREE.SphereGeometry(0.55
 const keys={};function sk(k,v){keys[k]=v}
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
  if(k==='arrowup'||k==='w')sk('F',1);if(k==='arrowdown'||k==='s')sk('B',1);if(k==='arrowleft'||k==='a')sk('TL',1);if(k==='arrowright'||k==='d')sk('TR',1);
- if(k===' ')sk('JUMP',1);if(k==='c')setView(camMode+1);if(e.key==='Enter')interact()});
+ if(k===' ')sk('JUMP',1);if(k==='c')setView(camMode+1);if(k==='b')throwBomb();if(e.key==='Enter')interact()});
 addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')sk('F',0);if(k==='arrowdown'||k==='s')sk('B',0);if(k==='arrowleft'||k==='a')sk('TL',0);if(k==='arrowright'||k==='d')sk('TR',0);if(k===' ')sk('JUMP',0)});
 function bindHold(el,key){el.addEventListener('touchstart',e=>{e.preventDefault();sk(key,1)},{passive:false});el.addEventListener('touchend',e=>{e.preventDefault();sk(key,0)},{passive:false});el.addEventListener('mousedown',()=>sk(key,1));el.addEventListener('mouseup',()=>sk(key,0));el.addEventListener('mouseleave',()=>sk(key,0))}
 bindHold($('bU'),'F');bindHold($('bD'),'B');bindHold($('bL'),'TL');bindHold($('bR'),'TR');bindHold($('bJ2'),'JUMP');
+$('bTNT').addEventListener('click',throwBomb);
 $('bE').addEventListener('click',interact);$('bE').addEventListener('touchstart',e=>{e.preventDefault();interact()},{passive:false});
 $('htrophy').addEventListener('click',openTrophies);$('hgloss').addEventListener('click',openGlossary);$('hwealth').addEventListener('click',openWealth);
 $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEventListener('click',openVault);$('hshop').addEventListener('click',openShop);
@@ -1514,6 +1549,32 @@ function ram(w){if(!w)return;armSwing();
    toast('🧱 CRACK! '+'█'.repeat(Math.ceil(pct/10))+'░'.repeat(10-Math.ceil(pct/10))+'  '+Math.max(0,w.hp)+' HP left — keep hitting ↵')}}
  else{sfx('hit');toast('🔨 You swing... '+Math.max(0,w.hp)+' HP left. Keep pressing ↵ — it IS working.')}}
 function breakWall(w){w.broken=true;if(w.mesh)worldGroup.remove(w.mesh);if(w.cap)worldGroup.remove(w.cap);sfx('break');burst(w.x,w.top,w.z,0xb08a5a);toast('🧱 Wall smashed — the path opens up!')}
+function throwBomb(){
+ if(bestTool().id!=='tnt'){toast('🧨 You need Dynamite for that — beat the bosses to earn it.');return}
+ if(bombs.length>2)return;
+ const fx=Math.sin(heading),fz=Math.cos(heading);
+ const m=box(0.36,0.7,0.36,0xd6453f);m.position.set(pos.x+fx*1.2,heroY+2,pos.z+fz*1.2);
+ (worldGroup||scene).add(m);
+ bombs.push({m,x:m.position.x,y:m.position.y,z:m.position.z,vx:fx*0.52,vy:0.34,vz:fz*0.52,fuse:78});
+ armSwing();sfx('hit');toast('🧨 Fire in the hole!');}
+function updateBombs(){
+ for(let i=bombs.length-1;i>=0;i--){const b=bombs[i];
+  b.vy-=0.026;b.x+=b.vx;b.y+=b.vy;b.z+=b.vz;
+  if(b.y<=0.35){b.y=0.35;b.vy=0;b.vx*=0.6;b.vz*=0.6}
+  b.m.position.set(b.x,b.y,b.z);b.m.rotation.x+=0.24;b.m.rotation.z+=0.15;
+  b.fuse--;
+  if(b.fuse<20)b.m.visible=(b.fuse%6<3);
+  if(b.fuse<=0){
+   for(let k=0;k<10;k++)burst(b.x+(Math.random()-0.5)*3,0.8,b.z+(Math.random()-0.5)*3,[0xff8a3a,0xf0c419,0x9a9a9a][k%3]);
+   sfx('break');let hits=0;
+   for(const w of walls){if(w.broken||w.solid)continue;
+    if(Math.hypot(w.x-b.x,w.z-b.z)<9){w.hp=0;breakWall(w);hits++}}
+   for(const bl of blocks){const d=bl.userData.d;
+    if(G.done[d.i]||!unlocked(d.i))continue;
+    if(Math.hypot(d.px-b.x,d.pz-b.z)<9){d.hp=Math.max(0,d.hp-9);hits++}}
+   (worldGroup||scene).remove(b.m);bombs.splice(i,1);
+   toast(hits?('💥 BOOM! '+hits+' thing'+(hits>1?'s':'')+' flattened.'):'💥 BOOM! ...you missed everything.');
+  }}}
 function interact(){if(paused)return;
  // TALKING WINS. rooms are walled now, so a wall is almost always within arm's
  // reach - checking walls first made every NPC impossible to speak to.
@@ -1813,10 +1874,20 @@ function update(t){if(!renderer)return;
  }
  for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;d.cube.rotation.y+=0.008;let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
  if(_stepT>0)_stepT--;
+ updateBombs();
+ // he blinks, and grins when he is rich
+ if(hero&&heroMouth){_blink--;
+  if(_blink<0){_blink=90+Math.random()*150;heroMouth._b=8}
+  if(heroMouth._b>0){heroMouth._b--;heroMouth.scale.y=2.4}else heroMouth.scale.y=1;
+  const happy=(G.wealth||0)>2000;
+  heroMouth.position.y=happy?2.58:2.62;heroMouth.scale.x=happy?1.5:1;}
  if(!paused&&(t|0)%17===0)checkQuest();
  {const fp=$('hfree');if(fp){const fn=freedomNumber();
    fp.textContent='🗽 '+Math.min(999,Math.round(Math.max(0,netWorth())/fn*1000)/10)+'%'}}
- if(_swing>0){_swing--;if(heroArms[0]){heroArms[0].rotation.x=-1.6*Math.sin((12-_swing)/12*Math.PI)}}
+ if(_swing>0){_swing--;const sw=-2.1*Math.sin((12-_swing)/12*Math.PI);
+  if(heroArms[1])heroArms[1].rotation.x=sw;        // the arm actually holding the tool
+  if(heroArms[0])heroArms[0].rotation.x=sw*0.35;   // the other one comes along for the ride
+ } else if(heroArms[1]&&!keys.F&&!keys.B){heroArms[1].rotation.x*=0.8}
  for(const w of walls){if(!w.mesh)continue;
   if(w._sh>0){w._sh--;w.mesh.position.x=w.x+Math.sin(w._sh*2.1)*0.16;w.mesh.position.z=w.z+Math.cos(w._sh*1.7)*0.1;
    if(w.cap){w.cap.position.x=w.mesh.position.x;w.cap.position.z=w.mesh.position.z}}
@@ -1941,7 +2012,7 @@ const FAUNA=[
  {e:'🐙',n:'Octopus',good:1,obvious:0,col:0x8a5cff,
   lines:['Eight arms, eight different baskets. That is diversification.','If one arm gets bitten, I still have seven. Never put it all in one place.']},
  {e:'🦈',n:'Loan Shark',good:0,obvious:1,col:0x5a6272,deal:{
-   pitch:'Cash right now, friend. No credit check. Just a small weekly fee.',
+   pitch:'Heyyy pal. Cash today? No credit check, no questions. Just a teensy weekly fee. Barely a nibble. You will hardly feel it. Probably.',
    cost:700,take:'You took the fast cash. The "small weekly fee" was 300% a year.',
    walk:'You walked away. Fast money always costs the most.',
    lesson:'Payday loans and "no credit check" offers run 200-400% APR. The cost is hidden in the speed.'}},
@@ -1951,17 +2022,17 @@ const FAUNA=[
    walk:'You stayed the course. The dip passed, like they all do.',
    lesson:'Missing just the 10 best days of a decade cuts your return roughly in half. Time in beats timing.'}},
  {e:'🐺',n:'Wolf in a Suit',good:0,obvious:0,col:0x7a7a86,deal:{
-   pitch:'I have a hot pick. Guaranteed 10x. My clients are all getting rich. In or out?',
+   pitch:'*straightens tie* Guaranteed 10x. Guaranteed. My other clients are all — well, I cannot name them. Trust me. In or out? Tick tock.',
    cost:900,take:'You bought his "sure thing". He sold his shares into your money.',
    walk:'You said no. Nobody with a guaranteed 10x needs YOUR money.',
    lesson:'"Guaranteed returns" is the oldest lie in finance. Guaranteed and high-return never appear together.'}},
  {e:'🐑',n:'The Herd',good:0,obvious:0,col:0xd8d8d0,deal:{
-   pitch:'EVERYONE is buying this one. You are going to be the only one left out!',
+   pitch:'Baaa. Everyone is buying it. EVERYONE. My cousin bought it. My cousin has no money and terrible ideas. But still. Baaa.',
    cost:600,take:'You followed the crowd in at the top. The crowd left before you did.',
    walk:'You let them run past. Crowded trades are usually late trades.',
    lesson:'By the time something is on every feed, the easy money already left. FOMO is not research.'}},
  {e:'🐷',n:'Piggy',good:0,obvious:0,col:0xf0a0b0,deal:{
-   pitch:'Why settle for 10% a year? Put it ALL on this. Go big or go home!',
+   pitch:'Ten percent a year? That is SNAIL money. Put it ALL on this one. Everything. The house too. What could go wrong. Oink.',
    cost:800,take:'You bet everything on one thing. One thing went wrong.',
    walk:'You kept your position sensible. Greed is the expensive one.',
    lesson:'Bulls make money, bears make money, pigs get slaughtered. Position size is survival.'}},
