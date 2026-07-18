@@ -612,6 +612,22 @@ GAME_PAGE = """<!doctype html><html lang=en><head><meta charset=utf-8>
 *{box-sizing:border-box;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#e9eef5}
 #stage{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center}
+#menu{position:fixed;right:8px;top:52px;z-index:45;display:none;flex-direction:column;gap:2px;
+ background:linear-gradient(180deg,rgba(20,30,50,.98),rgba(12,19,33,.98));border:1px solid #2b3654;
+ border-radius:14px;padding:7px;box-shadow:0 10px 34px rgba(0,0,0,.6);min-width:216px;max-height:78vh;overflow:auto}
+#menu.show{display:flex}
+.mrow{display:block;padding:9px 11px;border-radius:9px;color:#dce7f7;font-size:14px;font-weight:700;
+ white-space:nowrap;text-decoration:none}
+.mrow i{font-style:normal;font-weight:600;font-size:11px;color:#7fb4ff;margin-left:5px}
+.mrow b{color:#f0b429}
+.mrow.clk{cursor:pointer}
+.mrow.clk:hover{background:#1e2c48}
+.msep{height:1px;background:#2b3654;margin:4px 6px}
+@media(max-width:700px){#menu{min-width:190px;right:6px}.mrow{font-size:13px;padding:8px 9px}
+ #hdate{display:none}
+ #hud .hpill{font-size:12px;padding:5px 9px}
+ #hmenu span.lbl{display:none}}
+@media(max-width:400px){#hud .hpill{font-size:11px;padding:4px 7px}}
 #quest{position:fixed;left:10px;top:64px;z-index:30;max-width:290px;background:linear-gradient(180deg,rgba(22,34,58,.97),rgba(14,22,38,.97));
  border:2px solid #3d8bff;border-radius:14px;padding:11px 13px;color:#eaf1ff;box-shadow:0 6px 22px rgba(0,0,0,.5);display:none}
 #quest.show{display:block}
@@ -702,7 +718,25 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=htool>👊 Bare Hands</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill>💪 <b id=hwpn>0</b></span><span class="hpill clk" id=hview>👁 Overhead</span><span class="hpill clk" id=hvault>📚 <b id=hvn>0</b></span><span class="hpill clk" id=hgloss>📖 <b id=hwords>0</b></span><span class="hpill clk" id=htrophy>🏆</span><span class="hpill clk" id=hhelp>❔</span><span class="hpill" id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill id=hclock style="font-variant-numeric:tabular-nums">08:00 · Mon 1 Jan · Yr 1</span><span class="hpill clk" id=hprof title="Your profile">👤</span><span class="hpill clk" id=hmkt title="Real market predictions">📈</span><span class="hpill clk" id=hact>⏳</span><span class="hpill clk" id=hhome>🏠</span><span class="hpill clk" id=hshop>🛒</span><span class=hpill id=hsave style="opacity:.3">☁</span><a class="hpill clk" id=hdash href="/" style=color:inherit>📊</a></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=menu>
+ <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
+ <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
+ <span class="mrow clk" id=hact>⏳ Spend your day</span>
+ <span class="mrow clk" id=hshop>🛒 Shop</span>
+ <span class="mrow clk" id=hhome>🏠 Home / Outside</span>
+ <span class=msep></span>
+ <span class="mrow clk" id=hvault>📚 Vault <b id=hvn>0</b></span>
+ <span class="mrow clk" id=hgloss>📖 Word bank <b id=hwords>0</b></span>
+ <span class="mrow clk" id=htrophy>🏆 Trophies</span>
+ <span class="mrow" id=hwp>💪 Willpower <b id=hwpn>0</b></span>
+ <span class=msep></span>
+ <span class="mrow clk" id=hview>👁 Overhead</span>
+ <span class="mrow clk" id=htool>👊 Bare Hands</span>
+ <span class="mrow clk" id=hhelp>❔ How to play</span>
+ <span class="mrow" id=hsave style="opacity:.4">☁ Saved</span>
+ <a class="mrow clk" id=hdash href="/" style=color:inherit>📊 Trading dashboard</a>
+</div>
 <div id=hsense></div>
 <div id=hint>Press ↵ ENTER to go in</div>
 <div id=wbanner><div class=wt id=wbt>LEVEL 1</div><div class=wn id=wbn>Piggy Bank Park</div></div>
@@ -1083,7 +1117,13 @@ $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEvent
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
-$('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);$('htool').addEventListener('click',()=>toast('Your tool: '+bestTool().e+' '+bestTool().n+' — beat bosses to unlock stronger ones!'));
+$('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);
+// collapse the menu: it had grown to 13 pills and was wrapping over the game
+$('hmenu').addEventListener('click',e=>{e.stopPropagation();$('menu').classList.toggle('show')});
+document.querySelectorAll('#menu .clk').forEach(el=>el.addEventListener('click',()=>$('menu').classList.remove('show')));
+document.addEventListener('click',e=>{const m=$('menu');
+ if(m.classList.contains('show')&&!m.contains(e.target)&&e.target!==$('hmenu'))m.classList.remove('show')});
+addEventListener('keydown',e=>{if(e.key==='Escape')$('menu').classList.remove('show')});$('htool').addEventListener('click',()=>toast('Your tool: '+bestTool().e+' '+bestTool().n+' — beat bosses to unlock stronger ones!'));
 function setView(m){camMode=((m%4)+4)%4;$('hview').textContent='👁 '+CAMNAMES[camMode]}
 
 let hitCool=0;
@@ -2168,7 +2208,8 @@ function updateExtras(t){
   const p=tParts();
   if(p.totalMonths>(G.lastMonth||0)){G.lastMonth=p.totalMonths;passMonth();}
   if(p.year>(G.lastYear||1)){G.lastYear=p.year;birthday(p);}
-  const cl=$('hclock');if(cl)cl.textContent=clockStr()+' · '+dateStr();
+  const cl=$('hclock');if(cl)cl.textContent=clockStr();
+  const dEl=$('hdate');if(dEl)dEl.textContent=' · '+dateStr();
  } else {_lastT=0}
  const k=daylight();
  if(scene){const c=new THREE.Color(SKY[curWi]||0x8ecbff).lerp(new THREE.Color(0x243a66),(1-k)*0.85);scene.background=c;if(scene.fog)scene.fog.color=c}
