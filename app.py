@@ -628,6 +628,14 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
  #hud .hpill{font-size:12px;padding:5px 9px}
  #hmenu span.lbl{display:none}}
 @media(max-width:400px){#hud .hpill{font-size:11px;padding:4px 7px}}
+body.bigtext .p-teach,body.bigtext .gd{font-size:17px;line-height:1.55}
+body.bigtext .opt{font-size:18px;padding:15px 14px;font-weight:800}
+body.bigtext .p-q{font-size:21px}
+body.bigtext .p-title{font-size:25px}
+body.bigtext #quest .qt{font-size:17px}
+body.bigtext #quest .qw{font-size:14px}
+.readbtn{display:inline-block;margin:6px 0 4px;padding:9px 14px;border-radius:10px;background:#2a3f68;
+ border:1px solid #3d8bff;color:#dce7f7;font-weight:800;font-size:14px;cursor:pointer}
 #quest{position:fixed;left:10px;top:64px;z-index:30;max-width:290px;background:linear-gradient(180deg,rgba(22,34,58,.97),rgba(14,22,38,.97));
  border:2px solid #3d8bff;border-radius:14px;padding:11px 13px;color:#eaf1ff;box-shadow:0 6px 22px rgba(0,0,0,.5);display:none}
 #quest.show{display:block}
@@ -733,6 +741,7 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
  <span class=msep></span>
  <span class="mrow clk" id=hview>👁 Overhead</span>
  <span class="mrow clk" id=htool>👊 Bare Hands</span>
+ <span class="mrow clk" id=hnarr>🔇 Read aloud: OFF</span>
  <span class="mrow clk" id=hhelp>❔ How to play</span>
  <span class="mrow" id=hsave style="opacity:.4">☁ Saved</span>
  <a class="mrow clk" id=hdash href="/" style=color:inherit>📊 Trading dashboard</a>
@@ -767,7 +776,9 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
  <div class=p-title style="font-size:30px">Money World</div>
  <div class=p-world style="margin-bottom:14px">Smash stuff. Get paid. Get rich.</div>
  <button class=pbtn style="font-size:22px;padding:16px" onclick="startGame()">▶ PLAY</button>
- <div class=p-note style="margin-top:12px;cursor:pointer" onclick="document.getElementById('ctrls').style.display='block';this.style.display='none'">controls ↓</div>
+ <div class=readbtn style="margin-top:12px" onclick="toggleNarrate();this.textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF'">🔇 Read aloud: OFF</div>
+ <div class=p-note style="margin-top:4px">turn this on for young players</div>
+ <div class=p-note style="margin-top:10px;cursor:pointer" onclick="document.getElementById('ctrls').style.display='block';this.style.display='none'">controls ↓</div>
  <div id=ctrls style="display:none;text-align:left;margin-top:8px" class=p-teach>
   <b>Move</b> arrows / WASD or the pad &nbsp; <b>Jump</b> SPACE &nbsp; <b>Do it</b> ENTER<br>
   <b>Smash</b> walk into things &nbsp; <b>Look</b> C changes the camera<br>
@@ -956,7 +967,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -976,6 +987,35 @@ function nextPoss(){for(const q of POSSESSIONS)if(G.wealth<q.min)return q;return
 function addWealth(n){const b=topPoss();G.wealth=(G.wealth||0)+n;const a=topPoss();if(a.min>b.min){confetti();toast('🎉 New reward: '+a.e+' '+a.n+'!')}save();renderHUD()}
 function bossIndex(li){let n=-1;STAGES.forEach((s,i)=>{if(s.isBoss&&s.level===li)n=i});return n}
 function bossDone(li){const i=bossIndex(li);return i>=0&&!!G.done[i]}
+// A 7-year-old can play a game but cannot read "diversification".
+// The browser can talk - free, offline, no library. So it reads to them.
+function speak(t){
+ if(!G.narrate||!t)return;
+ try{
+  const sy=window.speechSynthesis;if(!sy)return;
+  sy.cancel();
+  const clean=String(t).replace(/[^\x20-\x7e]/g,' ').replace(/\s+/g,' ').trim();
+  if(!clean)return;
+  const u=new SpeechSynthesisUtterance(clean);
+  u.rate=0.98;u.pitch=1.06;u.volume=1;
+  const vs=sy.getVoices();
+  const v=vs.find(x=>/samantha|female/i.test(x.name))||vs.find(x=>x.lang&&x.lang.startsWith('en'));
+  if(v)u.voice=v;
+  sy.speak(u);
+ }catch(e){}}
+function stopSpeak(){try{window.speechSynthesis&&window.speechSynthesis.cancel()}catch(e){}}
+function toggleNarrate(){
+ G.narrate=G.narrate?0:1;save();
+ const el=$('hnarr');if(el)el.textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
+ document.body.classList.toggle('bigtext',!!G.narrate);
+ if(G.narrate)speak('Read aloud is on. I will read everything to you.');else stopSpeak();}
+function readChallenge(){
+ const b=$('cbody');if(!b)return;
+ const title=(b.querySelector('.p-title')||{}).textContent||'';
+ const teach=(b.querySelector('.p-teach')||{}).textContent||'';
+ const q=(b.querySelector('.p-q')||{}).textContent||'';
+ const opts=[...b.querySelectorAll('.opt')].map(o=>o.textContent.trim());
+ speak([title,teach,q].filter(Boolean).join('. ')+'. '+opts.join('. '));}
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2600)}
 function confetti(){const c=['#3fb950','#3d8bff','#a371f7','#f0b429','#f85149'];for(let k=0;k<44;k++){const p=document.createElement('div');p.className='conf';p.style.left=(Math.random()*100)+'vw';p.style.background=c[k%c.length];p.style.animationDelay=(Math.random()*.35)+'s';document.body.appendChild(p);setTimeout(()=>p.remove(),2300)}}
 
@@ -1053,7 +1093,7 @@ let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.we
  let f=440,d=0.12,ty='square';if(type==='hit'){f=170;d=0.07}else if(type==='break'){f=500;d=0.16;ty='triangle'}else if(type==='secret'){f=880;d=0.42;ty='sine'}else if(type==='tool'){f=620;d=0.3;ty='sawtooth'}else if(type==='win'){f=700;d=0.55;ty='triangle'}
  o.type=ty;o.frequency.setValueAtTime(f,now);if(type==='secret'||type==='win'||type==='break')o.frequency.exponentialRampToValueAtTime(f*2,now+d);
  g.gain.setValueAtTime(0.16,now);g.gain.exponentialRampToValueAtTime(0.001,now+d);o.start(now);o.stop(now+d)}catch(e){}}
-function startGame(){$('help').classList.remove('show');paused=false;if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function startGame(){$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
 function showHelp(){paused=true;$('help').classList.add('show')}
 
 function box(w,h,dp,col){return new THREE.Mesh(new THREE.BoxGeometry(w,h,dp),new THREE.MeshLambertMaterial({color:col}))}
@@ -1119,6 +1159,7 @@ $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
 $('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);
+$('hnarr').addEventListener('click',toggleNarrate);
 // collapse the menu: it had grown to 13 pills and was wrapping over the game
 $('hmenu').addEventListener('click',e=>{e.stopPropagation();$('menu').classList.toggle('show')});
 document.querySelectorAll('#menu .clk').forEach(el=>el.addEventListener('click',()=>$('menu').classList.remove('show')));
@@ -1976,7 +2017,9 @@ function renderQuest(){
  const q=$('quest');if(!q)return;
  if(G.tutSkipped){q.classList.remove('show');return}
  const i=Math.min(G.tut||0,TUTORIAL.length-1),st=TUTORIAL[i];
+ const changed=($('qtext').textContent!==st.t);
  $('qtext').textContent=st.t;$('qwhy').textContent=st.w;
+ if(changed)speak(st.t+'. '+st.w);
  $('qbar').style.width=Math.round(i/(TUTORIAL.length-1)*100)+'%';
  q.classList.add('show')}
 function checkQuest(){
@@ -2303,10 +2346,13 @@ function openChallenge(i){paused=true;G.cur=i;bossQ=0;const s=STAGES[i];$('cpane
  else if(s.type==='scenario'){b+=`<p class=p-teach>${s.setup}</p>`+s.options.map((o,k)=>`<button class=opt onclick="scenAns(${i},${k})">${o.label}</button>`).join('')}
  else if(s.type==='predict'){const a=CAT.assets.find(x=>x.id===s.asset);b+=`<p class=p-teach>${s.teach}</p>`+assetCard(a)}
  else if(s.type==='boss'){b+=`<p class=p-teach>${s.boss.intro}</p><div id=bosswrap></div>`}
- $('cbody').innerHTML=b;$('challenge').classList.add('show');
+ $('cbody').innerHTML=b;
+ if(G.narrate){const rb=document.createElement('div');rb.className='readbtn';rb.textContent='🔊 Read it to me';
+  rb.onclick=readChallenge;$('cbody').insertBefore(rb,$('cbody').firstChild);setTimeout(readChallenge,250)}
+ $('challenge').classList.add('show');
  if(s.type==='fill')setTimeout(()=>{const el=$('fillin');if(el)el.focus()},60);
  if(s.type==='boss')renderBossQ()}
-function closeChallenge(){$('challenge').classList.remove('show');paused=false}
+function closeChallenge(){stopSpeak();$('challenge').classList.remove('show');paused=false}
 function pick(i,k){if(k!==STAGES[i].a){toast('Not quite — read the clue again and retry.');return}complete(i)}
 function tfAns(i,v){if((!!v)!==(!!STAGES[i].a)){toast('Not quite — think it through and retry.');return}complete(i)}
 function norm(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9 ]/g,'')}
@@ -2371,10 +2417,15 @@ async function boot(){
   // never clobber something the player already did while the fetch was in flight
   if(srv&&typeof srv==='object'&&Object.keys(srv).length&&!_actedBeforeLoad&&(srv.rev||0)>=(G.rev||0)){
    G=srv;normalizeG();localStorage.setItem(KEY,JSON.stringify(G));
+   if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
+   document.body.classList.toggle('bigtext',!!G.narrate);
    if(typeof loadHome==='function'&&window.THREE){loadHome();updateTool();updateVaultCount();updateWP()}
    toast('☁ Profile loaded — welcome back!')}
   else{normalizeG();pushProfile()}
  }catch(e){normalizeG()}
+ // reflect the read-aloud setting however we got here
+ if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
+ document.body.classList.toggle('bigtext',!!G.narrate);
  try{CAT=await j('/api/game/catalog')}catch(e){document.body.innerHTML='<div style=color:#fff;padding:30px>Could not load market data: '+e.message+'</div>';return}
  await resolve();renderHUD();requestAnimationFrame(loop);setInterval(async()=>{try{CAT=await j('/api/game/catalog')}catch(e){}await resolve()},60000)}
 function fit(){if(renderer){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}}
