@@ -1246,7 +1246,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -1309,7 +1309,7 @@ let paused=false,nearGate=-1,shownWorld=-1;
 let blocks=[],curSecrets=[],coins=[],tempts=[],walls=[],npcs=[],dayT=0,nearNPC=null,curTempt=null,curWi=0;
 let BND={x0:-42,x1:42,z0:-42,z1:42},roomCells=[],gateSpots=[],mines=[],opps=[],ambLight=null,sunLight=null,lampLight=null;
 let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0,homeSmash=null,_pigCool=0;
-let heroHand=null,heroMouth=null,bombs=[],_blink=0;
+let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],rideProp=null;
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
@@ -1828,7 +1828,7 @@ function updateCamera(t){if(!hero)return;const P=hero.position,fx=Math.sin(headi
 function update(t){if(!renderer)return;
  if(!paused){if(keys.TL)heading+=0.052;if(keys.TR)heading-=0.052;
   const mv=(keys.F?1:0)-(keys.B?1:0),fx=Math.sin(heading),fz=Math.cos(heading);
-  if(mv){const dx=fx*0.18*mv,dz=fz*0.18*mv;
+  if(mv){const SP=0.18*(typeof vehSpeed==='function'?vehSpeed():1);const dx=fx*SP*mv,dz=fz*SP*mv;
    // auto-step: if the thing in your way is a short hop up, just climb it.
    // (a rope ladder raises how high you can step.)
    const reach=stepReach();
@@ -1875,6 +1875,9 @@ function update(t){if(!renderer)return;
  for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;d.cube.rotation.y+=0.008;let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
  if(_stepT>0)_stepT--;
  updateBombs();
+ if(heroRide){const spin=(keys.F||keys.B)?0.34:0;
+  rideWheels.forEach(w=>{w.rotation.x+=spin});
+  if(rideProp)rideProp.rotation.z+=0.5;}
  // he blinks, and grins when he is rich
  if(hero&&heroMouth){_blink--;
   if(_blink<0){_blink=90+Math.random()*150;heroMouth._b=8}
@@ -2120,6 +2123,12 @@ function passMonth(){
  // life costs money even when rent is $0
  const live=livingCost();
  G.wealth=(G.wealth||0)-live;
+ // vehicles: they cost money to keep, and quietly lose value every month
+ const vm=vehMonthly();
+ if(vm>0){G.wealth=(G.wealth||0)-vm;
+  setTimeout(()=>toast('🚗 Running costs took '+money(vm)+' this month — fuel, insurance, repairs.'),2000)}
+ VEHICLES.forEach(v=>{if(v.id==='feet'||!vehOwned(v.id)||!v.depr)return;
+  G.vehVal[v.id]=Math.max(0,Math.round((G.vehVal[v.id]||v.buy)*(1-v.depr)))});
  if(H.monthly>0){
   G.wealth=(G.wealth||0)-H.monthly;
   if(H.own&&H.equity)G.equity=(G.equity||0)+H.equity;
@@ -2148,7 +2157,7 @@ function birthday(p){paused=true;sfx('tool');confetti();
   +'<div class=p-note>Every year you wait, that number shrinks. Time is the ingredient you cannot buy back.</div>'
   +'<button class=pbtn onclick="hide(&#39;mine&#39;)">Another year →</button>';
  $('mine').classList.add('show')}
-function netWorth(){return (G.wealth||0)+(G.equity||0)}
+function netWorth(){return (G.wealth||0)+(G.equity||0)+(typeof vehValue==='function'?vehValue():0)}
 function buyFurn(id){const f=FURN.find(x=>x.id===id);if(!f||ownsF(id))return;
  if((G.wealth||0)<f.price){toast('Not enough money — clear rooms and collect coins first.');return}
  G.wealth-=f.price;G.furn[id]=1;save();renderHUD();sfx('secret');
@@ -2343,6 +2352,20 @@ function openShop(){paused=true;
   +'<div class=p-title style="font-size:17px;margin-top:14px">🎒 Gear & Knowledge</div>'+rows
   +'<div class=p-title style="font-size:17px;margin-top:14px">🛋️ Furniture for your room</div>'
   +'<div class=p-note style="margin-bottom:6px">Everything here shows up in your actual room at home.</div>'+frows
+  +'<div class=p-title style="font-size:17px;margin-top:14px">🚗 Getting around</div>'
+  +'<div class=p-note style="margin-bottom:6px">Faster means more ground covered and more cash picked up. It also means a meter running every month.</div>'
+  +VEHICLES.map(v=>{const has=vehOwned(v.id),riding=(G.riding||'feet')===v.id,afford=(G.wealth||0)>=v.buy;
+    const val=(G.vehVal&&G.vehVal[v.id])||0;
+    return '<div class=gloss style="'+(riding?'border-color:#3d8bff':has?'border-color:#3fb950':'')+'">'
+     +'<b>'+v.e+' '+v.n+'</b>'+(riding?' <span class=p-note style="color:#3d8bff">· riding this</span>':'')
+     +'<div class=gd>'+v.note+'</div>'
+     +'<div class=gd>Speed ×'+v.speed.toFixed(2)+' · '
+     +(v.buy?('costs '+money(v.buy)):'free')
+     +(v.monthly?(' · <b style="color:#f0b429">'+money(v.monthly)+'/month</b>'):' · <b style="color:#3fb950">$0/month</b>')
+     +(has&&val?(' · now worth '+money(val)):'')+'</div>'
+     +(has?(riding?'':'<button class=pbtn style="margin-top:6px" onclick="rideVehicle(&#39;'+v.id+'&#39;)">Ride this</button>')
+          :'<button class=pbtn style="margin-top:6px'+(afford?'':';opacity:.5')+'" onclick="buyVehicle(&#39;'+v.id+'&#39;)">Buy · '+money(v.buy)+'</button>')
+     +'</div>'}).join('')
   +'<div class=p-title style="font-size:17px;margin-top:14px">🏠 Where you live</div>'
   +'<div class=p-note style="margin-bottom:6px">You pay this every single month. It is the biggest number in most peoples lives.</div>'+hrows
   +'<button class=pbtn style="margin-top:10px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
@@ -2404,7 +2427,7 @@ function projectsDone(){return Math.floor((G.buildPts||0)/BUILD_PER_PROJECT)}
 function passiveIncome(){return projectsDone()*120}
 // Life costs money even with no rent: food, phone, transport.
 function livingCost(){return 700+homeIdx()*150}
-function monthlyBurn(){return curHome().monthly+livingCost()}
+function monthlyBurn(){return curHome().monthly+livingCost()+(typeof vehMonthly==='function'?vehMonthly():0)}
 function freedomNumber(){return monthlyBurn()*12*25}
 // ============ FIRST FIVE MINUTES ============
 // Everything in here already worked, but a new player landed in a bedroom with
@@ -2508,6 +2531,101 @@ function openActions(){paused=true;
   +((G.wasted||0)>=12?'<p class=p-teach style="border-color:#f85149">You have scrolled away <b>'+G.wasted+' hours</b> so far. That is '+Math.round(G.wasted/8)+' full working days.</p>':'')
   +rows+'<button class=pbtn style="margin-top:10px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
  $('shop').classList.add('show')}
+// ============ VEHICLES ============
+// Everything costs. Not just the sticker - the fuel, the insurance, the
+// repairs, and the value bleeding out of it while it sits there. The cheap
+// ones cost nothing to keep and hold their worth. The fast ones have a meter
+// running every single month. That is the entire lesson, and you can drive it.
+const VEHICLES=[
+ {id:'feet',e:'👟',n:'Your own two feet',buy:0,monthly:0,depr:0,speed:1.00,
+  note:'Free forever. Slow, but nothing has ever repossessed a foot.'},
+ {id:'cart',e:'🛒',n:'Shopping Cart',buy:20,monthly:0,depr:0,speed:1.12,
+  note:'Twenty dollars. Squeaky. Somehow still faster than walking.'},
+ {id:'barrow',e:'🛖',n:'Wheelbarrow',buy:60,monthly:0,depr:0.02,speed:1.15,
+  note:'Carries your stuff. Costs nothing to keep. Deeply unglamorous.'},
+ {id:'skate',e:'🛹',n:'Skateboard',buy:110,monthly:0,depr:0.03,speed:1.35,
+  note:'No fuel, no insurance, no paperwork. Just you and some bearings.'},
+ {id:'wagon',e:'🛷',n:'Wagon',buy:180,monthly:0,depr:0.02,speed:1.3,
+  note:'Pull it yourself. Zero running cost, and it lasts for decades.'},
+ {id:'bike',e:'🚲',n:'Bicycle',buy:400,monthly:5,depr:0.02,speed:1.75,
+  note:'The best value on this whole list. $5 a month for tyres and it just works.'},
+ {id:'kart',e:'🏎️',n:'Go-Kart',buy:1200,monthly:60,depr:0.06,speed:2.1,
+  note:'Enormous fun. Drinks fuel. Loses value the moment you take it home.'},
+ {id:'moto',e:'🏍️',n:'Motorcycle',buy:4500,monthly:190,depr:0.05,speed:2.6,
+  note:'Fast and cheap to fill. Insurance is where they get you.'},
+ {id:'car',e:'🚗',n:'Used Car',buy:12000,monthly:420,depr:0.04,speed:2.9,
+  note:'Fuel, insurance, tax, tyres, that noise it started making. ~$420 a month before you drive anywhere.'},
+ {id:'truck',e:'🛻',n:'Pickup Truck',buy:28000,monthly:680,depr:0.04,speed:3.0,
+  note:'Hauls anything. Costs like a second rent. Most people who buy one haul nothing.'},
+ {id:'train',e:'🚆',n:'Season Train Pass',buy:900,monthly:120,depr:0,speed:2.4,
+  note:'You own none of it and maintain none of it. Sometimes renting access beats owning the thing.'},
+ {id:'plane',e:'✈️',n:'Small Plane',buy:180000,monthly:3200,depr:0.05,speed:4.2,
+  note:'The purest liability in the game. Hangar, fuel, inspections, insurance. It eats money while parked.'},
+];
+function vehOwned(id){return id==='feet'||!!(G.veh&&G.veh[id])}
+function curVeh(){const v=VEHICLES.find(x=>x.id===(G.riding||'feet'));return v||VEHICLES[0]}
+function vehSpeed(){return curVeh().speed}
+function vehMonthly(){let t=0;VEHICLES.forEach(v=>{if(v.id!=='feet'&&vehOwned(v.id))t+=v.monthly});return t}
+function vehValue(){let t=0;VEHICLES.forEach(v=>{if(v.id!=='feet'&&vehOwned(v.id))t+=(G.vehVal&&G.vehVal[v.id])||0});return Math.round(t)}
+function buyVehicle(id){
+ const v=VEHICLES.find(x=>x.id===id);if(!v||vehOwned(id))return;
+ if((G.wealth||0)<v.buy){toast('Not enough money for that yet.');return}
+ G.wealth-=v.buy;G.veh=G.veh||{};G.veh[id]=1;
+ G.vehVal=G.vehVal||{};G.vehVal[id]=Math.round(v.buy*0.82);   // drives off the lot at a loss
+ G.riding=id;save();renderHUD();sfx('tool');confetti();buildRide();
+ paused=true;
+ $('minebody').innerHTML='<div class=p-badge style="font-size:56px">'+v.e+'</div>'
+  +'<div class=p-world>New wheels</div><div class=p-title>'+v.n+'</div>'
+  +'<p class=p-teach>'+v.note+'</p>'
+  +(v.buy>0?('<p class=p-teach style="border-color:#f85149">It is already worth <b>'+money(G.vehVal[id])
+   +'</b> — you lost '+money(v.buy-G.vehVal[id])+' driving it home. That is depreciation, and it never stops.</p>'):'')
+  +(v.monthly>0?('<p class=p-teach style="border-color:#f0b429">Running cost <b>'+money(v.monthly)+' every month</b>, '
+   +'whether you drive it or not. Over 10 years that is '+money(v.monthly*120)+'.</p>')
+   :'<p class=p-teach style="border-color:#3fb950">Running cost: <b>nothing</b>. This is why cheap transport makes people rich.</p>')
+  +'<button class=pbtn onclick="hide(&#39;mine&#39;)">Ride it →</button>';
+ $('mine').classList.add('show');}
+function rideVehicle(id){if(!vehOwned(id))return;G.riding=id;save();buildRide();
+ toast(curVeh().e+' Now riding: '+curVeh().n);openShop();}
+// a simple blocky ride under the hero
+function buildRide(){
+ if(!hero)return;
+ if(heroRide){hero.remove(heroRide);heroRide=null}
+ const id=(G.riding||'feet');if(id==='feet')return;
+ const g=new THREE.Group();
+ const wheel=(x,z,r)=>{const w=new THREE.Mesh(new THREE.CylinderGeometry(r,r,0.18,14),
+   new THREE.MeshLambertMaterial({color:0x1b1f26}));w.rotation.z=Math.PI/2;w.position.set(x,r,z);g.add(w);return w};
+ rideWheels=[];
+ if(id==='cart'){const b=box(1.2,0.9,1.5,0xb8c0cc);b.position.set(0,0.85,0.2);g.add(b);
+  [[-0.5,-0.5],[0.5,-0.5],[-0.5,0.9],[0.5,0.9]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.18)));}
+ else if(id==='barrow'){const t=box(1.1,0.45,1.3,0x9aa3b0);t.position.set(0,0.7,0.2);g.add(t);rideWheels.push(wheel(0,-0.7,0.3));}
+ else if(id==='skate'){const d=box(0.7,0.1,2.1,0xd6453f);d.position.y=0.34;g.add(d);
+  [[0,-0.7],[0,0.7]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.14)));}
+ else if(id==='wagon'){const t=box(1.3,0.55,1.9,0xd6453f);t.position.y=0.62;g.add(t);
+  [[-0.6,-0.6],[0.6,-0.6],[-0.6,0.6],[0.6,0.6]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.22)));}
+ else if(id==='bike'){const f=box(0.16,0.16,1.9,0x3d8bff);f.position.y=0.68;g.add(f);
+  const bar=box(0.9,0.12,0.12,0x22303a);bar.position.set(0,1.05,-0.7);g.add(bar);
+  rideWheels.push(wheel(0,-0.8,0.52));rideWheels.push(wheel(0,0.8,0.52));}
+ else if(id==='kart'){const b=box(1.3,0.5,2.2,0xf0b429);b.position.y=0.5;g.add(b);
+  const sp=box(0.2,0.5,0.6,0x22303a);sp.position.set(0,0.9,1.1);g.add(sp);
+  [[-0.75,-0.8],[0.75,-0.8],[-0.75,0.8],[0.75,0.8]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.3)));}
+ else if(id==='moto'){const b=box(0.5,0.5,2,0x22303a);b.position.y=0.72;g.add(b);
+  const tank=box(0.55,0.4,0.8,0xd6453f);tank.position.set(0,1.05,-0.2);g.add(tank);
+  rideWheels.push(wheel(0,-0.85,0.46));rideWheels.push(wheel(0,0.85,0.46));}
+ else if(id==='car'||id==='truck'){
+  const col=id==='car'?0x3fa35a:0x7a4a2a;
+  const b=box(1.9,0.85,3.4,col);b.position.y=0.78;g.add(b);
+  const cab=box(1.6,0.75,1.5,0x2a3a5a);cab.position.set(0,1.5,id==='truck'?-0.5:0);g.add(cab);
+  if(id==='truck'){const bed=box(1.8,0.5,1.5,col);bed.position.set(0,1.05,1.1);g.add(bed)}
+  [[-1,-1.1],[1,-1.1],[-1,1.1],[1,1.1]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.42)));}
+ else if(id==='train'){const b=box(1.7,1.5,3.6,0x5a6272);b.position.y=1.1;g.add(b);
+  const stripe=box(1.75,0.25,3.65,0xf0b429);stripe.position.y=1.2;g.add(stripe);
+  [[-0.9,-1.2],[0.9,-1.2],[-0.9,1.2],[0.9,1.2]].forEach(p=>rideWheels.push(wheel(p[0],p[1],0.34)));}
+ else if(id==='plane'){const b=box(0.9,0.9,4,0xe8eef6);b.position.y=1.1;g.add(b);
+  const wing=box(6,0.16,1.1,0xdfe7f2);wing.position.set(0,1.15,0.2);g.add(wing);
+  const tail=box(0.16,1.1,0.8,0xdfe7f2);tail.position.set(0,1.7,1.8);g.add(tail);
+  const prop=box(0.12,2.2,0.12,0x9aa3b0);prop.position.set(0,1.1,-2.05);g.add(prop);rideProp=prop;
+  rideWheels.push(wheel(-0.9,0.4,0.28));rideWheels.push(wheel(0.9,0.4,0.28));}
+ g.position.y=0.02;hero.add(g);heroRide=g;}
 const HOMES=[
  {id:'parents',n:"Mom & Dad's House",e:'🏠',buy:0,monthly:0,own:false,slots:5,w:16,d:14,
   note:'Rent-free. Boring, maybe. But every month here is a month of full savings — this is the biggest head start there is.'},
@@ -2889,7 +3007,7 @@ async function boot(){
    G=srv;normalizeG();localStorage.setItem(KEY,JSON.stringify(G));
    if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
    document.body.classList.toggle('bigtext',!!G.narrate);
-   if(typeof loadHome==='function'&&window.THREE){loadHome();updateTool();updateVaultCount();updateWP()}
+   if(typeof loadHome==='function'&&window.THREE){loadHome();updateTool();updateVaultCount();updateWP();if(typeof buildRide==='function')buildRide()}
    toast('☁ Profile loaded — welcome back!')}
   else{normalizeG();pushProfile()}
  }catch(e){normalizeG()}
