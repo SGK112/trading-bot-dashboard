@@ -762,17 +762,18 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
  <div class=p-note>Ranks are in-game knowledge levels, not the legal financial terms.</div>
  <div style=margin-top:10px><a href="/" style=color:#7fb4ff;font-weight:700>← Live account dashboard</a></div></div></div>
 <div class=ov id=wealth><div class=panel><button class=tclose onclick="hide('wealth')">✕</button><div id=wbody></div></div></div>
-<div class=ov id=help><div class=panel><div class=p-badge>🎮</div><div class=p-title>How to Play — Money World</div>
- <div class=p-teach style=text-align:left>
- <b>🎯 Goal:</b> Explore each world, hunt down hidden blocks, and smash them open to face money challenges. Beat the boss to unlock the next world — and a stronger tool!<br><br>
- <b>🕹️ Move:</b> Arrow keys / W A S D (or the on-screen pad). Up = run forward, Left &amp; Right = turn.<br>
- <b>⛏️ Smash a block:</b> just walk into a glowing block — it keeps cracking on its own (or press ENTER). A beam of light marks your next target. Tough blocks need better tools.<br>
- <b>🧱 Walls:</b> the world throws up walls — just like real life, the road ahead is never laid out in plain view. <b>Beat them down</b> (run into them or ENTER), <b>jump over</b> low ones (⤴ / Spacebar), or <b>find a way around</b>.<br>
- <b>🔥 Treasure sense:</b> the text up top tells you Hot or Cold as you near your target.<br>
- <b>👁 Camera:</b> press <b>C</b> (or tap 👁) to switch Overhead / 3rd person / 1st person / Cinematic.<br>
- <b>✨ Secrets of the Rich:</b> explore the far corners to uncover real money resources — they save to your 📚 Vault.<br>
- <b>📊 Dashboard:</b> jumps to your live trading account anytime.
- </div><button class=pbtn onclick=startGame()>▶ Start Adventure</button></div></div>
+<div class=ov id=help><div class=panel style="text-align:center">
+ <div class=p-badge style="font-size:64px">🐷</div>
+ <div class=p-title style="font-size:30px">Money World</div>
+ <div class=p-world style="margin-bottom:14px">Smash stuff. Get paid. Get rich.</div>
+ <button class=pbtn style="font-size:22px;padding:16px" onclick="startGame()">▶ PLAY</button>
+ <div class=p-note style="margin-top:12px;cursor:pointer" onclick="document.getElementById('ctrls').style.display='block';this.style.display='none'">controls ↓</div>
+ <div id=ctrls style="display:none;text-align:left;margin-top:8px" class=p-teach>
+  <b>Move</b> arrows / WASD or the pad &nbsp; <b>Jump</b> SPACE &nbsp; <b>Do it</b> ENTER<br>
+  <b>Smash</b> walk into things &nbsp; <b>Look</b> C changes the camera<br>
+  Walls: beat them down, climb them, or go round. Push crates. Climb mountains.
+ </div>
+</div></div>
 <div class=ov id=secret><div class=panel style=border-color:#f0b429><button class=tclose onclick="hide('secret')">✕</button><div id=secbody></div></div></div>
 <div class=ov id=vault><div class=panel><button class=tclose onclick="hide('vault')">✕</button><div id=vbody></div></div></div>
 <div class=ov id=glossary><div class=panel><button class=tclose onclick="hide('glossary')">✕</button>
@@ -955,7 +956,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -985,7 +986,7 @@ let heading=0,pos={x:0,z:0},walkPhase=0,camMode=0,curLevel=0,pendingWorld=null;
 let paused=false,nearGate=-1,shownWorld=-1;
 let blocks=[],curSecrets=[],coins=[],tempts=[],walls=[],npcs=[],dayT=0,nearNPC=null,curTempt=null,curWi=0;
 let BND={x0:-42,x1:42,z0:-42,z1:42},roomCells=[],gateSpots=[],mines=[],opps=[],ambLight=null,sunLight=null,lampLight=null;
-let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0;
+let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0,homeSmash=null,_pigCool=0;
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
@@ -1149,6 +1150,7 @@ function shakeWall(w){w._sh=10}
 function armSwing(){_swing=12}
 let _swing=0;
 function ram(w){if(!w)return;armSwing();
+ if(w.kind==='piggy'){hitPiggy();return}
  if(w.solid){shakeWall(w);sfx('hit');
   toast(w.kind==='mountain'?'⛰️ A mountain. You do not move this — you climb it. Walk up the tiers.'
    :w.immovable?'🪨 Immovable. Not everything gives way. Climb it or go around.'
@@ -1167,6 +1169,7 @@ function interact(){if(paused)return;
  // TALKING WINS. rooms are walled now, so a wall is almost always within arm's
  // reach - checking walls first made every NPC impossible to speak to.
  // (you smash walls just by walking into them anyway.)
+ if(atHome&&homeSmash&&!G.smashed&&Math.hypot(homeSmash.x-pos.x,homeSmash.z-pos.z)<3.2){_pigCool=0;hitPiggy();return}
  if(atHome&&homeBed&&Math.hypot(homeBed.x-pos.x,homeBed.z-pos.z)<2.6){sleepTilMorning();return}
  if(nearNPC){talkNPC();$('npc').classList.add('show');return}
  if(nearGate>=0){hitBlock(DOORS[nearGate]);return}
@@ -1311,6 +1314,39 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
  hero.position.set(pos.x,0,pos.z);shownWorld=-1}
 function goOutside(){atHome=false;if(bigGround)bigGround.visible=true;loadWorld(curLevel);toast('🚪 Out into the world you go.')}
 function goHome(){loadHome();toast('🏠 Home. Everything you own is right here.')}
+// A kid should be hitting something before they read a single word.
+// This sits two paces in front of where you wake up.
+function spawnPiggy(px,pz){
+ if(G.smashed){homeSmash=null;return}
+ const g=new THREE.Group();
+ const body=box(1.7,1.4,1.2,0xff8fb0);body.position.y=0.95;g.add(body);
+ const snout=box(0.55,0.42,0.32,0xff6f9c);snout.position.set(0,0.9,0.68);g.add(snout);
+ [[-0.55,-0.38],[0.55,-0.38],[-0.55,0.38],[0.55,0.38]].forEach(p=>{
+  const l=box(0.32,0.42,0.32,0xff6f9c);l.position.set(p[0],0.21,p[1]);g.add(l)});
+ const slot=box(0.9,0.09,0.18,0xd8577f);slot.position.set(0,1.66,0);g.add(slot);
+ const lbl=makeLabel('SMASH IT!','🐷');lbl.position.y=3.0;lbl.scale.set(7,3.4,1);g.add(lbl);
+ g.position.set(px,0,pz);worldGroup.add(g);
+ // a real collider - you bump into it instead of walking through it
+ const col={mesh:null,cap:null,x:px,z:pz,hw:1.05,hd:0.85,top:1.7,hp:999,maxhp:999,
+  broken:false,solid:true,immovable:true,gateFor:null,kind:'piggy',movable:false};
+ walls.push(col);
+ homeSmash={x:px,z:pz,g,hp:3,lbl,col};}
+function hitPiggy(){
+ if(!homeSmash||G.smashed)return;
+ if(_pigCool>0){_pigCool--;return}
+ _pigCool=7;homeSmash.hp--;
+ sfx('hit');burst(homeSmash.x,1.2,homeSmash.z,0xff8fb0);
+ if(homeSmash.g){homeSmash.g.scale.setScalar(0.7+0.3*(homeSmash.hp/3));homeSmash.g.rotation.z=0.25}
+ if(homeSmash.hp<=0){
+  G.smashed=1;save();
+  if(homeSmash.g)worldGroup.remove(homeSmash.g);
+  if(homeSmash.col)homeSmash.col.broken=true;
+  for(let q=0;q<6;q++)burst(homeSmash.x+(Math.random()-0.5)*2.4,1,homeSmash.z+(Math.random()-0.5)*2.4,0xf0c419);
+  confetti();sfx('secret');addWealth(50);
+  homeSmash=null;
+  toast('💰 $50! That is yours. Now go turn it into more.');
+  checkQuest();
+ } else toast('🐷 CRACK! Hit it again');}
 function loadHome(){
  if(worldGroup){scene.remove(worldGroup);disposeGroup(worldGroup)}
  worldGroup=new THREE.Group();scene.add(worldGroup);atHome=true;
@@ -1350,6 +1386,7 @@ function loadHome(){
   if(f.id==='bed'){homeBed={x:sp[0],z:sp[1]};
    const zz=makeLabel('SLEEP','😴');zz.position.set(sp[0],2.6,sp[1]);zz.scale.set(4.5,2.4,1);worldGroup.add(zz)}});
  pos={x:0,z:D/2-3};heading=Math.PI;heroY=0;heroVY=0;onGround=true;hero.position.set(pos.x,0,pos.z);
+ spawnPiggy(0,D/2-8);
  shownWorld=-1;renderHUD()}
 function maybeAdvanceWorld(){if(pendingWorld!=null){const w=pendingWorld;pendingWorld=null;if(w<LEVELS.length)loadWorld(w)}}
 
@@ -1592,7 +1629,7 @@ const SHOP=[
   why:'Information bought before you need it is always cheaper than the mistake.'},
  {id:'babylon',e:'📕',n:'The Richest Man in Babylon',price:300,cat:'Book',wp:1,
   d:'+1 willpower, forever. Adds the book to your Vault.',
-  why:'A book is the cheapest way to buy decades of somebody else\u2019s experience.',
+  why:'A book is the cheapest way to buy decades of somebody else’s experience.',
   url:'https://en.wikipedia.org/wiki/The_Richest_Man_in_Babylon'},
  {id:'psych',e:'📗',n:'The Psychology of Money',price:500,cat:'Book',wp:1,
   d:'+1 willpower, forever. Adds the book to your Vault.',
@@ -1609,7 +1646,7 @@ const SHOP=[
  {id:'fred',e:'📈',n:'FRED economic data',price:400,cat:'Knowledge',
   d:'The real data the professionals watch, saved to your Vault.',
   why:'Opinions are free and mostly wrong. Data costs something and is mostly right.'},
- {id:'advisor',e:'🧑\u200d💼',n:'Fee-only advisor session',price:900,cat:'Knowledge',
+ {id:'advisor',e:'🧑‍💼',n:'Fee-only advisor session',price:900,cat:'Knowledge',
   d:'An hour with someone paid by YOU, not by commissions.',
   why:'A fee-only advisor has no reason to sell you junk. How someone is paid tells you who they serve.',
   url:'https://www.napfa.org'},
@@ -1923,33 +1960,16 @@ function freedomNumber(){return monthlyBurn()*12*25}
 // eleven buttons and no idea what any of it was for. This is the thread that
 // connects them, in the order that teaches the thesis fastest.
 const TUTORIAL=[
- {t:'Open ⏳ and work a shift',
-  w:'You are 18 with $0. Everyone starts by selling hours — see what one day of your time is actually worth.',
-  chk:()=>((G.acts&&G.acts.work)||0)>=1},
- {t:'Now spend 4 hours studying a skill',
-  w:'It pays $0 today. That is exactly why most people skip it — and exactly why it is the most valuable thing on the menu.',
-  chk:()=>(G.skill||0)>=1},
- {t:'Study until you reach Junior',
-  w:'Watch what happens to your wage. This is the entire game in one number.',
-  chk:()=>(G.skill||0)>=5},
- {t:'Walk out the front door',
-  w:'Use the arrows to reach the doorway at the bottom of your room. The world is where the lessons are hidden.',
-  chk:()=>!atHome},
- {t:'Find a glowing block and break it open',
-  w:'Follow the beam of light. Walk into a block, or press ↵ ENTER, and keep hitting it.',
-  chk:()=>Object.keys(G.done||{}).length>=1},
- {t:'Talk to somebody out there',
-  w:'Some of them will help you. Some are trying to take your money. Press ↵ ENTER next to anyone.',
-  chk:()=>!!G._talked},
- {t:'Buy one thing from the 🛒 shop',
-  w:'Some purchases pay you back and some just cost you. The shop labels which is which — read them.',
-  chk:()=>Object.keys(G.owned||{}).length+Object.keys(G.furn||{}).length>=1},
- {t:'Open 📈 and call a real market',
-  w:'These are live prices from real markets. Pick a direction — the actual market settles it later, and none of your money is at risk.',
-  chk:()=>(G.predictions||[]).length>=1},
- {t:'You know how it works now — go get free',
-  w:'Freedom = 25 years of your spending, saved. Lower what you spend, raise what you earn, and let time do the rest.',
-  chk:()=>false},
+ {t:'🐷 SMASH the piggy bank',      w:'Walk straight into it.',                       chk:()=>!!G.smashed},
+ {t:'💼 Work a shift → get paid',  w:'☰ Menu → Spend your day.',                   chk:()=>((G.acts&&G.acts.work)||0)>=1},
+ {t:'📚 Study once',                w:'It pays $0 today. Watch what happens anyway.', chk:()=>(G.skill||0)>=1},
+ {t:'📈 Study until your pay JUMPS', w:'5 sessions = Junior = $200 a shift.',          chk:()=>(G.skill||0)>=5},
+ {t:'🚪 Get outside',               w:'Door at the bottom of your room.',             chk:()=>!atHome},
+ {t:'⛏️ Smash a glowing block',        w:'Follow the beam of light.',                    chk:()=>Object.keys(G.done||{}).length>=1},
+ {t:'🐺 Talk to an animal',         w:'Some help you. Some rob you.',                 chk:()=>!!G._talked},
+ {t:'🛒 Buy something',             w:'Some things pay you back. Most do not.',       chk:()=>Object.keys(G.owned||{}).length+Object.keys(G.furn||{}).length>=1},
+ {t:'📈 Call a REAL market',        w:'☰ Menu → Market Desk. Live prices.',          chk:()=>(G.predictions||[]).length>=1},
+ {t:'🗽 Now go get rich',           w:'Freedom = 25x what you spend in a year.',      chk:()=>false},
 ];
 function tutStep(){return TUTORIAL[Math.min(G.tut||0,TUTORIAL.length-1)]}
 function renderQuest(){
@@ -2223,6 +2243,13 @@ function updateExtras(t){
  if(!paused){
   for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.mesh.rotation.y+=0.09;c.mesh.position.y=0.9+Math.sin(t*0.004+c.x)*0.16;if(Math.hypot(c.x-pos.x,c.z-pos.z)<1.7){worldGroup.remove(c.mesh);coins.splice(i,1);G.coins[c.id]=1;G.coinCount=(G.coinCount||0)+1;addWealth(50);sfx('hit')}}
   for(const tm of tempts){if(G.tempts[tm.id]||tm.x==null)continue;if(tm.spr)tm.spr.position.y=1.5+Math.sin(t*0.003+tm.x)*0.2;if(Math.hypot(tm.x-pos.x,tm.z-pos.z)<2.5){openTempt(tm);break}}
+  // the piggy bank: walk into it and it breaks. no reading required.
+  if(atHome&&homeSmash&&!G.smashed){
+   const g=homeSmash.g;g.rotation.y=Math.sin(t*0.003)*0.25;
+   g.position.y=Math.abs(Math.sin(t*0.004))*0.18;
+   if(_pigCool>0)_pigCool--;
+   if(Math.hypot(homeSmash.x-pos.x,homeSmash.z-pos.z)<3.2){
+    $('hint').classList.add('show');$('hint').textContent='🐷 Walk into it! Or press ↵ ENTER';$('bE').classList.add('on')}}
   // step through the front door and you are out in the world
   if(atHome&&homeBed&&Math.hypot(homeBed.x-pos.x,homeBed.z-pos.z)<2.6&&nearGate<0){
    $('hint').classList.add('show');$('hint').textContent='😴 Press ↵ ENTER to sleep until morning';$('bE').classList.add('on')}
