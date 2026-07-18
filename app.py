@@ -702,7 +702,7 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=htool>👊 Bare Hands</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill>💪 <b id=hwpn>0</b></span><span class="hpill clk" id=hview>👁 Overhead</span><span class="hpill clk" id=hvault>📚 <b id=hvn>0</b></span><span class="hpill clk" id=hgloss>📖 <b id=hwords>0</b></span><span class="hpill clk" id=htrophy>🏆</span><span class="hpill clk" id=hhelp>❔</span><span class="hpill" id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill id=hclock style="font-variant-numeric:tabular-nums">08:00 · Mon 1 Jan · Yr 1</span><span class="hpill clk" id=hmkt title="Real market predictions">📈</span><span class="hpill clk" id=hact>⏳</span><span class="hpill clk" id=hhome>🏠</span><span class="hpill clk" id=hshop>🛒</span><span class=hpill id=hsave style="opacity:.3">☁</span><a class="hpill clk" id=hdash href="/" style=color:inherit>📊</a></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=htool>👊 Bare Hands</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill>💪 <b id=hwpn>0</b></span><span class="hpill clk" id=hview>👁 Overhead</span><span class="hpill clk" id=hvault>📚 <b id=hvn>0</b></span><span class="hpill clk" id=hgloss>📖 <b id=hwords>0</b></span><span class="hpill clk" id=htrophy>🏆</span><span class="hpill clk" id=hhelp>❔</span><span class="hpill" id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill id=hclock style="font-variant-numeric:tabular-nums">08:00 · Mon 1 Jan · Yr 1</span><span class="hpill clk" id=hprof title="Your profile">👤</span><span class="hpill clk" id=hmkt title="Real market predictions">📈</span><span class="hpill clk" id=hact>⏳</span><span class="hpill clk" id=hhome>🏠</span><span class="hpill clk" id=hshop>🛒</span><span class=hpill id=hsave style="opacity:.3">☁</span><a class="hpill clk" id=hdash href="/" style=color:inherit>📊</a></div>
 <div id=hsense></div>
 <div id=hint>Press ↵ ENTER to go in</div>
 <div id=wbanner><div class=wt id=wbt>LEVEL 1</div><div class=wn id=wbn>Piggy Bank Park</div></div>
@@ -711,6 +711,7 @@ html,body{margin:0;height:100%;background:#0a0d16;overflow:hidden;font-family:sy
  <button class=gbtn id=bJ2 style=margin-right:8px>⤴</button><button class="gbtn enter" id=bE>↵ ENTER</button></div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
+<div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
 <div id=quest><div class=qh>Your next step</div><div class=qt id=qtext></div><div class=qw id=qwhy></div><div class=qp><i id=qbar style=width:0%></i></div><div class=qs onclick="skipTutorial()">Skip the walkthrough</div></div>
 <div id=web><div id=webbar><button onclick="closeWeb()">← Back to Money World</button><span id=webtitle></span><a id=weblink href="#" target=_blank rel=noopener>Open in new tab ↗</a></div><iframe id=webframe title="Resource"></iframe><div id=webnote style="display:none"></div></div>
@@ -1081,7 +1082,8 @@ $('htrophy').addEventListener('click',openTrophies);$('hgloss').addEventListener
 $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEventListener('click',openVault);$('hshop').addEventListener('click',openShop);
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
-$('hmkt').addEventListener('click',openMarket);$('hhelp').addEventListener('click',showHelp);$('htool').addEventListener('click',()=>toast('Your tool: '+bestTool().e+' '+bestTool().n+' — beat bosses to unlock stronger ones!'));
+$('hmkt').addEventListener('click',openMarket);
+$('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);$('htool').addEventListener('click',()=>toast('Your tool: '+bestTool().e+' '+bestTool().n+' — beat bosses to unlock stronger ones!'));
 function setView(m){camMode=((m%4)+4)%4;$('hview').textContent='👁 '+CAMNAMES[camMode]}
 
 let hitCool=0;
@@ -1099,12 +1101,18 @@ function spawnWalls(wi,par){walls=[];const gap=(Math.random()-0.5)*22;
 function stepReach(){return owns('ladder')?3.2:1.45}
 let _stepT=0;
 function stepFX(w){if(_stepT>0)return;_stepT=10;sfx('hit');burst(pos.x,heroY,pos.z,0xd8c8a8)}
+let _shoveT=0;
+function pushFX(w){if(_shoveT>0){_shoveT--;return}_shoveT=26;sfx('hit');
+ burst(w.x,0.4,w.z,0xc8a06a);toast('📦 You shoved it aside — some things move if you lean on them.')}
 function blockedAt(nx,nz,y){for(const w of walls){if(w.broken)continue;if(y>=w.top-0.25)continue;if(Math.abs(nx-w.x)<w.hw+0.55&&Math.abs(nz-w.z)<w.hd+0.55)return w}return null}
 function shakeWall(w){w._sh=10}
 function armSwing(){_swing=12}
 let _swing=0;
 function ram(w){if(!w)return;armSwing();
- if(w.solid){shakeWall(w);sfx('hit');toast('🪨 Solid rock — this one will not break. Climb it (⤴ SPACE) or go around.');return}
+ if(w.solid){shakeWall(w);sfx('hit');
+  toast(w.kind==='mountain'?'⛰️ A mountain. You do not move this — you climb it. Walk up the tiers.'
+   :w.immovable?'🪨 Immovable. Not everything gives way. Climb it or go around.'
+   :'🪨 Solid — climb it (⤴ SPACE) or go around.');return}
  if(w.broken)return;
  if(w.gateFor!=null){toast('🚪 This door is locked — clear the challenge in this room to open it!');return}
  shakeWall(w);burst(w.x,Math.min(w.top,2.2),w.z,0xb08a5a);
@@ -1192,7 +1200,7 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
   const sign=makeLabel(nm,'🚪');sign.position.set(rc.x,7.2,rc.z-HR+0.6);
   sign.scale.set(6,3.2,1);worldGroup.add(sign)})
  // obstacles: rubble to smash, barricades, boulders + ledges to climb
- const KINDS=['rubble','rubble','barricade','boulder','ledge','tower'];
+ const KINDS=['rubble','rubble','barricade','boulder','ledge','tower','crate','crate','barrel','bedrock'];
  roomCells.forEach((rc,idx)=>{const cnt=3+Math.min(4,li+(idx%3));
   for(let k=0;k<cnt;k++){const a=Math.random()*6.283,d=7.5+Math.random()*(HR-6);
    const x=rc.x+Math.cos(a)*d,z=rc.z+Math.sin(a)*d;
@@ -1216,6 +1224,9 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
    if(nearGateSpot(x,z,7))continue;                          // not in a doorway
    const base=MINES[(li*3+mi)%MINES.length];
    const m=Object.assign({},base,{id,x,z});spawnMine(m,worldGroup);mines.push(m)}});
+ // mountains: one per level in the far corner, plus one mid-map you can summit
+ {const mx1=X0+14,mz1=Z1-14;buildMountain(mx1,mz1,worldGroup,1.0);
+  if(rows>1){const mx2=X1-14,mz2=Z0+14;buildMountain(mx2,mz2,worldGroup,0.8)}}
  // distant treeline so the edge of the world reads as landscape, not a wall
  for(let k=0;k<80;k++){const a=k/80*6.283;
   const rx=mx+Math.cos(a)*((X1-X0)/2+34)+(Math.random()-0.5)*10;
@@ -1327,9 +1338,11 @@ function update(t){if(!renderer)return;
    const reach=stepReach();
    let w=blockedAt(pos.x+dx,pos.z,heroY);
    if(w&&onGround&&(w.top-heroY)<=reach&&(w.top-heroY)>0){heroY=w.top+0.01;heroVY=0;onGround=true;pos.x+=dx;stepFX(w)}
+   else if(w&&w.movable&&onGround){if(pushWall(w,Math.sign(dx),0)){pos.x+=dx;pushFX(w)}else ram(w)}
    else if(!w)pos.x+=dx;else ram(w);
    w=blockedAt(pos.x,pos.z+dz,heroY);
    if(w&&onGround&&(w.top-heroY)<=reach&&(w.top-heroY)>0){heroY=w.top+0.01;heroVY=0;onGround=true;pos.z+=dz;stepFX(w)}
+   else if(w&&w.movable&&onGround){if(pushWall(w,0,Math.sign(dz))){pos.z+=dz;pushFX(w)}else ram(w)}
    else if(!w)pos.z+=dz;else ram(w);
    walkPhase+=0.3}
   if(keys.JUMP&&onGround){heroVY=0.42;onGround=false;sfx('hit')}
@@ -1389,7 +1402,7 @@ function bigWall(x,z,w,d,opts){opts=opts||{};const H=opts.h||6,gate=(opts.gateFo
  const m=box(w,H,d,gate?0x9a5a3a:(opts.col||0x726052));m.position.set(x,H/2,z);worldGroup.add(m);
  const cap=box(w+0.15,0.3,d+0.15,opts.cap||0x554637);cap.position.set(x,H,z);worldGroup.add(cap);
  const hp=opts.solid?999:(opts.hp||999);
- const wall={mesh:m,cap,x,z,hw:w/2,hd:d/2,top:H,hp,maxhp:hp,broken:false,solid:!!opts.solid,gateFor:(gate?opts.gateFor:null),kind:opts.kind||'wall'};
+ const wall={mesh:m,cap,x,z,hw:w/2,hd:d/2,top:H,hp,maxhp:hp,broken:false,solid:!!opts.solid,gateFor:(gate?opts.gateFor:null),kind:opts.kind||'wall',movable:!!opts.movable,immovable:!!opts.immovable};
  if(wall.gateFor!=null&&G.done[wall.gateFor]){wall.broken=true;worldGroup.remove(m);worldGroup.remove(cap)}
  walls.push(wall);return wall}
 // rooms you actually walk through — a home, a school, a store, an office, a bank
@@ -1700,6 +1713,73 @@ function openMarket(){
   +rows
   +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;market&#39;)">← Back to Money World</button>';
  $('market').classList.add('show')}
+// Everything you are, in one place. Who you became, what you learned,
+// what you own, and how close you actually are to being free.
+function hoursSpent(){const a=G.acts||{};let h=0;
+ ACTIONS.forEach(x=>{h+=(a[x.id]||0)*x.hours});return h}
+function openProfile(){
+ paused=true;
+ const p=tParts(),tier=wageTier(),st=predStats(),fn=freedomNumber(),nw=netWorth();
+ const pct=Math.max(0,Math.min(999,Math.round(nw/fn*1000)/10));
+ const earned=BADGES.filter(b=>{try{return b.test(G)}catch(e){return false}});
+ const locked=BADGES.filter(b=>!earned.includes(b));
+ const a=G.acts||{};
+ const rooms=Object.keys(G.done||{}).length;
+ const stat=(l,v,c)=>'<div style="flex:1 1 44%;min-width:130px;background:#0d1420;border:1px solid #2b3654;border-radius:10px;padding:9px 11px">'
+   +'<div style="font-size:11px;color:#7b8aa3;text-transform:uppercase;letter-spacing:.06em">'+l+'</div>'
+   +'<div style="font-size:19px;font-weight:800;color:'+(c||'#eaf1ff')+'">'+v+'</div></div>';
+ const invTiers=CAT?Object.keys(CAT.classes).map(c=>{const cl=CAT.classes[c],{t}=tierFor(c),tr=TIERS[t];
+   return '<div class=trow><span class=ti>'+cl.icon+'</span><span class=tn>'+cl.name+'</span>'
+     +'<span class=tr style=color:'+tr.c+'>'+tr.ic+' '+tr.n+'</span></div>'}).join(''):'';
+ const vault=SECRETS.filter(x=>G.secrets[x.id]).map(x=>x.e+' '+x.name)
+   .concat(SHOP.filter(x=>x.url&&owns(x.id)).map(x=>x.e+' '+x.n));
+ $('profbody').innerHTML=
+  '<div class=p-badge>'+curHome().e+'</div>'
+  +'<div class=p-world>Your life so far</div>'
+  +'<div class=p-title>'+tier.n+' · age '+p.age+'</div>'
+  +'<div class=p-note style="margin-bottom:10px">'+dateStr()+' · day '+(p.totalDays+1)+' of the story</div>'
+
+  +'<div class=p-teach style="border-color:'+(pct>=100?'#3fb950':pct>=25?'#f0b429':'#3d8bff')+'">'
+  +'<b>Financial freedom: '+pct+'%</b><div class=qp style="margin-top:6px;height:8px"><i style="width:'+Math.min(100,pct)+'%"></i></div>'
+  +'<div class=gd style="margin-top:6px">You burn '+money(monthlyBurn())+' a month, so freedom costs '+money(fn)+'. '
+  +(pct>=100?'You are already there — your money covers your life.':'You need '+money(Math.max(0,fn-nw))+' more.')+'</div></div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">💰 Money</div>'
+  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +stat('Net worth',money(nw),'#3fb950')+stat('Cash',money(G.wealth||0))
+  +stat('Home equity',money(G.equity||0))+stat('Monthly burn',money(monthlyBurn()),'#f0b429')
+  +stat('Passive income',money(passiveIncome()),passiveIncome()>0?'#3fb950':'#7b8aa3')
+  +stat('A shift pays',money(wage()))+'</div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">🧠 What you know</div>'
+  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +stat('Skill',(G.skill||0)+' / '+SKILL_CAP)+stat('Wage tier',tier.n,'#3d8bff')
+  +stat('Rooms cleared',rooms+' / '+STAGES.length)+stat('Words learned',Object.keys(G.glossary||{}).length)
+  +stat('Willpower',(G.willpower||0)+' 💪')+stat('Street smarts',Math.round(streetSmarts()*10)/10)+'</div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">⏳ Where the hours went</div>'
+  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +stat('Shifts worked',(a.work||0))+stat('Study sessions',(a.study||0))
+  +stat('Projects finished',projectsDone())+stat('Hours scrolled away',(G.wasted||0),(G.wasted||0)>12?'#f85149':'#7b8aa3')
+  +'</div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">🏠 Home</div>'
+  +'<div class=gloss><b>'+curHome().e+' '+curHome().n+'</b><div class=gd>'+curHome().note+'</div>'
+  +'<div class=gd>Furniture: '+(Object.keys(G.furn||{}).length?FURN.filter(f=>ownsF(f.id)).map(f=>f.e).join(' '):'nothing yet')+'</div></div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">📈 Market record</div>'
+  +'<div class=gloss><b>'+(st.resolved?(st.right+' of '+st.resolved+' calls right · '+st.acc+'% accurate'):'No calls settled yet')+'</b>'
+  +(st.open?'<div class=gd>'+st.open+' still open</div>':'')+'</div>'+invTiers
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">🏆 Accomplishments <span class=p-note>· '+earned.length+' of '+BADGES.length+'</span></div>'
+  +'<div class=badges>'+earned.map(b=>'<div class=bg><div class=i>'+b.ic+'</div><div class=n>'+b.n+'</div></div>').join('')
+  +locked.map(b=>'<div class="bg off"><div class=i>'+b.ic+'</div><div class=n>'+b.n+'</div></div>').join('')+'</div>'
+
+  +'<div class=p-title style="font-size:16px;margin-top:14px">📚 Vault <span class=p-note>· '+vault.length+'</span></div>'
+  +(vault.length?vault.map(v=>'<div class=gloss><b>'+v+'</b></div>').join(''):'<div class=p-note>Nothing found yet — explore the far corners.</div>')
+
+  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;profile&#39;)">← Back to Money World</button>';
+ $('profile').classList.add('show')}
 function openShop(){paused=true;
  const rows=SHOP.map(it=>{const has=owns(it.id),afford=(G.wealth||0)>=it.price;
   return '<div class=gloss style="'+(has?'border-color:#3fb950':'')+'">'
@@ -2002,7 +2082,31 @@ const SUBB=[
  {n:'Marsh',g:0x4a6a58,f:(x,z,p)=>{const w=new THREE.Mesh(new THREE.PlaneGeometry(6,6),new THREE.MeshLambertMaterial({color:0x3a6a5a}));w.rotation.x=-Math.PI/2;w.position.set(x,0.05,z);p.add(w);for(let k=0;k<4;k++){const r=box(0.16,1.8,0.16,0x6a8a4a);r.position.set(x+(Math.random()-0.5)*4,0.9,z+(Math.random()-0.5)*4);p.add(r)}}}
 ];
 // obstacle kit — break it, climb it, or go around it
+// Some things in your way you can shove aside. Some you never will —
+// you go over them, or you go around. Knowing which is which is the skill.
+function pushWall(w,dx,dz){
+ if(!w||!w.movable||w.broken)return false;
+ const step=0.22,nx=w.x+dx*step,nz=w.z+dz*step;
+ if(nx<BND.x0+2||nx>BND.x1-2||nz<BND.z0+2||nz>BND.z1-2)return false;
+ for(const o of walls){if(o===w||o.broken)continue;
+  if(Math.abs(nx-o.x)<w.hw+o.hw-0.05&&Math.abs(nz-o.z)<w.hd+o.hd-0.05)return false}
+ w.x=nx;w.z=nz;
+ if(w.mesh)w.mesh.position.set(nx,w.mesh.position.y,nz);
+ if(w.cap)w.cap.position.set(nx,w.cap.position.y,nz);
+ if(w.spr)w.spr.position.set(nx,w.spr.position.y,nz);
+ return true}
+// A mountain: stacked tiers, each a walk-up step. Big enough to see the whole
+// level from the top, and impossible to move.
+function buildMountain(x,z,par,scale){
+ const S=scale||1,tiers=[[13*S,1.4],[10*S,2.8],[7.4*S,4.2],[5*S,5.6],[2.8*S,7.0]];
+ tiers.forEach((t,k)=>{
+  const w=bigWall(x,z,t[0],t[0],{h:t[1],solid:1,immovable:1,
+   col:k<2?0x6a7280:k<4?0x7b8290:0xe8eef6,cap:k<4?0x4a515e:0xffffff,kind:'mountain'})});
+ const flag=makeLabel('SUMMIT','⛰️');flag.position.set(x,8.6,z);flag.scale.set(6,3,1);par.add(flag)}
 function obstacle(kind,x,z,lv){
+ if(kind==='crate')   return bigWall(x,z,2.6,2.6,{h:2.2,solid:1,movable:1,col:0xa8814e,cap:0x7a5c34,kind:'crate'});
+ if(kind==='barrel')  return bigWall(x,z,2.2,2.2,{h:2.4,solid:1,movable:1,col:0x8a6a3a,cap:0x5f4726,kind:'barrel'});
+ if(kind==='bedrock') return bigWall(x,z,4.2,4.2,{h:5.2,solid:1,immovable:1,col:0x3f4652,cap:0x2a3038,kind:'bedrock'});
  if(kind==='rubble')   return bigWall(x,z,2.4,2.4,{h:1.6,hp:2+lv,col:0x8a7a6a,cap:0x6a5a4a,kind:'rubble'});
  if(kind==='barricade')return bigWall(x,z,6,1.4,{h:2.7,hp:4+lv*2,col:0x7a5a3a,cap:0x5a4028,kind:'barricade'});
  if(kind==='boulder')  return bigWall(x,z,3,3,{h:3.2,solid:1,col:0x6a6a72,cap:0x4a4a52,kind:'boulder'});
