@@ -994,7 +994,7 @@ function speak(t){
  try{
   const sy=window.speechSynthesis;if(!sy)return;
   sy.cancel();
-  const clean=String(t).replace(/[^\x20-\x7e]/g,' ').replace(/\s+/g,' ').trim();
+  const clean=String(t).replace(/[^ -~]/g,' ').replace(/ +/g,' ').trim();
   if(!clean)return;
   const u=new SpeechSynthesisUtterance(clean);
   u.rate=0.98;u.pitch=1.06;u.volume=1;
