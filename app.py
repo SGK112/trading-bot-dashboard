@@ -634,8 +634,15 @@ body.bigtext .p-q{font-size:21px}
 body.bigtext .p-title{font-size:25px}
 body.bigtext #quest .qt{font-size:17px}
 body.bigtext #quest .qw{font-size:14px}
+.helpbox{border:2px solid #f0b429;background:#161f33;border-radius:12px;padding:11px 13px;margin:0 0 10px;
+ color:#eaf1ff;font-size:15px;line-height:1.5}
+body.bigtext .helpbox{font-size:17px}
 .readbtn{display:inline-block;margin:6px 0 4px;padding:9px 14px;border-radius:10px;background:#2a3f68;
  border:1px solid #3d8bff;color:#dce7f7;font-weight:800;font-size:14px;cursor:pointer}
+@media(max-width:820px){
+ #pad button,#bJ2,#bE{min-width:62px;min-height:62px;font-size:24px}
+ #mini{width:96px!important;height:96px!important}
+}
 #quest{position:fixed;left:10px;top:64px;z-index:30;max-width:290px;background:linear-gradient(180deg,rgba(22,34,58,.97),rgba(14,22,38,.97));
  border:2px solid #3d8bff;border-radius:14px;padding:11px 13px;color:#eaf1ff;box-shadow:0 6px 22px rgba(0,0,0,.5);display:none}
 #quest.show{display:block}
@@ -645,7 +652,25 @@ body.bigtext #quest .qw{font-size:14px}
 #quest .qs{margin-top:8px;font-size:11.5px;color:#6b7c96;cursor:pointer;text-decoration:underline}
 #quest .qp{margin-top:7px;height:5px;background:#0d1420;border-radius:4px;overflow:hidden}
 #quest .qp i{display:block;height:100%;background:linear-gradient(90deg,#3d8bff,#3fb950)}
-@media(max-width:700px){#quest{max-width:210px;font-size:12px;top:58px}#quest .qt{font-size:13px}#quest .qw{font-size:11px}}
+@media(max-width:820px){
+ #quest{max-width:none;left:6px;right:6px;top:46px;padding:7px 10px}
+ #quest .qh{display:none}
+ #quest .qt{font-size:14px;line-height:1.25}
+ #quest .qw{font-size:11.5px;margin-top:2px;display:none}
+ #quest.open .qw{display:block}
+ #quest .qs{margin-top:5px;font-size:10.5px}
+ #quest .qp{margin-top:5px;height:4px}
+ #quest:after{content:'tap for why';position:absolute;right:10px;top:7px;font-size:10px;color:#7fb4ff}
+ #quest.open:after{content:'tap to hide'}
+ #wbt{font-size:13px!important}
+ #wbn{font-size:26px!important}
+ #hsense{font-size:12px;top:76px}
+ #toast{top:auto;bottom:150px;font-size:13px;max-width:92vw}
+}
+@media(max-width:820px) and (orientation:landscape){
+ #quest{max-width:280px;right:auto}
+ #toast{bottom:96px}
+}
 #web{position:fixed;inset:0;z-index:80;background:#0a0f18;display:none;flex-direction:column}
 #web.show{display:flex}
 #webbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(180deg,#16223a,#0e1626);border-bottom:2px solid #3d8bff;box-shadow:0 3px 14px rgba(0,0,0,.5)}
@@ -967,7 +992,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -993,9 +1018,11 @@ function speak(t){
  if(!G.narrate||!t)return;
  try{
   const sy=window.speechSynthesis;if(!sy)return;
-  sy.cancel();
+  // do NOT cancel here - it was cutting off every previous line mid-sentence.
+  // the browser queues utterances natively; let it.
   const clean=String(t).replace(/[^ -~]/g,' ').replace(/ +/g,' ').trim();
   if(!clean)return;
+  if(sy.pending&&sy.speaking&&clean.length<40)return;   // skip short filler while busy
   const u=new SpeechSynthesisUtterance(clean);
   u.rate=0.98;u.pitch=1.06;u.volume=1;
   const vs=sy.getVoices();
@@ -1010,6 +1037,7 @@ function toggleNarrate(){
  document.body.classList.toggle('bigtext',!!G.narrate);
  if(G.narrate)speak('Read aloud is on. I will read everything to you.');else stopSpeak();}
 function readChallenge(){
+ stopSpeak();                       // deliberate repeat: interrupt whatever is going
  const b=$('cbody');if(!b)return;
  const title=(b.querySelector('.p-title')||{}).textContent||'';
  const teach=(b.querySelector('.p-teach')||{}).textContent||'';
@@ -1143,6 +1171,29 @@ function updatePoss(){const tp=topPoss();const face=tp.min>0?tp.e:'';if(possSpri
 
 const parts=[];
 function burst(x,y,z,col){for(let k=0;k<14;k++){const m=box(0.3,0.3,0.3,col);m.position.set(x,y,z);scene.add(m);parts.push({m,vx:(Math.random()-0.5)*0.4,vy:Math.random()*0.4+0.1,vz:(Math.random()-0.5)*0.4,life:1})}}
+// Real gold coins and real dollar bills, scattered thick enough that you are
+// always running toward something.
+function makeMoney(x,z,kind,par){
+ const g=new THREE.Group();
+ if(kind==='bill'||kind==='wad'){
+  const green=kind==='wad'?0x2f7d46:0x3fa35a;
+  const n=kind==='wad'?3:1;
+  for(let k=0;k<n;k++){const b=box(1.25,0.06,0.6,green);
+   b.position.set((Math.random()-0.5)*0.12,0.06+k*0.08,(Math.random()-0.5)*0.12);
+   b.rotation.y=(Math.random()-0.5)*0.5;g.add(b);
+   const band=box(0.3,0.07,0.62,0xe8e2c8);band.position.copy(b.position);band.position.y+=0.005;g.add(band)}
+  const lbl=makeLabel('',kind==='wad'?'$$':'$');lbl.position.y=1.15;lbl.scale.set(1.5,1.5,1);g.add(lbl);
+ } else {
+  const c=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.11,18),
+   new THREE.MeshLambertMaterial({color:0xf0c419}));
+  c.rotation.x=Math.PI/2;c.position.y=0.55;g.add(c);
+  const rim=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.13,18),
+   new THREE.MeshLambertMaterial({color:0xffe066}));
+  rim.rotation.x=Math.PI/2;rim.position.y=0.55;g.add(rim);
+  const lbl=makeLabel('','$');lbl.position.y=0.55;lbl.scale.set(0.85,0.85,1);
+  lbl.material.depthTest=false;g.add(lbl);
+ }
+ g.position.set(x,0,z);par.add(g);return g}
 function spawnSecret(s,par){const o=new THREE.Mesh(new THREE.SphereGeometry(0.55,14,14),new THREE.MeshBasicMaterial({color:0xffd54a}));o.position.set(s.x,1.4,s.z);par.add(o);s.orb=o;const sp=makeLabel('','✨');sp.position.set(s.x,2.5,s.z);sp.scale.set(1.2,1.2,1);par.add(sp);s.spr=sp}
 
 const keys={};function sk(k,v){keys[k]=v}
@@ -1160,6 +1211,9 @@ $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
 $('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);
 $('hnarr').addEventListener('click',toggleNarrate);
+// on a phone the "why" line is hidden until you tap the card
+$('quest').addEventListener('click',e=>{if(e.target.classList.contains('qs'))return;
+ $('quest').classList.toggle('open')});
 // collapse the menu: it had grown to 13 pills and was wrapping over the game
 $('hmenu').addEventListener('click',e=>{e.stopPropagation();$('menu').classList.toggle('show')});
 document.querySelectorAll('#menu .clk').forEach(el=>el.addEventListener('click',()=>$('menu').classList.remove('show')));
@@ -1321,10 +1375,16 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
   const g=buildBlock(d);g.visible=true;worldGroup.add(g);blocks.push(g)});
  // coins
  coins=[];let ci=0;
- roomCells.forEach(rc=>{for(let k=0;k<3;k++){const id='c'+li+'-'+(ci++);if(G.coins[id])continue;
-  const a=Math.random()*6.283,d=5+Math.random()*(HR-5);
-  const x=rc.x+Math.cos(a)*d,z=rc.z+Math.sin(a)*d;
-  const m=box(0.55,0.55,0.14,0xf0c419);m.position.set(x,0.9,z);worldGroup.add(m);coins.push({mesh:m,x,z,id})}});
+ roomCells.forEach(rc=>{
+  for(let k=0;k<7;k++){const id='c'+li+'-'+(ci++);if(G.coins[id])continue;
+   const a=Math.random()*6.283,d=4+Math.random()*(HR-4);
+   const x=rc.x+Math.cos(a)*d,z=rc.z+Math.sin(a)*d;
+   if(nearGateSpot(x,z,4))continue;
+   const roll=Math.random();
+   const kind=roll<0.62?'coin':roll<0.9?'bill':'wad';
+   const val=kind==='coin'?50:kind==='bill'?200:500;
+   const m=makeMoney(x,z,kind,worldGroup);
+   coins.push({mesh:m,x,z,id,val,kind})}});
  // hidden secrets, tucked in the far corners of later rooms
  curSecrets=SECRETS.filter(s=>s.world===wi);
  curSecrets.forEach((s,idx)=>{if(G.secrets[s.id])return;const rc=roomCells[Math.min(roomCells.length-1,1+idx)];
@@ -1442,10 +1502,13 @@ function initWorld(){scene=new THREE.Scene();scene.background=new THREE.Color(0x
  loadWorld(LEVELS[STAGES[firstOpen()].level]?STAGES[firstOpen()].level:0)}
 
 function updateCamera(t){if(!hero)return;const P=hero.position,fx=Math.sin(heading),fz=Math.cos(heading);
- if(camMode===0){camera.position.set(P.x-fx*5,30,P.z-fz*5);camera.lookAt(P.x+fx*0.5,0.6,P.z+fz*0.5)}
- else if(camMode===1){camera.position.set(P.x-fx*9,6,P.z-fz*9);camera.lookAt(P.x+fx*2,2.4,P.z+fz*2)}
+ // portrait screens: sit further back and aim higher, so the frame fills with
+ // world instead of the patch of grass by your feet
+ const nar=camera.aspect<1.1, Z=nar?1.5:1, LIFT=nar?1.6:0;
+ if(camMode===0){camera.position.set(P.x-fx*5*Z,30*(nar?1.15:1),P.z-fz*5*Z);camera.lookAt(P.x+fx*0.5,0.6,P.z+fz*0.5)}
+ else if(camMode===1){camera.position.set(P.x-fx*9*Z,6+LIFT,P.z-fz*9*Z);camera.lookAt(P.x+fx*2,2.4+LIFT*1.5,P.z+fz*2)}
  else if(camMode===2){camera.position.set(P.x+fx*0.2,2.9,P.z+fz*0.2);camera.lookAt(P.x+fx*8,2.7,P.z+fz*8)}
- else{const a=t*0.0003;camera.position.set(P.x+Math.cos(a)*15,11,P.z+Math.sin(a)*15);camera.lookAt(P.x,2,P.z)}}
+ else{const a=t*0.0003;camera.position.set(P.x+Math.cos(a)*15*Z,11+LIFT,P.z+Math.sin(a)*15*Z);camera.lookAt(P.x,2+LIFT,P.z)}}
 
 function update(t){if(!renderer)return;
  if(!paused){if(keys.TL)heading+=0.052;if(keys.TR)heading-=0.052;
@@ -1490,7 +1553,8 @@ function update(t){if(!renderer)return;
   // treasure sense + light beacon over the current target
   let td=1e9,tgt=null;for(const b of blocks){const d=b.userData.d;if(G.done[d.i]||!unlocked(d.i))continue;const dd=Math.hypot(d.px-pos.x,d.pz-pos.z);if(dd<td){td=dd;tgt=d}}
   if(beacon){if(tgt){beacon.visible=true;beacon.position.set(tgt.px,11,tgt.pz);beacon.material.opacity=0.2+0.16*Math.abs(Math.sin(t*0.004))}else beacon.visible=false}
-  $('hsense').textContent=tgt?(td<5?'🔥🔥 RIGHT HERE — press ENTER to smash!':td<12?'🔥 Getting hot!':td<22?'🙂 Warm — follow the beam of light':'❄️ Cold — head toward the beam of light'):'🏆 World cleared!';
+  $('hsense').textContent=tgt?(td<5?'🔥🔥 RIGHT HERE — press ENTER to smash!':td<12?'🔥 Getting hot!':td<22?'🙂 Warm — follow the beam of light':'❄️ Cold — head toward the beam of light')
+   :(Object.keys(G.done).length>=STAGES.length?'🏆 All worlds beaten — now grow that 🗽 number!':'🏆 World cleared! Beat the boss to move on.');
   if(!atHome){const cw=LEVELS[curLevel].world;if(cw!==shownWorld){shownWorld=cw;showBanner(cw)}}
  }
  for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;d.cube.rotation.y+=0.008;let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
@@ -1835,6 +1899,27 @@ function openMarket(){
 // what you own, and how close you actually are to being free.
 function hoursSpent(){const a=G.acts||{};let h=0;
  ACTIONS.forEach(x=>{h+=(a[x.id]||0)*x.hours});return h}
+// Finishing all six worlds used to do nothing at all. Now it lands.
+function showFinale(){
+ paused=true;stopSpeak();
+ const p=tParts(),fn=freedomNumber(),nw=netWorth();
+ const pct=Math.round(Math.max(0,nw)/fn*1000)/10;
+ const badges=BADGES.filter(b=>{try{return b.test(G)}catch(e){return false}}).length;
+ $('minebody').innerHTML='<div class=p-badge style="font-size:60px">🏆</div>'
+  +'<div class=p-world>All six worlds. Finished.</div>'
+  +'<div class=p-title>You beat Money World</div>'
+  +'<p class=p-teach>You started at 18 with nothing and no idea what any of it meant. '
+  +'You now know '+Object.keys(G.glossary||{}).length+' money words, you spotted the scammers, '
+  +'and you are '+wageTier().n+'.</p>'
+  +'<p class=p-teach style="border-color:#3fb950">Net worth <b>'+money(nw)+'</b> · '
+  +badges+' badges · <b>'+pct+'%</b> of the way to never needing a job again.</p>'
+  +'<p class=p-teach style="border-color:#7fb4ff"><b>The real game keeps going.</b> Keep calling markets, '
+  +'keep building side projects, keep your spending low — and watch that percentage climb past 100.</p>'
+  +'<button class=pbtn onclick="hide(&#39;mine&#39;);openProfile()">See everything you did →</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;mine&#39;)">Keep playing</button>';
+ $('mine').classList.add('show');
+ confetti();setTimeout(confetti,600);setTimeout(confetti,1200);sfx('win');
+ speak('You beat Money World. All six worlds finished.');}
 function openProfile(){
  paused=true;
  const p=tParts(),tier=wageTier(),st=predStats(),fn=freedomNumber(),nw=netWorth();
@@ -2284,7 +2369,16 @@ function updateExtras(t){
   if(lamp&&!lampLight){lampLight=new THREE.PointLight(0xffd9a0,1.15,26);scene.add(lampLight)}
   if(lampLight&&hero)lampLight.position.set(hero.position.x,3.2,hero.position.z)}
  if(!paused){
-  for(let i=coins.length-1;i>=0;i--){const c=coins[i];c.mesh.rotation.y+=0.09;c.mesh.position.y=0.9+Math.sin(t*0.004+c.x)*0.16;if(Math.hypot(c.x-pos.x,c.z-pos.z)<1.7){worldGroup.remove(c.mesh);coins.splice(i,1);G.coins[c.id]=1;G.coinCount=(G.coinCount||0)+1;addWealth(50);sfx('hit')}}
+  for(let i=coins.length-1;i>=0;i--){const c=coins[i];
+   c.mesh.rotation.y+=(c.kind==='coin'?0.075:0.03);
+   c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16;
+   if(Math.hypot(c.x-pos.x,c.z-pos.z)<2.0){          // roomier grab radius - it should feel greedy
+    worldGroup.remove(c.mesh);coins.splice(i,1);G.coins[c.id]=1;
+    G.coinCount=(G.coinCount||0)+1;
+    const v=c.val||50;addWealth(v);sfx('hit');
+    burst(c.x,1,c.z,c.kind==='coin'?0xf0c419:0x3fa35a);
+    if(v>=500)toast('💵 '+money(v)+'! Nice find.');
+   }}
   for(const tm of tempts){if(G.tempts[tm.id]||tm.x==null)continue;if(tm.spr)tm.spr.position.y=1.5+Math.sin(t*0.003+tm.x)*0.2;if(Math.hypot(tm.x-pos.x,tm.z-pos.z)<2.5){openTempt(tm);break}}
   // the piggy bank: walk into it and it breaks. no reading required.
   if(atHome&&homeSmash&&!G.smashed){
@@ -2319,7 +2413,9 @@ function drawMini(){const mc=$('mini');if(!mc)return;const g=mc.getContext('2d')
  function P(x,z){return[S/2+(x-_ox)*sc,S/2+(z-_oz)*sc]}
  for(const b of blocks){const d=b.userData.d;if(!b.visible)continue;const st=doorState(d);g.fillStyle=st==='done'?'#f0b429':d.s.isBoss?'#f05a4a':'#3d8bff';const p=P(d.px,d.pz);g.fillRect(p[0]-2,p[1]-2,4,4)}
  g.fillStyle='#ffd54a';for(const s of curSecrets){if(G.secrets[s.id])continue;const p=P(s.x,s.z);g.beginPath();g.arc(p[0],p[1],2,0,7);g.fill()}
- g.fillStyle='#f5d76e';for(const c of coins){const p=P(c.x,c.z);g.fillRect(p[0]-1,p[1]-1,2,2)}
+ for(const c of coins){const p=P(c.x,c.z);
+   g.fillStyle=c.kind==='coin'?'#f5d76e':'#5fd18a';
+   const sz=c.kind==='wad'?3:2;g.fillRect(p[0]-sz/2,p[1]-sz/2,sz,sz)}
  g.fillStyle='#ff7a3a';{const sense=mineSense();for(const m of mines){if(G.mines[m.id])continue;
    if(Math.hypot(m.x-pos.x,m.z-pos.z)>sense)continue;const p=P(m.x,m.z);g.fillRect(p[0]-1.5,p[1]-1.5,3,3)}}
  g.fillStyle='#f85149';for(const tm of tempts){if(G.tempts[tm.id]||tm.x==null)continue;const p=P(tm.x,tm.z);g.beginPath();g.arc(p[0],p[1],2,0,7);g.fill()}
@@ -2353,11 +2449,58 @@ function openChallenge(i){paused=true;G.cur=i;bossQ=0;const s=STAGES[i];$('cpane
  if(s.type==='fill')setTimeout(()=>{const el=$('fillin');if(el)el.focus()},60);
  if(s.type==='boss')renderBossQ()}
 function closeChallenge(){stopSpeak();$('challenge').classList.remove('show');paused=false}
-function pick(i,k){if(k!==STAGES[i].a){toast('Not quite — read the clue again and retry.');return}complete(i)}
-function tfAns(i,v){if((!!v)!==(!!STAGES[i].a)){toast('Not quite — think it through and retry.');return}complete(i)}
+// A 7-year-old hit "Self-Employment Tax", got it wrong six times, saw the same
+// six words each time, and quit. Wrong answers now escalate into help:
+// nudge -> hint -> show me the answer. Being stuck is never the end of the road.
+function hintFor(i){const s=STAGES[i];
+ if(s.teach)return s.teach;
+ if(s.word)return s.word.t+' means: '+s.word.d;
+ if(s.passage)return s.passage;
+ return 'Read the question again slowly. One of these is more true than the others.'}
+function answerTextFor(i){const s=STAGES[i];
+ if(s.choices&&typeof s.a==='number')return s.choices[s.a];
+ if(s.type==='tf')return s.a?'True':'False';
+ if(s.options){const o=s.options.find(x=>x.ok);return o?o.label:''}
+ if(s.answer)return s.answer;
+ return '';}
+function helpBox(i,html,cls){
+ const b=$('cbody');if(!b)return;
+ let box=b.querySelector('.helpbox');
+ if(!box){box=document.createElement('div');box.className='helpbox';b.insertBefore(box,b.firstChild)}
+ box.style.borderColor=cls||'#f0b429';box.innerHTML=html;
+ speak(box.textContent);}
+function wrongCost(i){return 25*((STAGES[i].level||0)+1)}
+function wrongTry(i){
+ G.tries=G.tries||{};G.tries[i]=(G.tries[i]||0)+1;
+ const n=G.tries[i],s=STAGES[i];
+ sfx('hit');
+ // Being wrong about money costs money. That is the whole point.
+ const fee=wrongCost(i),had=G.wealth||0;
+ G.wealth=Math.max(0,had-fee);save();renderHUD();
+ const lost=had-G.wealth;
+ burst(pos.x,1.6,pos.z,0xf85149);
+ if(n>=4){
+  helpBox(i,'<b>🤝 Let me just tell you.</b><br>The answer is: <b style="color:#3fb950">'+answerTextFor(i)+'</b>'
+   +'<br><span style="opacity:.85">'+hintFor(i)+'</span>'
+   +'<br><span class=p-note>Those wrong guesses cost you '+money(G.tries[i]*wrongCost(i))+'. Next time the hint is cheaper than the guessing.</span>'
+   +'<br><button class=pbtn style="margin-top:8px" onclick="giveAnswer('+i+')">Got it — carry on →</button>','#3fb950');
+ } else if(n>=2){
+  helpBox(i,'<b>💡 Hint</b> <span class=p-note>(free — hints never cost you)</span><br>'+hintFor(i)
+   +'<br><span class=p-note>'+(lost>0?('Wrong guesses have cost you '+money(G.tries[i]*wrongCost(i))+' so far. '):'')
+   +'Try again — you are close.</span>','#f0b429');
+ } else {
+  toast(lost>0?('❌ Wrong — that cost you '+money(lost)+'. Guessing is expensive.')
+              :'❌ Wrong — have another go. 💪');
+ }}
+function giveAnswer(i){
+ // they learned it the slow way, which still counts
+ toast('👍 Now you know it. That is what matters.');
+ complete(i);}
+function pick(i,k){if(k!==STAGES[i].a){wrongTry(i);return}complete(i)}
+function tfAns(i,v){if((!!v)!==(!!STAGES[i].a)){wrongTry(i);return}complete(i)}
 function norm(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9 ]/g,'')}
-function fillAns(i){const s=STAGES[i];const v=norm(($('fillin')||{}).value);const ok=[s.answer].concat(s.accept||[]).some(a=>norm(a)===v);if(!ok){toast('Close! Re-read the hint and try again.');return}complete(i)}
-function scenAns(i,k){const o=STAGES[i].options[k];if(!o.ok){toast(o.outcome||'Try another choice.');return}complete(i)}
+function fillAns(i){const s=STAGES[i];const v=norm(($('fillin')||{}).value);const ok=[s.answer].concat(s.accept||[]).some(a=>norm(a)===v);if(!ok){wrongTry(i);return}complete(i)}
+function scenAns(i,k){const o=STAGES[i].options[k];if(!o.ok){if(o.outcome)toast(o.outcome);wrongTry(i);return}complete(i)}
 function renderBossQ(){const s=STAGES[G.cur],B=s.boss,total=B.questions.length,remain=total-bossQ,q=B.questions[bossQ];
  const hp=Array.from({length:total},(_,k)=>`<div class="hpseg ${k>=remain?'gone':''}"></div>`).join('');
  $('bosswrap').innerHTML=`<div class=arena><div class=enemy id=enemy>${B.enemy}</div><div class=ename>${B.name}</div><div class=hpwrap>${hp}</div><div class=hplbl>HP ${remain}/${total}</div></div><div class=bossp>Attack ${bossQ+1} of ${total} — answer to strike!</div><div class=p-q>${q.q}</div>`+q.choices.map((c,k)=>`<button class=opt onclick="bossPick(${k})">${String.fromCharCode(65+k)}.  ${c}</button>`).join('')}
@@ -2379,7 +2522,9 @@ function complete(i){const s=STAGES[i];if(s.word&&!G.glossary[s.word.t]){G.gloss
   G.skill=Math.min(SKILL_CAP,(G.skill||0)+gain);
   if(wageTier().n!==before)setTimeout(()=>{confetti();
    toast('📈 What you just learned made you '+wageTier().n+' — every shift now pays '+money(wage())+'.')},1200)}save();renderHUD();if(typeof refreshBlocks==='function')refreshBlocks();if(typeof refreshGates==='function')refreshGates();
- if(first&&s.isBoss){if(typeof grantToolFor==='function')grantToolFor(s);if(s.level+1<LEVELS.length)pendingWorld=s.level+1}
+ if(first&&s.isBoss){if(typeof grantToolFor==='function')grantToolFor(s);
+  if(s.level+1<LEVELS.length)pendingWorld=s.level+1;
+  else setTimeout(showFinale,900)}
  if(typeof sfx==='function')sfx(s.isBoss?'win':'break');confetti();
  $('challenge').classList.remove('show');$('clburst').textContent=s.isBoss?'🏆':'⭐';
  $('clw').textContent=s.isBoss?('LEVEL '+(s.level+1)+' COMPLETE'):('Level '+(s.level+1)+' · Room '+(s.room+1));
@@ -2428,6 +2573,13 @@ async function boot(){
  document.body.classList.toggle('bigtext',!!G.narrate);
  try{CAT=await j('/api/game/catalog')}catch(e){document.body.innerHTML='<div style=color:#fff;padding:30px>Could not load market data: '+e.message+'</div>';return}
  await resolve();renderHUD();requestAnimationFrame(loop);setInterval(async()=>{try{CAT=await j('/api/game/catalog')}catch(e){}await resolve()},60000)}
-function fit(){if(renderer){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}}
+function fit(){if(!renderer)return;
+ renderer.setSize(innerWidth,innerHeight);
+ const asp=innerWidth/innerHeight;camera.aspect=asp;
+ // On a portrait phone, a fixed vertical fov crushes the view. Keep the
+ // horizontal field constant so a tall screen shows MORE, not less.
+ const HFOV=76*Math.PI/180;
+ camera.fov=asp<1.35?Math.min(88,2*Math.atan(Math.tan(HFOV/2)/asp)*180/Math.PI):70;
+ camera.updateProjectionMatrix()}
 addEventListener('resize',fit);fit();boot();
 </script></body></html>"""
