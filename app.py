@@ -1246,7 +1246,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -1329,10 +1329,10 @@ const SECRETS=[
  {id:'fred',world:3,e:'📈',name:'FRED Economic Data',insight:'The exact free data the pros watch — inflation, interest rates, and more.',url:'https://fred.stlouisfed.org'},
  {id:'investopedia',world:3,e:'📚',name:'Investopedia Dictionary',insight:'Look up ANY money word ever invented, explained simply — free.',url:'https://www.investopedia.com/financial-term-dictionary-4769738'},
  {id:'psych',world:4,e:'🧠',name:'The Psychology of Money',insight:'The rich know wealth is more about behavior than math. This explains why patience beats brains.',url:'https://en.wikipedia.org/wiki/The_Psychology_of_Money'},
- {id:'match',world:5,e:'🎁',name:'The Employer Match',insight:'If your job matches 401(k) contributions, that is an instant 50-100% return on your own money — the highest guaranteed return in all of finance. Most people leave it on the table.',url:'https://www.investor.gov/introduction-investing/investing-basics/employer-sponsored-plans'},
+ {id:'match',world:5,e:'🎁',name:'The Employer Match',insight:'If your job matches 401(k) contributions, that is an instant 50-100% return on your own money — the highest guaranteed return in all of finance. Most people leave it on the table.',url:'https://www.investor.gov/introduction-investing/investing-basics/glossary/401k-plans'},
  {id:'roth',world:5,e:'🌱',name:'Roth IRA & HSA',insight:'A Roth IRA grows TAX-FREE forever. An HSA is the only account with a triple tax break — deductible going in, growing tax-free, tax-free coming out for medical costs. These are the legal loopholes hiding in plain sight.',url:'https://www.investor.gov/introduction-investing/investing-basics/glossary/roth-iras'},
  {id:'capgains',world:5,e:'⚖️',name:'Why the Rich Own Things',insight:'Wages are taxed at up to 37%. Long-term capital gains are taxed at 0-20%. That gap is the single biggest structural reason wealthy people OWN assets instead of only earning a paycheck.',url:'https://www.irs.gov/taxtopics/tc409'},
- {id:'fees',world:5,e:'🪙',name:'The Fee Trap',insight:'A 1% yearly fee sounds tiny. Over 40 years it can quietly eat roughly a quarter of your final balance. Low-cost index funds exist precisely because of this maths.',url:'https://www.investor.gov/financial-tools-calculators/calculators/mutual-fund-analyzer'},
+ {id:'fees',world:5,e:'🪙',name:'The Fee Trap',insight:'A 1% yearly fee sounds tiny. Over 40 years it can quietly eat roughly a quarter of your final balance. Low-cost index funds exist precisely because of this maths.',url:'https://tools.finra.org/fund_analyzer/'},
  {id:'sec',world:4,e:'🏛️',name:'investor.gov (SEC)',insight:'The official free government site to check any investment and dodge scams before you put in a dime.',url:'https://www.investor.gov'},
 ];
 const NPCS=[
@@ -2157,8 +2157,68 @@ const SHOP=[
 // obvious way back on screen. (We cannot put our button on someone else's site.)
 const EMBEDDABLE=[/(^|[.])investor[.]gov$/i,/(^|[.])wikipedia[.]org$/i,/(^|[.])khanacademy[.]org$/i];
 function canEmbed(u){try{return EMBEDDABLE.some(r=>r.test(new URL(u).hostname))}catch(e){return false}}
-function openResource(url,title){
+// Every resource has a question waiting on the other side. You cannot claim
+// the reward by opening a tab and closing it - you have to have actually read
+// the thing. Answer it and the money is real.
+const READCHECK={
+ 'compound-interest-calculator':{q:'On that calculator, what makes the final number grow fastest?',
+   a:['Leaving it invested for more years','Picking a lucky month','Checking it more often','Using a bigger font'],reward:600},
+ 'The_Richest_Man_in_Babylon':{q:'What is the book’s one golden rule?',
+   a:['Pay yourself first — save at least 10% of everything you earn','Borrow as much as the bank allows','Spend it before prices rise','Keep it all in a jar'],reward:600},
+ 'The_Psychology_of_Money':{q:'What does the book say wealth is mostly about?',
+   a:['How you behave, more than how clever you are','Having a maths degree','Knowing the right people','Getting in early on one big thing'],reward:600},
+ 'ruleof72':{q:'Using the Rule of 72, roughly how long does money take to double at 8%?',
+   a:['About 9 years','About 3 years','About 40 years','It never doubles'],reward:600},
+ 'personal-finance':{q:'That course is free. Who pays for it?',
+   a:['Nobody — it is genuinely free to learn','You do, after 30 days','Your school','Advertisers only'],reward:600},
+ 'Getting_started':{q:'What do the Bogleheads mostly recommend?',
+   a:['Low-cost index funds, held for a long time','Day trading','Picking one hot stock','Gold only'],reward:600},
+ 'letters':{q:'Who writes those annual letters?',
+   a:['Warren Buffett','A newspaper','A bank’s marketing team','Nobody knows'],reward:600},
+ '401k-plans':{q:'What is an employer match on a 401(k)?',
+   a:['Free money your employer adds when you contribute','A loan you repay','A tax you owe','A type of share'],reward:900},
+ 'roth-iras':{q:'What is special about a Roth IRA?',
+   a:['It grows and comes out tax-free','It is guaranteed by the bank','It has no limits','It is only for the rich'],reward:900},
+ 'tc409':{q:'How are long-term capital gains taxed compared to wages?',
+   a:['Usually at a LOWER rate than wages','Exactly the same','Always higher','They are never taxed'],reward:900},
+ 'fund_analyzer':{q:'What is that tool built to show you?',
+   a:['How fees eat your returns over time','Which fund will win next year','The best day to buy','Your credit score'],reward:900},
+ 'napfa':{q:'How is a fee-only advisor paid?',
+   a:['By you, directly — not by commissions','By the funds they sell you','By the government','They work for free'],reward:900},
+ 'investor.gov':{q:'What is investor.gov for?',
+   a:['Checking an investment is legitimate before you put money in','Buying shares','Free stock tips','Filing your taxes'],reward:600},
+ 'financial-term-dictionary':{q:'What do you use that dictionary for?',
+   a:['Looking up any money word you do not know','Comparing bank fees','Buying crypto','Filing taxes'],reward:600},
+ 'fred':{q:'What is FRED?',
+   a:['Free official economic data — inflation, rates and more','A stock picker','A trading app','A budgeting tool'],reward:600},
+};
+function readCheckFor(url){
+ for(const k in READCHECK)if(url.indexOf(k)>=0)return{key:k,...READCHECK[k]};
+ return null}
+function offerReadCheck(url,title){
+ const rc=readCheckFor(url);
+ if(!rc||(G.readChecks&&G.readChecks[rc.key]))return;
  paused=true;
+ const opts=rc.a.map((t,k)=>'<button class=opt onclick="answerRead(&#39;'+rc.key+'&#39;,'+k+')">'+String.fromCharCode(65+k)+'.  '+t+'</button>').join('');
+ $('minebody').innerHTML='<div class=p-badge>🧐</div><div class=p-world>Prove you read it</div>'
+  +'<div class=p-title>'+(title||'That resource')+'</div>'
+  +'<p class=p-teach>Opening a page is easy. Reading it is the bit that pays.</p>'
+  +'<div class=p-q>'+rc.q+'</div>'+opts
+  +'<div class=p-note style="margin-top:8px">Get it right and you earn '+money(rc.reward)+'. Get it wrong and you can go back and look again — no charge.</div>';
+ $('mine').classList.add('show');speak(rc.q+'. '+rc.a.join('. '));}
+function answerRead(key,k){
+ const rc={key,...READCHECK[key]};
+ if(k!==0){sfx('hit');toast('🧐 Not what it said — have another look at the page.');return}
+ G.readChecks=G.readChecks||{};G.readChecks[key]=1;
+ const before=wageTier().n;G.skill=Math.min(SKILL_CAP,(G.skill||0)+1);
+ addWealth(rc.reward);save();renderHUD();confetti();sfx('secret');
+ $('minebody').innerHTML='<div class=p-badge>✅</div><div class=p-world>You actually read it</div>'
+  +'<div class=p-title>+'+money(rc.reward)+'</div>'
+  +'<p class=p-teach>That is the difference between collecting links and collecting knowledge. +1 skill, too.</p>'
+  +(wageTier().n!==before?'<p class=p-teach style="border-color:#3fb950">You are now '+wageTier().n+' — '+money(wage())+' a shift.</p>':'')
+  +'<button class=pbtn onclick="hide(&#39;mine&#39;)">Carry on →</button>';}
+function openResource(url,title){
+ paused=true;_lastResourceUrl=url;_lastResourceTitle=title;
  $('webtitle').textContent=title||url;
  $('weblink').href=url;
  const fr=$('webframe'),note=$('webnote');
@@ -2166,11 +2226,15 @@ function openResource(url,title){
  else{fr.style.display='none';fr.removeAttribute('src');note.style.display='';
   note.innerHTML='<h2 style="margin:0 0 10px">'+(title||'Resource')+'</h2>'
    +'<p>This site does not allow itself to be opened inside another page, so it opened in a <b>new tab</b>.</p>'
-   +'<p>Your game is still running right here — come back to this tab, or hit the big blue button above, any time.</p>'
+   +'<p>Your game is still running right here. Come back to this tab and hit the big blue button above.</p>'
+   +'<p style="color:#f0b429;font-weight:700">When you are done reading, there is a question waiting worth real money.</p>'
    +'<p><a href="'+url+'" target=_blank rel=noopener style="color:#7fb4ff;font-weight:800">Open it again ↗</a></p>';
   window.open(url,'_blank','noopener')}
  $('web').classList.add('show')}
-function closeWeb(){const fr=$('webframe');fr.removeAttribute('src');$('web').classList.remove('show');paused=false}
+function closeWeb(){const fr=$('webframe');const u=_lastResourceUrl,t=_lastResourceTitle;
+ fr.removeAttribute('src');$('web').classList.remove('show');paused=false;
+ if(u)setTimeout(()=>offerReadCheck(u,t),350);}
+let _lastResourceUrl=null,_lastResourceTitle=null;
 function owns(id){return !!(G.owned&&G.owned[id])}
 function ownedBooks(){return SHOP.filter(i=>i.cat==='Book'&&owns(i.id)).length}
 // how good you are at spotting a bad actor - grows as you read and clear rooms
