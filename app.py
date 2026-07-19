@@ -1151,7 +1151,7 @@ body.bigtext .helpbox{font-size:17px}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/10</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/13</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
  <span class="mrow clk" id=hteam>👥 Team</span>
@@ -1235,6 +1235,9 @@ const WORLDS=[
  {name:'Tax Town',ground:'#3f4a3a',tint:'#55654e',prop:'🧾'},
  {name:'Founders Bay',ground:'#1f5a6a',tint:'#2f7d8a',prop:'🚀'},
  {name:'The Prompt Foundry',ground:'#2a2f52',tint:'#3d4370',prop:'🤖'},
+ {name:'Scam Alley',ground:'#4a2a2a',tint:'#6a3c3c',prop:'🎭'},
+ {name:'Property Peak',ground:'#4a4030',tint:'#6a5a44',prop:'🏘️'},
+ {name:'The Long View',ground:'#2a4a4a',tint:'#3d6a6a',prop:'⏳'},
 ];
 const LEVELS=[
  {world:0,diff:1,rooms:[
@@ -1460,7 +1463,99 @@ const LEVELS=[
    {q:'When an AI states a confident fact you should...',choices:['Check it if it matters','Believe it always','Assume it is a lie','Ask it if it is sure and stop there'],a:0},
    {q:'AI usage is billed by...',choices:['Tokens - the text going in and out','The hour','The question','It is always free'],a:0},
    {q:'Open-weight models are ones you can...',choices:['Download and run yourself','Only rent by the minute','Never use commercially','Only use in one country'],a:0},
-   {q:'Used well, AI is best thought of as...',choices:['Leverage on skill you already have','A replacement for learning','Always right','A search engine'],a:0}]}}
+   {q:'Used well, AI is best thought of as...',choices:['Leverage on skill you already have','A replacement for learning','Always right','A search engine'],a:0}]}},
+ {world:10,diff:5,rooms:[
+   {type:'vocab',ic:'🎣',title:'Word: Phishing',term:'PHISHING',
+    choices:['A fake message pretending to be someone you trust, to steal from you','A type of bank account','A savings method','A kind of investment'],a:0,
+    word:{t:'Phishing',d:'A fake message dressed up as your bank, your school or a friend, designed to make you hand over a password or money. The tell is almost always urgency.'}},
+   {type:'mc',ic:'⏰',title:'Why the Rush?',
+    teach:'Nearly every scam needs you to act before you think. Real organisations let you hang up, check, and call back. Criminals cannot afford that.',
+    q:'A message says your account closes in 10 minutes unless you click. What is the giveaway?',
+    choices:['The urgency itself — real institutions give you time','The spelling','The time of day','The colour of the logo'],a:0},
+   {type:'mc',ic:'💸',title:'The Too-Good Offer',
+    teach:'If someone can genuinely turn $100 into $1,000 in a week, they do not need your $100. That sentence dismantles most investment scams on its own.',
+    q:'Someone guarantees to double your money in a month. What is happening?',
+    choices:['It is a scam — guaranteed high returns do not exist','You found a great opportunity','They are being generous','It is normal for crypto'],a:0},
+   {type:'tf',ic:'📞',title:'Nobody Legitimate Asks',
+    teach:'Your bank will never ask for your full password or a code. Anyone who does is a criminal, no matter what the caller ID says.',
+    q:'A bank might phone and ask you to read out the code they just texted you.',a:false,
+    word:{t:'One-Time Code',d:'A code texted to prove it is you. Nobody legitimate will ever ask you to read one out. Handing it over is handing over your account.'}},
+   {type:'scenario',ic:'👤',title:'The Friend Who Is Not',
+    setup:'Someone you have only met online has been kind for weeks. Now they need $200 for an emergency and ask you to keep it secret.',
+    options:[{label:'💗 Help them, and keep it quiet',ok:false,outcome:'The secrecy is the scam. Kindness for weeks then a sudden emergency and "do not tell anyone" is the oldest pattern there is.'},
+             {label:'🗣️ Tell a grown-up you trust first',ok:true}],
+    word:{t:'Social Engineering',d:'Manipulating a person instead of hacking a computer. It works by building trust, then adding urgency and secrecy.'}},
+   {type:'mc',ic:'🔐',title:'The Boring Defences Work',
+    teach:'Unique passwords and two-factor authentication stop almost everything. They are dull, free, and worth more than any clever trick.',
+    q:'What protects your money most?',
+    choices:['A different password everywhere plus two-factor','Changing banks often','Keeping cash at home','Telling nobody you have money'],a:0}],
+  boss:{name:'The Con Artist',enemy:'🎭',intro:'It has a warm voice, a good story and a deadline. Every one of those is a tool.',questions:[
+   {q:'Phishing is...',choices:['A fake message pretending to be someone you trust','A bank fee','A savings plan','A tax'],a:0},
+   {q:'The most common ingredient in a scam is...',choices:['Urgency — act now, do not check','Bad spelling','A foreign accent','A small amount'],a:0},
+   {q:'Guaranteed high returns mean...',choices:['It is a scam','A rare chance','A government scheme','Low risk'],a:0},
+   {q:'If someone asks for the code your bank just texted you...',choices:['They are a criminal, always','They are your bank','It is routine','It is safe if they know your name'],a:0},
+   {q:'"Do not tell anyone about this" is...',choices:['The clearest warning sign there is','Normal for money matters','A sign of trust','Good advice'],a:0}]}},
+ {world:11,diff:5,rooms:[
+   {type:'vocab',ic:'🏘️',title:'Word: Equity',term:'EQUITY',
+    choices:['The part of a property you actually own','The total price of the house','Your monthly payment','The interest you pay'],a:0,
+    word:{t:'Equity',d:'What the property is worth minus what you still owe. It grows as you repay and as prices rise — and it can shrink if prices fall.'}},
+   {type:'mc',ic:'🔑',title:'Leverage, In Bricks',
+    teach:'Put 10% down and you control 100% of the asset. If it rises 10% you have doubled your money — and if it falls 10% yours is gone. Leverage magnifies both directions.',
+    q:'Why is a mortgage a form of leverage?',
+    choices:['A small deposit controls a much larger asset','The bank gives you free money','Houses always go up','Interest is refunded'],a:0},
+   {type:'mc',ic:'🧾',title:'The Costs Nobody Mentions',
+    teach:'The mortgage is not the cost of owning. Add insurance, tax, repairs, and roughly 1% of the value a year in things quietly breaking.',
+    q:'A landlord charges rent that exactly matches the mortgage. What happens?',
+    choices:['They lose money — repairs, tax and empty months are not covered','They break even','They make a good profit','Rent is pure profit'],a:0},
+   {type:'tf',ic:'📉',title:'Property Can Fall',
+    teach:'Between 2007 and 2012 many homes lost a third of their value. People who had to sell lost badly. People who stayed put mostly recovered.',
+    q:'House prices only ever go up.',a:false},
+   {type:'scenario',ic:'🏚️',title:'The Cheap House',
+    setup:'A house is $40,000 below market. The survey mentions damp and the roof is 30 years old.',
+    options:[{label:'💰 Grab the bargain',ok:false,outcome:'A new roof and damp work can easily pass $40,000. The discount was the repair bill, priced in.'},
+             {label:'🔍 Price the repairs before bidding',ok:true}],
+    word:{t:'Due Diligence',d:'Checking what you are actually buying before you commit. In property the discount is usually the repair bill in disguise.'}},
+   {type:'mc',ic:'🏦',title:'Rent vs Buy',
+    teach:'Buying wins when you stay long enough to outrun the buying and selling costs. Move every two years and renting usually wins.',
+    q:'When does renting genuinely beat buying?',
+    choices:['When you will move again soon, or cannot cover repairs','Never — renting is always wasted','Only for the poor','Only in cities'],a:0}],
+  boss:{name:'The Landlord',enemy:'🏰',intro:'It owns half the street and assumes you have not done the maths.',questions:[
+   {q:'Equity is...',choices:['What it is worth minus what you owe','The full price','Your deposit only','Your monthly payment'],a:0},
+   {q:'A mortgage is leverage because...',choices:['A small deposit controls a large asset','The bank pays you','Houses cannot fall','Interest is free'],a:0},
+   {q:'Rent equal to the mortgage means the landlord...',choices:['Is losing money once repairs and voids are counted','Breaks even','Profits well','Pays no tax'],a:0},
+   {q:'A house priced far below market usually means...',choices:['There is a repair bill hiding in it','A generous seller','A market error','Guaranteed profit'],a:0},
+   {q:'Renting beats buying when...',choices:['You will move soon or cannot cover repairs','Never','Always','Only when young'],a:0}]}},
+ {world:12,diff:5,rooms:[
+   {type:'vocab',ic:'🎈',title:'Word: Inflation',term:'INFLATION',
+    choices:['Money slowly buying less than it used to','Prices being fixed by law','A type of tax','Interest on savings'],a:0,
+    word:{t:'Inflation',d:'Prices rise, so the same money buys less. At 3% a year, cash under a mattress loses about half its power in 24 years while the number never changes.'}},
+   {type:'mc',ic:'🕰️',title:'The Quiet Thief',
+    teach:'This is why "safe" cash is not safe. The number stays the same while what it buys shrinks. Only assets that grow faster than inflation protect you.',
+    q:'$10,000 under a mattress for 24 years at 3% inflation is worth about...',
+    choices:['Half what it is today','The same','Double','Nothing at all'],a:0},
+   {type:'mc',ic:'🌍',title:'Money Is a Promise',
+    teach:'Notes are not backed by gold. A currency is worth something because enough people agree it is — which is why trust in a country changes what its money buys.',
+    q:'What gives a modern currency its value?',
+    choices:['Shared trust that others will accept it','Gold in a vault','The paper it is printed on','A law of physics'],a:0},
+   {type:'tf',ic:'🌱',title:'Time Beats Timing',
+    teach:'Someone investing steadily through crashes almost always beats someone waiting for the perfect moment, because the perfect moment is only obvious afterwards.',
+    q:'Waiting for the perfect time to invest usually beats investing steadily.',a:false},
+   {type:'scenario',ic:'🎁',title:'What Is It All For?',
+    setup:'You are financially free. Your money covers your life. A friend asks what the point was.',
+    options:[{label:'💰 To have the biggest number',ok:false,outcome:'A number is not a life. People who chase the number alone tend to find the finish line keeps moving.'},
+             {label:'🕊️ To buy back my own time and help people I care about',ok:true}],
+    word:{t:'Financial Freedom',d:'Not a big number — enough that your time belongs to you. What you then do with that time is the actual point.'}},
+   {type:'mc',ic:'🌳',title:'The Long View',
+    teach:'The best time to plant a tree was 20 years ago. The second best time is now. That is compounding, and it is also true of skills, health and friendships.',
+    q:'What single thing helps compounding most?',
+    choices:['Starting earlier and not interrupting it','Picking better days to buy','Checking it often','Bigger amounts later on'],a:0}],
+  boss:{name:'Old Father Time',enemy:'⏳',intro:'The last one. It cannot be beaten, out-earned or hurried — only used well.',questions:[
+   {q:'Inflation means...',choices:['The same money buys less over time','Prices fall','Wages rise','Savings grow'],a:0},
+   {q:'Cash held for decades is...',choices:['Quietly losing value','Perfectly safe','The best investment','Growing'],a:0},
+   {q:'A currency has value because...',choices:['People trust and accept it','It is backed by gold','It is printed on special paper','A law says so'],a:0},
+   {q:'Investing steadily through ups and downs usually...',choices:['Beats waiting for the perfect moment','Loses money','Only works when rich','Is illegal'],a:0},
+   {q:'The best time to start was 20 years ago. The second best is...',choices:['Now','When you are older','When you earn more','After the next crash'],a:0},
+   {q:'Financial freedom is really about...',choices:['Owning your own time','Owning the most things','Never working again','Beating other people'],a:0}]}}
 ];
 const STAGES=[];
 LEVELS.forEach((L,li)=>{L.rooms.forEach((r,ri)=>STAGES.push(Object.assign({},r,{wi:L.world,level:li,room:ri,diff:L.diff,isBoss:false})));
@@ -1617,9 +1712,9 @@ let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],r
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
-const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6,0x4a4f80];
-const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a,0x3d4370];
-const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a,0x2a2f52];
+const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6,0x4a4f80,0x6a4040,0xc8b48a,0x7ac4c4];
+const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a,0x3d4370,0x6a3c3c,0x6a5a44,0x3d6a6a];
+const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a,0x2a2f52,0x4a2a2a,0x4a4030,0x2a4a4a];
 const BSTATE={done:0xf0b429,open:0x3d8bff,boss:0xf05a4a,lock:0x59647c};
 const CAMNAMES=['Overhead','3rd Person','1st Person','Cinematic'];
 const TOOLS=[{id:'fist',e:'👊',n:'Bare Hands',dmg:1},{id:'pick',e:'⛏️',n:'Pickaxe',dmg:2},{id:'hammer',e:'🔨',n:'Sledgehammer',dmg:3},{id:'drill',e:'🛠️',n:'Power Drill',dmg:5},{id:'tnt',e:'🧨',n:'Dynamite',dmg:9}];
@@ -2279,7 +2374,7 @@ function bigWall(x,z,w,d,opts){opts=opts||{};const H=opts.h||6,gate=(opts.gateFo
  if(wall.gateFor!=null&&G.done[wall.gateFor]){wall.broken=true;worldGroup.remove(m);worldGroup.remove(cap)}
  walls.push(wall);return wall}
 // rooms you actually walk through — a home, a school, a store, an office, a bank
-const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4,0x7a80b8];
+const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4,0x7a80b8,0x9a6a6a,0xb8a684,0x7ab0b0];
 const VENUE=[
  {v:'Home',   rooms:['Bedroom','Kitchen','Living Room','Garage','Back Yard','Attic','Basement']},
  {v:'School', rooms:['Classroom','Library','Cafeteria','Gym','Science Lab','Hallway','Auditorium']},
@@ -2291,6 +2386,9 @@ const VENUE=[
  {v:'Tax Office',rooms:['Reception','Filing Room','Brackets Hall','Deductions Desk','Audit Room','Refund Window','Archive']},
  {v:'Startup', rooms:['Garage','Pitch Room','Ledger Room','Customer Desk','Ops Room','Board Room','Launch Pad']},
  {v:'AI Lab',  rooms:['Prompt Bench','Model Room','Context Window','Eval Lab','Guardrails','Token Meter','Build Bay']},
+ {v:'Back Alley',rooms:['Fake Front','Cold Call Booth','Pop-Up Shop','The Hook','Pressure Room','Locked Door','Way Out']},
+ {v:'Estate',  rooms:['Viewing Room','Survey Office','Mortgage Desk','The Roof','Rental Flat','Repairs Yard','Closing Table']},
+ {v:'Observatory',rooms:['Time Room','Vault of Years','Currency Hall','Orchard','Long Gallery','Quiet Room','Horizon']},
 ];
 // ============ WHAT EACH PLACE LOOKS LIKE ============
 // The rooms were named Classroom and Trading Floor and then all looked
