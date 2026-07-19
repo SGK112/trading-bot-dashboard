@@ -241,6 +241,152 @@ def auth_logout(resp: Response):
     return {"ok": True}
 
 
+# ============================================================================
+# SOCIAL - built deliberately narrow.
+# There is no free-text messaging in this file and there should not be. Word
+# filters catch slurs; they do not catch grooming, which reads like ordinary
+# friendly conversation. Children play this. So: teams share GOALS, players
+# see each other's PROGRESS, and the only thing anyone can send is one of a
+# fixed list of phrases picked from a menu. There is no search-by-name and no
+# private channel, so a stranger cannot find or contact a specific child.
+# ============================================================================
+CHEERS = [
+    "Nice one!", "Good find!", "Let's go!", "Well played",
+    "I'm saving up", "Team goal!", "Almost there", "Good luck!",
+    "Thanks!", "Great teamwork", "I found a secret", "Levelled up!",
+]
+_TEAM_RE = _re.compile(r"^[A-Za-z0-9 _-]{3,24}$")
+
+
+def _teams_col():
+    col = _profiles()
+    return None if col is None else col.database["teams"]
+
+
+def _team_of(uid: str):
+    col = _teams_col()
+    if col is None:
+        return None
+    try:
+        return col.find_one({"members": uid})
+    except Exception:
+        return None
+
+
+@app.get("/api/social/leaderboard")
+def social_leaderboard(uid: str = Depends(player)):
+    """Progress only. No contact details, no way to look up a named person."""
+    col = _profiles()
+    rows = []
+    if col is not None:
+        try:
+            for d in col.find({"pub": {"$exists": True}}, {"_id": 0, "user": 1, "pub": 1}).limit(300):
+                p = d.get("pub") or {}
+                rows.append({"name": d.get("user", "player"),
+                             "nw": int(p.get("nw", 0) or 0),
+                             "fp": float(p.get("fp", 0) or 0),
+                             "skill": int(p.get("skill", 0) or 0),
+                             "badges": int(p.get("badges", 0) or 0),
+                             "lvl": int(p.get("lvl", 1) or 1),
+                             "tier": str(p.get("tier", ""))[:24],
+                             "me": d.get("user") == uid})
+        except Exception:
+            pass
+    rows.sort(key=lambda r: (-r["fp"], -r["nw"]))
+    return {"top": rows[:25], "total": len(rows)}
+
+
+@app.post("/api/social/team/create")
+async def team_create(req: Request, uid: str = Depends(player)):
+    d = await req.json()
+    name = str(d.get("name", "")).strip()
+    if not _TEAM_RE.match(name):
+        raise HTTPException(400, "Team name: 3-24 letters, numbers, spaces.")
+    col = _teams_col()
+    if col is None:
+        raise HTTPException(503, "Teams need the database. Try again later.")
+    if _team_of(uid):
+        raise HTTPException(409, "You are already in a team.")
+    code = "".join(secrets.choice("ABCDEFGHJKLMNPQRSTUVWXYZ23456789") for _ in range(6))
+    col.insert_one({"code": code, "name": name, "owner": uid,
+                    "members": [uid], "cheers": [], "created": int(time.time())})
+    return {"ok": True, "code": code, "name": name}
+
+
+@app.post("/api/social/team/join")
+async def team_join(req: Request, uid: str = Depends(player)):
+    d = await req.json()
+    code = str(d.get("code", "")).strip().upper()
+    col = _teams_col()
+    if col is None:
+        raise HTTPException(503, "Teams need the database. Try again later.")
+    if _team_of(uid):
+        raise HTTPException(409, "You are already in a team.")
+    t = col.find_one({"code": code})
+    if not t:
+        raise HTTPException(404, "No team with that code.")
+    if len(t.get("members", [])) >= 12:
+        raise HTTPException(409, "That team is full.")
+    col.update_one({"code": code}, {"$addToSet": {"members": uid}})
+    return {"ok": True, "name": t.get("name")}
+
+
+@app.post("/api/social/team/leave")
+def team_leave(uid: str = Depends(player)):
+    col = _teams_col()
+    if col is not None:
+        col.update_one({"members": uid}, {"$pull": {"members": uid}})
+        col.delete_many({"members": {"$size": 0}})
+    return {"ok": True}
+
+
+@app.post("/api/social/team/cheer")
+async def team_cheer(req: Request, uid: str = Depends(player)):
+    """The ONLY thing a player can send. An index into a fixed list - never text."""
+    d = await req.json()
+    try:
+        idx = int(d.get("i", -1))
+    except Exception:
+        idx = -1
+    if idx < 0 or idx >= len(CHEERS):
+        raise HTTPException(400, "unknown cheer")
+    col = _teams_col()
+    t = _team_of(uid)
+    if col is None or not t:
+        raise HTTPException(404, "You are not in a team.")
+    col.update_one({"_id": t["_id"]}, {"$push": {"cheers": {
+        "$each": [{"u": uid, "i": idx, "t": int(time.time())}], "$slice": -30}}})
+    return {"ok": True}
+
+
+@app.get("/api/social/team")
+def team_get(uid: str = Depends(player)):
+    t = _team_of(uid)
+    if not t:
+        return {"team": None, "cheers": CHEERS}
+    prof = _profiles()
+    members = []
+    goal = 0
+    for m in t.get("members", []):
+        p = {}
+        if prof is not None:
+            try:
+                doc = prof.find_one({"user": m}, {"_id": 0, "pub": 1}) or {}
+                p = doc.get("pub") or {}
+            except Exception:
+                pass
+        nw = int(p.get("nw", 0) or 0)
+        goal += nw
+        members.append({"name": m, "nw": nw, "fp": float(p.get("fp", 0) or 0),
+                        "skill": int(p.get("skill", 0) or 0), "me": m == uid})
+    members.sort(key=lambda r: -r["nw"])
+    return {"team": {"name": t.get("name"), "code": t.get("code"),
+                     "members": members, "combined": goal,
+                     "cheers": [{"name": c.get("u"), "text": CHEERS[c.get("i", 0)] if 0 <= c.get("i", 0) < len(CHEERS) else ""}
+                                for c in (t.get("cheers") or [])[-12:]]},
+            "cheers": CHEERS}
+
+
 @app.get("/api/auth/me")
 def auth_me(mw_session: str = Cookie(default=None)):
     uid = _verify(mw_session) if mw_session else None
@@ -1007,6 +1153,8 @@ body.bigtext .helpbox{font-size:17px}
 <canvas id=game width=800 height=450></canvas>
 <div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
+ <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
+ <span class="mrow clk" id=hteam>👥 Team</span>
  <span class="mrow clk" id=hchar>🧍 Your character</span>
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
@@ -1034,6 +1182,7 @@ body.bigtext .helpbox{font-size:17px}
  <button class=gbtn id=bTNT style=margin-right:8px title="Throw dynamite (B)">🧨</button><button class=gbtn id=bJ2 style=margin-right:8px>⤴</button><button class="gbtn enter" id=bE>↵ ENTER</button></div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
+<div class=ov id=team><div class=panel><button class=tclose onclick="hide('team')">✕</button><div id=teambody></div></div></div>
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
 <div id=quest><div class=qh>Your next step</div><div class=qt id=qtext></div><div class=qw id=qwhy></div><div class=qp><i id=qbar style=width:0%></i></div><div class=qs onclick="skipTutorial()">Skip the walkthrough</div></div>
@@ -1249,7 +1398,15 @@ if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
 if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
-function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
+function publicSummary(){
+ // Progress only. Never anything that could identify or contact a person.
+ let badges=0;try{badges=BADGES.filter(b=>{try{return b.test(G)}catch(e){return false}}).length}catch(e){}
+ let fp=0;try{fp=Math.round(Math.max(0,netWorth())/freedomNumber()*1000)/10}catch(e){}
+ let lvl=1;try{let i=0;while(i<STAGES.length&&G.done[i])i++;lvl=(i>=STAGES.length?LEVELS.length:STAGES[i].level+1)}catch(e){}
+ return{nw:Math.round(netWorth?netWorth():0),fp,skill:G.skill||0,badges,lvl,
+        tier:(typeof wageTier==='function'?wageTier().n:'')}}
+function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;
+ try{G.pub=publicSummary()}catch(e){}localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
 function pushProfile(){fetch('/api/game/profile',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(G)})
  .then(r=>r.json()).then(r=>{const el=$('hsave');if(!el)return;
@@ -1519,7 +1676,9 @@ $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
 $('hprof').addEventListener('click',openProfile);
-$('hchar').addEventListener('click',openCharacter);$('hhelp').addEventListener('click',showHelp);
+$('hchar').addEventListener('click',openCharacter);
+$('hteam').addEventListener('click',openTeam);
+$('hboard').addEventListener('click',openBoard);$('hhelp').addEventListener('click',showHelp);
 $('hnarr').addEventListener('click',toggleNarrate);
 // on a phone the "why" line is hidden until you tap the card
 $('quest').addEventListener('click',e=>{if(e.target.classList.contains('qs'))return;
@@ -2407,6 +2566,76 @@ function showFinale(){
  $('mine').classList.add('show');
  confetti();setTimeout(confetti,600);setTimeout(confetti,1200);sfx('win');
  speak('You beat Money World. All six worlds finished.');}
+// Teams share a goal. They do not share a message box - the only thing you can
+// send is one of twelve fixed phrases, chosen from a menu.
+let CHEERLIST=[];
+async function openTeam(){
+ paused=true;
+ $('teambody').innerHTML='<div class=p-title>👥 Team</div><p class=p-teach>Loading…</p>';
+ $('team').classList.add('show');
+ let d={};
+ try{d=await j('/api/social/team')}catch(e){
+  $('teambody').innerHTML='<div class=p-title>👥 Team</div><p class=p-teach>Could not reach the server.</p>'
+   +'<button class=pbtn onclick="hide(&#39;team&#39;)">← Back</button>';return}
+ CHEERLIST=d.cheers||[];
+ if(!d.team){
+  $('teambody').innerHTML='<div class=p-title>👥 Team</div>'
+   +'<p class=p-teach>Nobody gets rich alone. Make a team, or join one with a code a friend gives you <b>in person</b>.</p>'
+   +'<input id=tname placeholder="Team name" maxlength=24 style="width:100%;padding:12px;border-radius:10px;border:1px solid #2b3654;background:#0d1420;color:#eaf1ff;font-size:16px">'
+   +'<button class=pbtn onclick="createTeam()">Make a team</button>'
+   +'<div class=p-note style="margin:12px 0 4px">or join one</div>'
+   +'<input id=tcode placeholder="6-letter code" maxlength=6 style="width:100%;padding:12px;border-radius:10px;border:1px solid #2b3654;background:#0d1420;color:#eaf1ff;font-size:16px;text-transform:uppercase">'
+   +'<button class=pbtn onclick="joinTeam()">Join</button>'
+   +'<div class=p-note style="margin-top:12px">There is no way to search for a person here, and no private messages. '
+   +'You can only send one of a fixed set of phrases to your own team.</div>'
+   +'<button class=pbtn style="background:#1b2740;border-color:#2b3654;margin-top:8px" onclick="hide(&#39;team&#39;)">← Back to Money World</button>';
+  return}
+ const t=d.team;
+ const rows=t.members.map((m,k)=>'<div class=trow style="'+(m.me?'color:#7fb4ff':'')+'">'
+   +'<span class=ti>'+(k===0?'🥇':k===1?'🥈':k===2?'🥉':'·')+'</span>'
+   +'<span class=tn>'+m.name+(m.me?' (you)':'')+'</span>'
+   +'<span class=tr>'+money(m.nw)+' · '+m.fp+'%</span></div>').join('');
+ const feed=(t.cheers||[]).slice().reverse().map(c=>'<div class=gd><b>'+c.name+':</b> '+c.text+'</div>').join('')
+   ||'<div class=p-note>No cheers yet.</div>';
+ const btns=CHEERLIST.map((c,k)=>'<button class=opt style="padding:9px;font-size:14px" onclick="sendCheer('+k+')">'+c+'</button>').join('');
+ $('teambody').innerHTML='<div class=p-badge>👥</div><div class=p-world>Your team</div><div class=p-title>'+t.name+'</div>'
+  +'<div class=p-teach style="border-color:#3fb950"><b>Together you are worth '+money(t.combined)+'</b>'
+  +'<div class=gd>Every member pulls the team total up. Nobody gets rich alone.</div></div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Members</div>'+rows
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Join code</div>'
+  +'<div class=gloss style="text-align:center;font-size:26px;font-weight:800;letter-spacing:4px">'+t.code+'</div>'
+  +'<div class=p-note>Share this face to face, not online.</div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Say something</div>'
+  +'<div class=p-note style="margin-bottom:6px">Pick a phrase — you cannot type your own. That is on purpose.</div>'
+  +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+btns+'</div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Team feed</div>'+feed
+  +'<button class=pbtn style="margin-top:12px" onclick="leaveTeam()">Leave team</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;team&#39;)">← Back to Money World</button>';}
+async function createTeam(){const n=($('tname')||{}).value||'';
+ try{await j('/api/social/team/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n})});
+  confetti();sfx('secret');openTeam()}catch(e){toast(String(e.message||e).slice(0,80))}}
+async function joinTeam(){const c=(($('tcode')||{}).value||'').toUpperCase();
+ try{await j('/api/social/team/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c})});
+  confetti();sfx('secret');openTeam()}catch(e){toast(String(e.message||e).slice(0,80))}}
+async function leaveTeam(){try{await j('/api/social/team/leave',{method:'POST'})}catch(e){}openTeam()}
+async function sendCheer(i){try{await j('/api/social/team/cheer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({i})});
+ sfx('hit');openTeam()}catch(e){toast(String(e.message||e).slice(0,80))}}
+async function openBoard(){
+ paused=true;$('teambody').innerHTML='<div class=p-title>🏆 Leaderboard</div><p class=p-teach>Loading…</p>';
+ $('team').classList.add('show');
+ let d={top:[]};try{d=await j('/api/social/leaderboard')}catch(e){}
+ const rows=d.top.map((r,k)=>'<div class=trow style="'+(r.me?'color:#7fb4ff;font-weight:800':'')+'">'
+  +'<span class=ti>'+(k===0?'🥇':k===1?'🥈':k===2?'🥉':(k+1))+'</span>'
+  +'<span class=tn>'+r.name+(r.me?' (you)':'')+'</span>'
+  +'<span class=tr>'+r.fp+'% free</span></div>').join('')||'<div class=p-note>Nobody on the board yet.</div>';
+ $('teambody').innerHTML='<div class=p-badge>🏆</div><div class=p-world>Closest to financial freedom</div>'
+  +'<div class=p-title>Leaderboard</div>'
+  +'<p class=p-teach>Ranked by how close each player is to never needing a job — not by who has the most money. '
+  +'A player at Mum and Dad’s with $200k can beat someone in a mansion with a million.</p>'
+  +rows
+  +'<div class=p-note style="margin-top:10px">Names and progress only. There is no way to contact anyone from here.</div>'
+  +'<button class=pbtn style="margin-top:10px" onclick="openTeam()">👥 Your team</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;team&#39;)">← Back to Money World</button>';}
 function openProfile(){
  paused=true;
  const p=tParts(),tier=wageTier(),st=predStats(),fn=freedomNumber(),nw=netWorth();
