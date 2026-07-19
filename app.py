@@ -1061,13 +1061,6 @@ body.bigtext .helpbox{font-size:17px}
 .readbtn{display:inline-block;margin:6px 0 4px;padding:9px 14px;border-radius:10px;background:#2a3f68;
  border:1px solid #3d8bff;color:#dce7f7;font-weight:800;font-size:14px;cursor:pointer}
 @media(max-width:820px){
- /* thumbs, not cursors - big targets, clear of the edges and the home bar */
- #pad{left:10px;right:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:auto}
- #pad button{width:64px;height:64px;font-size:25px}
- #gctl{right:10px;bottom:calc(16px + env(safe-area-inset-bottom,0px));gap:8px}
- .gbtn{width:64px;height:64px;font-size:25px}
- .gbtn.enter{width:84px;height:84px;font-size:12px}
- .gbtn.enter b{font-size:30px}
  #mini{width:74px!important;height:74px!important;bottom:auto;top:96px;right:10px}
  #hud .hpill{min-height:34px;display:inline-flex;align-items:center}
  #hmenu{min-width:54px;justify-content:center}
@@ -1157,22 +1150,148 @@ body.bigtext .helpbox{font-size:17px}
 #hsense{position:absolute;top:46px;left:0;right:0;text-align:center;z-index:5;pointer-events:none;font-weight:800;font-size:14px;color:#fff;text-shadow:0 2px 6px #000}
 #mini{position:absolute;right:12px;bottom:92px;width:120px;height:120px;border-radius:50%;border:2px solid #2b3654;background:rgba(10,16,30,.4);z-index:5;pointer-events:none}
 #pad{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;z-index:6}
-.dpad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
-.dpad .gbtn{width:52px;height:52px}
+/* ---- side panel ---- */
+#sidep{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);z-index:26;
+ background:linear-gradient(170deg,#151d36,#0d1220);border-left:1px solid #2b3654;
+ box-shadow:-14px 0 40px rgba(0,0,0,.5);transform:translateX(104%);transition:transform .3s cubic-bezier(.2,.9,.3,1);
+ display:flex;flex-direction:column}
+#sidep.show{transform:none}
+#sidep.peek{transform:translateX(104%)}
+#sideveil{position:fixed;inset:0;background:rgba(6,9,16,.5);z-index:25;display:none}
+#sideveil.show{display:block}
+#sidehd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #22304e;flex:0 0 auto}
+#sidehd .st{font-weight:800;font-size:15px;flex:1;text-align:left}
+#sidehd button{width:36px;height:36px;border-radius:11px;background:#0e1626;border:1px solid #2b3654;color:#cfe0ff;font-size:16px;flex:0 0 auto}
+#sidetabs{display:flex;gap:5px;padding:8px 10px;border-bottom:1px solid #22304e;overflow-x:auto;flex:0 0 auto;-webkit-overflow-scrolling:touch}
+#sidetabs button{white-space:nowrap;padding:8px 12px;font-size:12.5px;font-weight:800;border-radius:11px;
+ background:#0e1626;color:#93a1b5;border:1px solid #2b3654}
+#sidetabs button.on{color:#7fb4ff;border-color:#3d8bff;background:#122038}
+#sidebody{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(28px + env(safe-area-inset-bottom,0px));text-align:left}
+#sidebody .p-title{text-align:left}
+.slotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:6px 0 4px}
+.slotit{background:#0e1626;border:1px solid #2b3654;border-radius:13px;padding:9px 7px;text-align:center;cursor:pointer;position:relative;transition:transform .12s,border-color .12s}
+.slotit:active{transform:scale(.95)}
+.slotit.on{border-color:#3d8bff;background:#122038;box-shadow:0 0 0 1px #3d8bff inset}
+.slotit.owned{border-color:#2f6b3d}
+.slotit.locked{opacity:.72}
+.slotit .se{font-size:26px;line-height:1.1;display:block}
+.slotit .sn{font-size:11px;font-weight:700;color:#cfe0ff;margin-top:3px;line-height:1.25}
+.slotit .sc{font-size:10px;font-weight:800;margin-top:3px;color:#f0b429}
+.slotit .sc.free{color:#3fb950}
+.slotit .tick{position:absolute;top:4px;right:5px;font-size:11px;color:#3d8bff}
+.slotnote{font-size:12px;color:#93a1b5;line-height:1.5;background:#0e162699;border:1px solid #22304e;
+ border-radius:11px;padding:9px 11px;margin:6px 0 12px}
+.sechd{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#7fb4ff;margin:16px 0 2px}
+.swrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.sw{width:36px;height:36px;border-radius:11px;cursor:pointer;border:3px solid #2b3654}
+.sw.on{border-color:#3d8bff;transform:scale(1.06)}
+#peekbtn{position:fixed;right:14px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:27;display:none;
+ padding:12px 18px;border-radius:14px;background:rgba(61,139,255,.92);color:#fff;font-weight:800;font-size:14px;border:none}
+#sidep.show ~ #peekbtn{display:block}
+@media(max-width:820px){
+ #sidep{width:100%;border-left:none}
+ #sideveil{display:none!important}
+ #sidebody{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+.dpad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:6px}
+.dpad .gbtn{width:56px;height:56px}
 .dU{grid-column:2;grid-row:1}.dL{grid-column:1;grid-row:2}.dR{grid-column:3;grid-row:2}.dD{grid-column:2;grid-row:3}
 .gbtn{border-radius:14px;background:rgba(20,28,50,.82);border:1px solid #33456a;color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;touch-action:none}
 .gbtn:active{background:rgba(61,139,255,.5)}
-.gbtn.enter{width:76px;height:76px;border-radius:50%;border:3px solid #3d8bff;color:#fff;
- font-size:12px;font-weight:800;background:rgba(61,139,255,.35);display:flex;flex-direction:column;
- line-height:1.05;gap:1px}
+.gbtn.enter{border:2px solid #3d8bff;color:#fff;font-size:12px;font-weight:800;
+ background:rgba(61,139,255,.35);display:flex;align-items:center;justify-content:center;line-height:1.05}
 .gbtn.enter.on{background:rgba(61,139,255,.92);animation:pE 1s infinite;border-color:#fff}
 .gbtn.enter b{font-size:26px;font-weight:900}
-#gctl{position:fixed;right:14px;bottom:20px;z-index:20;display:grid;
- grid-template-columns:auto auto;gap:8px;align-items:end}@keyframes pE{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes pE{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+/* ---- the control bar: dpad on the left, actions on the right, one row, one grid ---- */
+#ctlbar{position:fixed;left:0;right:0;bottom:0;z-index:22;display:grid;
+ grid-template-columns:auto 1fr auto;align-items:end;gap:12px;
+ padding:0 14px calc(14px + env(safe-area-inset-bottom,0px));pointer-events:none}
+#ctlbar>*{pointer-events:auto}
+/* the ring that appears where your thumb lands */
+#stick{position:fixed;z-index:19;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;
+ border:2px solid rgba(127,180,255,.55);background:rgba(61,139,255,.10);display:none;pointer-events:none}
+#stick.on{display:block}
+#stick i{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;border-radius:50%;
+ background:rgba(61,139,255,.72);border:2px solid #cfe0ff;display:block}
+#coach{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(238px + env(safe-area-inset-bottom,0px));
+ z-index:23;display:none;background:rgba(11,17,30,.93);border:1px solid #3d8bff;border-radius:15px;
+ padding:11px 14px;max-width:min(380px,94vw);color:#eaf1ff;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#coach.show{display:block}
+#coach h5{margin:0 0 7px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#7fb4ff;font-weight:800}
+#coach .cg{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:12.5px;line-height:1.4;align-items:center}
+#coach .ce{font-size:17px;text-align:center}
+#coach .cx{margin-top:9px;width:100%;padding:9px;border-radius:11px;background:#3d8bff;color:#fff;font-weight:800;font-size:13px;border:none}
+#gesthint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(232px + env(safe-area-inset-bottom,0px));
+ z-index:18;font-size:11.5px;color:#93a1b5;background:rgba(11,17,30,.7);border-radius:10px;padding:5px 11px;
+ display:none;white-space:nowrap;pointer-events:none}
+.ctlside{background:rgba(11,17,30,.58);border:1px solid #223052;border-radius:22px;padding:10px;
+ backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);box-shadow:0 8px 26px rgba(0,0,0,.38)}
+#pad{position:static;left:auto;right:auto;bottom:auto;width:auto;display:block;padding:10px;z-index:auto}
+#gctl{position:static;display:grid;grid-template-columns:repeat(3,56px);grid-auto-rows:56px;gap:8px;justify-items:stretch}
+#gctl .gbtn{width:100%;height:100%}
+#gctl .gbtn.enter{grid-column:1/-1;width:100%;height:58px;border-radius:18px;flex-direction:row;gap:9px}
+#gctl .gbtn.enter b{font-size:24px}
+#gctl .gbtn.enter span{font-size:13px;letter-spacing:.05em}
+/* --- phone sizes: keep both panels on one row, inside the screen --- */
+@media(max-width:820px){
+ #ctlbar{gap:6px;padding:0 7px calc(9px + env(safe-area-inset-bottom,0px))}
+ .ctlside{padding:7px;border-radius:19px}
+ .dpad{grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,52px);gap:4px}
+ .dpad .gbtn{width:52px;height:52px}
+ #pad{padding:7px}
+ #gctl{grid-template-columns:repeat(2,52px);grid-auto-rows:52px;gap:5px}
+ #gctl .gbtn.enter{height:54px}
+ #gctl .gbtn.enter b{font-size:23px}
+ #gctl .gbtn.enter span{font-size:12px}
+}
+@media(max-width:400px){
+ #ctlbar{gap:5px;padding:0 5px calc(8px + env(safe-area-inset-bottom,0px))}
+ .ctlside{padding:6px;border-radius:17px}
+ .dpad{grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);gap:3px}
+ .dpad .gbtn{width:46px;height:46px}
+ #pad{padding:6px}
+ #gctl{grid-template-columns:repeat(2,46px);grid-auto-rows:46px;gap:4px}
+ .gbtn{font-size:20px}
+ #gctl .gbtn.enter{height:48px}
+ #gctl .gbtn.enter b{font-size:20px}
+ #gctl .gbtn.enter span{font-size:10.5px}
+}
+@media(max-height:540px) and (orientation:landscape){
+ .dpad{grid-template-columns:repeat(3,44px);grid-template-rows:repeat(3,44px);gap:3px}
+ .dpad .gbtn{width:44px;height:44px}
+ #gctl{grid-template-columns:repeat(2,44px);grid-auto-rows:44px;gap:4px}
+ #gctl .gbtn.enter{height:44px}
+}
 .ov{position:absolute;inset:0;background:rgba(6,9,16,.86);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
 .ov.show{display:flex}
 .panel{background:linear-gradient(160deg,#1a2340,#12172a);border:1px solid #3d8bff;border-radius:22px;padding:20px;max-width:460px;width:100%;text-align:center;max-height:94vh;overflow:auto;animation:pin .4s cubic-bezier(.2,1.4,.4,1);position:relative}
 .panel.boss{border-color:#f0b429}
+.panel.wide{max-width:900px;text-align:left;padding:18px 18px 20px}
+.mapgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:12px}
+.island{background:#0d142099;border:1px solid #2b3654;border-radius:16px;padding:13px 13px 11px;
+ display:flex;flex-direction:column;transition:transform .14s,border-color .14s}
+.island:hover{transform:translateY(-2px)}
+.island h4{font-size:16px;font-weight:800;margin:0 0 2px;display:flex;align-items:center;gap:7px}
+.island .ib{font-size:12.5px;color:#93a1b5;line-height:1.45;margin:6px 0 8px;flex:1 1 auto}
+.island .ip{height:6px;background:#0a0f18;border-radius:4px;overflow:hidden;margin:4px 0 3px}
+.island .ip i{display:block;height:100%;border-radius:4px}
+.island .ic{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.wbtn{display:flex;align-items:center;gap:8px;width:100%;text-align:left;margin:4px 0 0;
+ background:#0e1626;color:#e9eef5;border:1px solid #2b3654;border-radius:11px;padding:9px 11px;font-size:13px;font-weight:700}
+.wbtn:active{background:#122038;border-color:#3d8bff}
+.wbtn.beat{border-color:#2f6b3d}
+.wbtn .wn2{flex:1 1 auto;line-height:1.25}
+.wbtn .wp{font-size:11px;font-weight:800;color:#7b8aa3;white-space:nowrap}
+.wbtn.beat .wp{color:#3fb950}
+.island.soon{opacity:.5}
+.maphd{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.maphd .p-badge{margin:0;width:56px;height:56px;font-size:28px;border-radius:16px;flex:0 0 auto}
+@media(max-width:820px){
+ .panel.wide{padding:14px 13px calc(18px + env(safe-area-inset-bottom,0px));border-radius:18px;max-height:92vh}
+ .mapgrid{grid-template-columns:1fr;gap:10px}
+ .maphd .p-badge{width:46px;height:46px;font-size:23px}
+}
 @keyframes pin{from{transform:scale(.82);opacity:0}to{transform:none;opacity:1}}
 .p-badge{width:74px;height:74px;margin:0 auto 6px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;background:linear-gradient(160deg,#3d8bff,#a371f7);box-shadow:0 8px 24px rgba(61,139,255,.4)}
 .p-world{color:#7fb4ff;font-weight:800;font-size:11px;letter-spacing:1.2px;text-transform:uppercase}
@@ -1252,19 +1371,39 @@ body.bigtext .helpbox{font-size:17px}
 <div id=hsense></div>
 <div id=hint>Press ↵ ENTER to go in</div>
 <div id=wbanner><div class=wt id=wbt>LEVEL 1</div><div class=wn id=wbn>Piggy Bank Park</div></div>
-<div id=pad>
- <div class=dpad><button class="gbtn dU" id=bU>▲</button><button class="gbtn dL" id=bL>◀</button><button class="gbtn dR" id=bR>▶</button><button class="gbtn dD" id=bD>▼</button></div>
+<div id=stick><i></i></div>
+<div id=gesthint>drag to walk · double-tap to hit · flick up to jump</div>
+<div id=ctlbar>
+ <div id=pad class=ctlside>
+  <div class=dpad><button class="gbtn dU" id=bU>▲</button><button class="gbtn dL" id=bL>◀</button><button class="gbtn dR" id=bR>▶</button><button class="gbtn dD" id=bD>▼</button></div>
+ </div>
+ <div></div>
+ <div id=gctl class=ctlside>
+  <button class=gbtn id=bView title="Change view">👁</button>
+  <button class=gbtn id=bTNT title="Throw dynamite">🧨</button>
+  <button class=gbtn id=bJ2 title="Jump">⤴</button>
+  <button class="gbtn enter" id=bE title="Do it"><b>✊</b><span id=bElbl>HIT</span></button>
+ </div>
 </div>
-<div id=gctl>
- <button class=gbtn id=bView title="Change view">👁</button>
- <button class=gbtn id=bTNT title="Throw dynamite">🧨</button>
- <button class=gbtn id=bJ2 title="Jump">⤴</button>
- <button class="gbtn enter" id=bE title="Do it"><b>✊</b><span id=bElbl>HIT</span></button>
-</div>
+<div id=coach><h5>Touch controls</h5>
+ <div class=cg>
+  <span class=ce>👆</span><span><b>Drag anywhere</b> — your character turns that way and walks. Point it where you want to go.</span>
+  <span class=ce>✌️</span><span><b>Double-tap</b> — hit, smash, or go in. Same as the ✊ button.</span>
+  <span class=ce>⤴</span><span><b>Flick up</b> — jump.</span>
+  <span class=ce>🤏</span><span><b>Two fingers</b> — change the camera view.</span>
+  <span class=ce>🎮</span><span>The pad on the left still works if you prefer buttons.</span>
+ </div>
+ <button class=cx onclick=closeCoach()>Got it — let me play</button></div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
-<div class=ov id=map><div class=panel><button class=tclose onclick="hide('map')">✕</button><div id=mapbody></div></div></div>
+<div class=ov id=map><div class='panel wide'><button class=tclose onclick="hide('map')">✕</button><div id=mapbody></div></div></div>
 <div class=ov id=team><div class=panel><button class=tclose onclick="hide('team')">✕</button><div id=teambody></div></div></div>
+<div id=sideveil onclick=closeSide()></div>
+<div id=sidep><div id=sidehd><div class=st id=sidetitle>You</div>
+ <button onclick=peekSide() title="See your character">👁</button>
+ <button onclick=closeSide() title=Close>✕</button></div>
+ <div id=sidetabs></div><div id=sidebody></div></div>
+<button id=peekbtn onclick=unpeekSide()>◀ Back to the panel</button>
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
 <div id=quest><div class=qh>Your next step</div><div class=qt id=qtext></div><div class=qw id=qwhy></div><div class=qp><i id=qbar style=width:0%></i></div><div class=qs onclick="skipTutorial()">Skip the walkthrough</div></div>
@@ -1770,7 +1909,7 @@ let G=fresh();
 if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;if(!G.hidden)G.hidden={};if(G.coach==null)G.coach=0;if(G.highCoins==null)G.highCoins=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -1928,10 +2067,12 @@ function updateTool(){const t=bestTool();$('htool').textContent=t.e+' '+t.n;
 function grantToolFor(s){if(!s.isBoss)return;const nt=TOOLS[s.level+1];if(nt&&!G.tools.includes(nt.id)){G.tools.push(nt.id);save();updateTool();setTimeout(()=>{sfx('tool');toast('🎁 TOOL UNLOCKED: '+nt.e+' '+nt.n+' — blocks break faster now!')},950)}}
 function updateVaultCount(){$('hvn').textContent=Object.keys(G.secrets).length+SHOP.filter(i=>i.url&&owns(i.id)).length}
 let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);const now=actx.currentTime;
- let f=440,d=0.12,ty='square';if(type==='hit'){f=170;d=0.07}else if(type==='break'){f=500;d=0.16;ty='triangle'}else if(type==='secret'){f=880;d=0.42;ty='sine'}else if(type==='tool'){f=620;d=0.3;ty='sawtooth'}else if(type==='win'){f=700;d=0.55;ty='triangle'}
- o.type=ty;o.frequency.setValueAtTime(f,now);if(type==='secret'||type==='win'||type==='break')o.frequency.exponentialRampToValueAtTime(f*2,now+d);
+ let f=440,d=0.12,ty='square';if(type==='hit'){f=170;d=0.07}else if(type==='break'){f=500;d=0.16;ty='triangle'}else if(type==='secret'){f=880;d=0.42;ty='sine'}else if(type==='tool'){f=620;d=0.3;ty='sawtooth'}else if(type==='win'){f=700;d=0.55;ty='triangle'}else if(type==='coin'){f=1180;d=0.1;ty='sine'}else if(type==='bad'){f=140;d=0.22;ty='sawtooth'}
+ o.type=ty;o.frequency.setValueAtTime(f,now);if(type==='secret'||type==='win'||type==='break'||type==='coin')o.frequency.exponentialRampToValueAtTime(f*(type==='coin'?1.5:2),now+d);
+ if(type==='bad')o.frequency.exponentialRampToValueAtTime(f*0.5,now+d);
  g.gain.setValueAtTime(0.16,now);g.gain.exponentialRampToValueAtTime(0.001,now+d);o.start(now);o.stop(now+d)}catch(e){}}
-function startGame(){$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function startGame(){$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
+ setTimeout(()=>{try{showCoach()}catch(e){}},700)}
 function showHelp(){paused=true;$('help').classList.add('show')}
 
 function box(w,h,dp,col){return new THREE.Mesh(new THREE.BoxGeometry(w,h,dp),new THREE.MeshLambertMaterial({color:col}))}
@@ -1967,11 +2108,23 @@ function buildHero(){const g=new THREE.Group();
  const torso=box(tw,1.3,0.58,of.col);torso.position.y=1.75;g.add(torso);
  if(fem){const hips=box(hipW,0.4,0.6,of.legs);hips.position.y=1.16;g.add(hips)}
  const head=box(0.82,0.82,0.82,skin);head.position.y=2.85;g.add(head);
- const eL=box(0.13,0.13,0.06,0x22303a);eL.position.set(-0.18,2.9,0.42);g.add(eL);
- const eR=eL.clone();eR.position.x=0.18;g.add(eR);
- const brow=box(0.5,0.07,0.06,hairC);brow.position.set(0,3.05,0.42);g.add(brow);
- const nose=box(0.13,0.15,0.13,skin);nose.position.set(0,2.78,0.45);g.add(nose);
- heroMouth=box(0.26,0.06,0.05,0x8a4a3a);heroMouth.position.set(0,2.6,0.44);g.add(heroMouth);
+ const eyeC=EYECOL[c.eyecol]||EYECOL[0];
+ [-0.19,0.19].forEach(x=>{
+  const w=box(0.19,0.16,0.05,0xf7fbff);w.position.set(x,2.9,0.42);g.add(w);
+  const ir=box(0.10,0.11,0.05,eyeC);ir.position.set(x+(x<0?0.01:-0.01),2.89,0.445);g.add(ir);
+  const pu=box(0.05,0.06,0.04,0x0d1119);pu.position.set(x+(x<0?0.01:-0.01),2.89,0.462);g.add(pu);
+  const gl=box(0.03,0.03,0.03,0xffffff);gl.position.set(x+0.04,2.93,0.47);g.add(gl);
+  const br=box(0.21,0.055,0.05,hairC);br.position.set(x,3.06,0.43);g.add(br);
+ });
+ // ears
+ [-0.44,0.44].forEach(x=>{const ea=box(0.09,0.24,0.2,skin);ea.position.set(x,2.85,0);g.add(ea)});
+ const nose=box(0.13,0.16,0.14,skin);nose.position.set(0,2.76,0.45);g.add(nose);
+ // cheeks
+ [-0.3,0.3].forEach(x=>{const ck=box(0.16,0.1,0.04,0xd98a7a);ck.material.opacity=0.5;ck.material.transparent=true;
+  ck.position.set(x,2.72,0.425);g.add(ck)});
+ heroMouth=box(0.3,0.07,0.05,0x8a4a3a);heroMouth.position.set(0,2.58,0.44);g.add(heroMouth);
+ // chin/jaw shading gives the head some shape
+ const jaw=box(0.7,0.14,0.72,skin);jaw.position.y=2.46;g.add(jaw);
  // hair
  const cap=box(0.9,0.26,0.9,hairC);cap.position.y=3.22;g.add(cap);
  if(c.hair==='long'){const bk=box(0.86,1.0,0.3,hairC);bk.position.set(0,2.75,-0.42);g.add(bk)}
@@ -1981,22 +2134,76 @@ function buildHero(){const g=new THREE.Group();
    new THREE.MeshLambertMaterial({color:hairC}));a.position.y=3.3;g.add(a)}
  else if(c.hair==='braids'){[-0.34,0.34].forEach(x=>{const br=box(0.2,0.95,0.2,hairC);br.position.set(x,2.72,-0.3);g.add(br)})}
  else if(c.hair==='buzz'){cap.scale.y=0.5}
- // accessory
- if(c.acc==='cap'){const h=box(0.95,0.3,0.95,0x2f7d3a);h.position.y=3.42;g.add(h);
-   const brim=box(0.95,0.09,0.45,0x2a6a32);brim.position.set(0,3.3,0.42);g.add(brim)}
- else if(c.acc==='beanie'){const h=box(0.94,0.42,0.94,0xd6453f);h.position.y=3.42;g.add(h)}
- else if(c.acc==='glasses'){const fr=box(0.72,0.1,0.05,0x22303a);fr.position.set(0,2.9,0.46);g.add(fr)}
- else if(c.acc==='shades'){const fr=box(0.76,0.18,0.06,0x11151c);fr.position.set(0,2.9,0.46);g.add(fr)}
- else if(c.acc==='crown'){const cr=box(0.86,0.3,0.86,0xf0c419);cr.position.y=3.46;g.add(cr);
-   [-0.3,0,0.3].forEach(x=>{const p=box(0.14,0.24,0.14,0xf0c419);p.position.set(x,3.68,0);g.add(p)})}
+ // ---- hat ----
+ const hid=c.hat||'none';
+ if(hid==='cap'){const h=box(0.95,0.3,0.95,0x2f7d3a);h.position.y=3.42;g.add(h);
+   const brim=box(0.95,0.09,0.5,0x2a6a32);brim.position.set(0,3.3,0.46);g.add(brim)}
+ else if(hid==='beanie'){const h=box(0.94,0.44,0.94,0xd6453f);h.position.y=3.44;g.add(h);
+   const cuf=box(0.99,0.14,0.99,0xf0f4fa);cuf.position.y=3.26;g.add(cuf);
+   const bob=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,8),new THREE.MeshLambertMaterial({color:0xf0f4fa}));
+   bob.position.y=3.74;g.add(bob)}
+ else if(hid==='hard'){const h=new THREE.Mesh(new THREE.SphereGeometry(0.56,14,10,0,Math.PI*2,0,Math.PI/2),
+    new THREE.MeshLambertMaterial({color:0xf0b429}));h.position.y=3.3;g.add(h);
+   const brim=box(1.0,0.08,0.62,0xe0a41f);brim.position.set(0,3.3,0.24);g.add(brim);
+   const rib=box(0.12,0.1,1.0,0xd89a18);rib.position.y=3.62;g.add(rib)}
+ else if(hid==='chef'){const b=box(0.86,0.2,0.86,0xf7fbff);b.position.y=3.32;g.add(b);
+   const p=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.42,0.7,12),new THREE.MeshLambertMaterial({color:0xf7fbff}));
+   p.position.y=3.78;g.add(p)}
+ else if(hid==='cowboy'){const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.95,0.95,0.08,14),
+    new THREE.MeshLambertMaterial({color:0x8a6a3a}));brim.position.y=3.3;g.add(brim);
+   const cr=new THREE.Mesh(new THREE.CylinderGeometry(0.44,0.5,0.55,12),new THREE.MeshLambertMaterial({color:0x8a6a3a}));
+   cr.position.y=3.6;g.add(cr);
+   const bnd=new THREE.Mesh(new THREE.CylinderGeometry(0.51,0.51,0.13,12),new THREE.MeshLambertMaterial({color:0x3a2a18}));
+   bnd.position.y=3.4;g.add(bnd)}
+ else if(hid==='phones'){const bd=box(0.16,0.62,0.16,0x22303a);bd.position.set(0,3.3,0);g.add(bd);
+   const arc=new THREE.Mesh(new THREE.TorusGeometry(0.5,0.07,6,14,Math.PI),new THREE.MeshLambertMaterial({color:0x22303a}));
+   arc.position.y=3.16;arc.rotation.y=Math.PI/2;g.add(arc);
+   [-0.5,0.5].forEach(x=>{const cu=box(0.16,0.4,0.36,0x3d8bff);cu.position.set(x,2.9,0);g.add(cu)})}
+ else if(hid==='top'){const brim=new THREE.Mesh(new THREE.CylinderGeometry(0.82,0.82,0.08,14),
+    new THREE.MeshLambertMaterial({color:0x11151c}));brim.position.y=3.3;g.add(brim);
+   const cr=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.5,1.0,14),new THREE.MeshLambertMaterial({color:0x11151c}));
+   cr.position.y=3.84;g.add(cr);
+   const bnd=new THREE.Mesh(new THREE.CylinderGeometry(0.51,0.51,0.16,14),new THREE.MeshLambertMaterial({color:0x8a1a2a}));
+   bnd.position.y=3.44;g.add(bnd)}
+ else if(hid==='crown'){const cr=box(0.86,0.3,0.86,0xf0c419);cr.position.y=3.46;g.add(cr);
+   [-0.3,0,0.3].forEach(x=>{const p=box(0.14,0.26,0.14,0xf0c419);p.position.set(x,3.7,0);g.add(p);
+     const j=box(0.09,0.09,0.09,0x3d8bff);j.position.set(x,3.85,0);g.add(j)})}
+ // ---- face gear ----
+ const fid=c.face||'none';
+ if(fid==='glasses'){const fr=box(0.78,0.09,0.05,0x22303a);fr.position.set(0,2.9,0.46);g.add(fr);
+   [-0.19,0.19].forEach(x=>{const l=box(0.28,0.24,0.03,0xbfe3ff);l.material.opacity=0.45;l.material.transparent=true;
+     l.position.set(x,2.9,0.47);g.add(l)})}
+ else if(fid==='shades'){const fr=box(0.8,0.22,0.06,0x11151c);fr.position.set(0,2.9,0.46);g.add(fr);
+   [-0.46,0.46].forEach(x=>{const a=box(0.06,0.05,0.3,0x11151c);a.position.set(x,2.9,0.28);g.add(a)})}
+ else if(fid==='monocle'){const r=new THREE.Mesh(new THREE.TorusGeometry(0.15,0.03,6,14),
+    new THREE.MeshLambertMaterial({color:0xf0c419}));r.position.set(0.19,2.9,0.46);g.add(r);
+   const ch2=box(0.02,0.3,0.02,0xf0c419);ch2.position.set(0.3,2.74,0.44);g.add(ch2)}
+ else if(fid==='mask'){const m=box(0.66,0.36,0.14,0xdfe8f5);m.position.set(0,2.62,0.4);g.add(m);
+   [-0.4,0.4].forEach(x=>{const st=box(0.24,0.04,0.04,0xdfe8f5);st.position.set(x,2.7,0.2);g.add(st)})}
  const legL=box(fem?0.38:0.42,1.15,0.5,of.legs);legL.position.set(-0.26,0.58,0);g.add(legL);heroLegs.push(legL);
  const legR=legL.clone();legR.position.x=0.26;g.add(legR);heroLegs.push(legR);
  const armL=box(0.3,1.15,0.44,of.col);armL.position.set(-(tw/2+0.18),1.75,0);g.add(armL);heroArms.push(armL);
  const armR=armL.clone();armR.position.x=(tw/2+0.18);g.add(armR);heroArms.push(armR);
  const belt=box(tw+0.04,0.2,0.63,0x1b2740);belt.position.y=1.16;g.add(belt);
  const buckle=box(0.24,0.2,0.05,0xf0b429);buckle.position.set(0,1.16,0.33);g.add(buckle);
- const shoeL=box(0.46,0.22,0.62,0x22303a);shoeL.position.set(-0.26,0.1,0.06);g.add(shoeL);
- const shoeR=shoeL.clone();shoeR.position.x=0.26;g.add(shoeR);
+ const SHOECOL={trainer:[0xdfe8f5,0x9aa3b0],boots:[0x6a4a2a,0x3a2a18],run:[0x3d8bff,0xf0b429],
+   dress:[0x2a1a12,0x11151c],hyped:[0xf7fbff,0xf85149],gold:[0xf0c419,0xc09a10]};
+ const sc=SHOECOL[c.shoe]||SHOECOL.trainer;
+ [-0.26,0.26].forEach(x=>{
+  const sh=box(0.46,0.2,0.62,sc[0]);sh.position.set(x,0.1,0.06);g.add(sh);
+  const sole=box(0.48,0.09,0.64,sc[1]);sole.position.set(x,0.03,0.06);g.add(sole);
+  if(c.shoe==='boots'){const cuff=box(0.44,0.24,0.44,sc[1]);cuff.position.set(x,0.3,-0.02);g.add(cuff)}
+  if(c.shoe==='hyped'||c.shoe==='run'){const stripe=box(0.47,0.06,0.3,sc[1]);stripe.position.set(x,0.15,0.1);g.add(stripe)}
+ });
+ const GLOVECOL={work:0xf0b429,winter:0xd6453f,box:0xc42a2a,gold:0xf0c419};
+ if(c.glove&&c.glove!=='none'){
+  const gc=GLOVECOL[c.glove]||0xf0b429, big=c.glove==='box';
+  [armL,armR].forEach(a=>{const gv=box(big?0.44:0.34,big?0.46:0.36,big?0.56:0.48,gc);
+   gv.position.set(0,-0.62,0.02);a.add(gv);
+   if(!big){const cuf=box(0.36,0.1,0.5,0xf7fbff);cuf.position.set(0,-0.42,0.02);a.add(cuf)}});
+ } else {
+  [armL,armR].forEach(a=>{const hd=box(0.3,0.3,0.44,skin);hd.position.set(0,-0.64,0.02);a.add(hd)});
+ }
  heroHand=new THREE.Group();heroHand.position.set(0,-0.62,0.1);armR.add(heroHand);
  possSprite=makeLabel('','');possSprite.position.y=4.1;possSprite.scale.set(1.4,1.4,1);g.add(possSprite);
  refreshHandTool();return g}
@@ -2052,7 +2259,234 @@ function makeMoney(x,z,kind,par){
  g.position.set(x,0,z);par.add(g);return g}
 function spawnSecret(s,par){const o=new THREE.Mesh(new THREE.SphereGeometry(0.55,14,14),new THREE.MeshBasicMaterial({color:0xffd54a}));o.position.set(s.x,1.4,s.z);par.add(o);s.orb=o;const sp=makeLabel('','✨');sp.position.set(s.x,2.5,s.z);sp.scale.set(1.2,1.2,1);par.add(sp);s.spr=sp}
 
+/* =================================================================
+   HIDDEN LESSONS — the stuff nobody tells you, put somewhere nobody
+   walks. Every one of these is on a roof, a summit, behind a wall,
+   or in the corner of a room you had no reason to enter.
+   ================================================================= */
+const HIDDEN=[
+ // ---------- money basics ----------
+ {id:'h_payself',th:'basics',e:'🥇',n:'Pay Yourself First',cash:300,skill:2,
+  teach:'Almost everyone saves whatever is left at the end of the month. There is never anything left. '
+   +'People who build money move it out on payday, before they spend a cent — then live on the rest. '
+   +'Same income, same life, completely different result. Set it to happen automatically and you will never have to be disciplined again.'},
+ {id:'h_lifestyle',th:'basics',e:'🎈',n:'Lifestyle Creep',cash:250,skill:2,
+  teach:'Here is why people who earn triple still feel broke: every raise gets spent within about two months. '
+   +'The trick the wealthy use is boring — when your pay goes up, bank the difference and keep living the old way for one more year. '
+   +'One year of not upgrading your life is often the entire gap between rich and stuck.'},
+ {id:'h_72',th:'basics',e:'🔢',n:'The Rule of 72',cash:200,skill:2,
+  teach:'Divide 72 by your yearly return and you get the years it takes to double. At 7% that is about 10 years. '
+   +'It also works against you: a 24% credit card doubles what you owe in 3 years. '
+   +'You can do this in your head in two seconds, and it tells you more than most financial adverts ever will.'},
+ {id:'h_emerg',th:'basics',e:'🛟',n:'Why the Boring Fund Wins',cash:400,skill:2,
+  teach:'Three months of expenses in cash earns you almost nothing, and it is the highest-return thing most people ever do. '
+   +'Not because of interest — because it stops you selling investments at the worst moment, borrowing at 24%, or staying in a job you hate. '
+   +'It buys you the ability to say no. That is what it is actually for.'},
+ {id:'h_price',th:'basics',e:'🏷️',n:'Price It In Hours',cash:180,skill:1,
+  teach:'Stop reading prices in dollars. Read them in hours of your life. '
+   +'If you clear $20 an hour, a $200 pair of trainers is ten hours — a whole day and a bit, gone. '
+   +'Some things are still worth it. But you will buy very differently once you can see the real price tag.'},
+ // ---------- investing ----------
+ {id:'h_index',th:'invest',e:'🧺',n:'Why Boring Beats Clever',cash:500,skill:3,
+  teach:'Over 20 years, roughly 9 out of 10 professional fund managers fail to beat a plain index fund — '
+   +'people paid millions, working full-time, with better information than you. '
+   +'You do not beat them by being smarter. You beat them by buying the whole market, paying almost no fees, and never touching it.'},
+ {id:'h_fees',th:'invest',e:'🐜',n:'The 1% That Eats a Third',cash:600,skill:3,
+  teach:'A 1% yearly fee sounds like nothing. Over 40 years it quietly eats around a third of everything you would have had. '
+   +'Fees are the only part of investing you can control with certainty. '
+   +'Check the number on anything you own — it is usually printed somewhere small.'},
+ {id:'h_time',th:'invest',e:'⏳',n:'Time In, Not Timing',cash:550,skill:3,
+  teach:'Miss the ten best days of a decade and you lose most of the gains. Those days almost always land right beside the worst ones, '
+   +'while everyone is panicking. Nobody reliably jumps out and back in. '
+   +'The people who did best were the ones who forgot the account existed.'},
+ {id:'h_dca',th:'invest',e:'🪣',n:'The Same Amount, Every Month',cash:450,skill:2,
+  teach:'Putting in a fixed amount on a fixed date means you buy more when prices are low and less when they are high, automatically, '
+   +'with no judgement calls. It removes the part of investing that people are worst at: deciding. '
+   +'Set the transfer up once and let it run for a decade.'},
+ {id:'h_tax',th:'invest',e:'🧾',n:'The Free Money Most People Skip',cash:700,skill:3,
+  teach:'Tax-sheltered accounts (401k, ISA, Roth, super — every country has one) let your growth compound untaxed. '
+   +'If an employer matches your contributions, that is an instant 50-100% return before the money is even invested. '
+   +'People turn this down every day because the form looked boring.'},
+ {id:'h_reinv',th:'invest',e:'♻️',n:'Turn Dividends Back On',cash:400,skill:2,
+  teach:'Dividends paid out and spent are just pocket money. Dividends reinvested buy more shares, which pay more dividends. '
+   +'Over 30 years reinvestment is a huge share of total returns. It is usually one checkbox you have never looked at.'},
+ // ---------- protect ----------
+ {id:'h_minpay',th:'protect',e:'🕸️',n:'The Minimum Payment Trap',cash:500,skill:3,
+  teach:'Minimum payments are designed by the lender, for the lender. Paying the minimum on a $5,000 card can take over 20 years '
+   +'and cost more in interest than the original debt. '
+   +'Pay anything above the minimum and the maths flips hard in your favour. Pay double and you cut the time by more than half.'},
+ {id:'h_avalanche',th:'protect',e:'🏔️',n:'Avalanche vs Snowball',cash:450,skill:2,
+  teach:'Two ways to kill debt. Avalanche: attack the highest interest rate first — mathematically cheapest. '
+   +'Snowball: kill the smallest balance first — psychologically easiest, and people actually finish it. '
+   +'The best one is the one you will not quit. Knowing both is the point.'},
+ {id:'h_urgency',th:'protect',e:'⏰',n:'Urgency Is the Tell',cash:400,skill:3,
+  teach:'Every scam in history shares one feature: you must decide NOW. Limited spots. Price goes up tonight. Do not tell anyone. '
+   +'Real opportunities survive a night of sleep and a second opinion. '
+   +'Make "I will decide tomorrow" your automatic answer and you become nearly unrobbable.'},
+ {id:'h_guarantee',th:'protect',e:'🚩',n:'Guaranteed High Returns',cash:400,skill:3,
+  teach:'Return and risk are welded together. Anyone promising high returns with no risk is either lying or does not understand what they sell. '
+   +'The words "guaranteed", "risk-free" and "12% monthly" in the same sentence mean walk away. '
+   +'Not haggle. Walk.'},
+ {id:'h_insure',th:'protect',e:'☂️',n:'Insure the Catastrophe, Not the Annoyance',cash:350,skill:2,
+  teach:'Insurance is worth buying for things that would ruin you — your health, your ability to earn, your home. '
+   +'It is a bad deal for things you could simply pay for: phone screens, extended warranties, appliance cover. '
+   +'Those are sold with big commissions precisely because the maths favours the seller.'},
+ {id:'h_credit',th:'protect',e:'📊',n:'The Score Is a Rented Reputation',cash:300,skill:2,
+  teach:'Your credit score is not a measure of wealth — plenty of rich people have thin files. It measures whether you repay on time. '
+   +'On-time payments and using less than about 30% of your limit do most of the work. '
+   +'A good score is worth tens of thousands over a mortgage lifetime, for behaviour that costs nothing.'},
+ // ---------- developer ----------
+ {id:'h_ship',th:'dev',e:'🚢',n:'Shipped Beats Perfect',cash:500,skill:3,
+  teach:'The developers who get paid most are not the ones who write the prettiest code — they are the ones whose work reaches real users. '
+   +'A rough thing in someone’s hands teaches you more in a week than six months of planning. '
+   +'Finish something small. Then finish another one.'},
+ {id:'h_proof',th:'dev',e:'📁',n:'Nobody Reads the CV',cash:600,skill:3,
+  teach:'A link to something working beats a page describing what you can do. Three finished projects with a live link will out-compete '
+   +'a degree in most hiring rooms under ten people. '
+   +'Build the portfolio before you need it — it is the one asset that argues on your behalf while you sleep.'},
+ {id:'h_read',th:'dev',e:'🔍',n:'Read the Error',cash:250,skill:2,
+  teach:'Beginners see a red wall and panic. Professionals read line one, find the file, find the line number, and look. '
+   +'The error almost always says exactly what is wrong. '
+   +'The single biggest skill jump in programming is learning to slow down and actually read it.'},
+ // ---------- AI ----------
+ {id:'h_context',th:'ai',e:'🧠',n:'Give It the Whole Picture',cash:500,skill:3,
+  teach:'Weak prompt: "write me a business plan." Strong prompt: who you are, what you sell, to whom, your budget, what you already tried, '
+   +'and what a good answer looks like. '
+   +'These models are not mind readers — they are extremely fast readers. Feed them more and they get dramatically better.'},
+ {id:'h_verify',th:'ai',e:'🔎',n:'It Can Be Confidently Wrong',cash:450,skill:3,
+  teach:'AI will state a wrong fact in exactly the same tone as a right one. It has no way to sound unsure about things it invented. '
+   +'Use it to draft, explore and explain — then check anything that involves money, law, health or a number. '
+   +'The people who get hurt are the ones who never learned it can be wrong.'},
+ {id:'h_iterate',th:'ai',e:'🔁',n:'The Second Prompt Is the Real One',cash:400,skill:2,
+  teach:'Almost nobody gets what they want on the first try, and almost nobody follows up. '
+   +'Say what was wrong with the answer and ask again. Three rounds of "closer, but make it shorter and less salesy" '
+   +'gets you further than any clever magic phrase.'},
+ // ---------- business ----------
+ {id:'h_margin',th:'biz',e:'📐',n:'Revenue Is Vanity',cash:700,skill:3,
+  teach:'"We did $100,000 in sales" tells you nothing. If it cost $98,000 to make, you earned $2,000 for a year of stress. '
+   +'Profit is what is left. Cash in the bank is what is real. '
+   +'Businesses die with full order books all the time, because the money arrives later than the bills.'},
+ {id:'h_presell',th:'biz',e:'🎯',n:'Sell It Before You Build It',cash:650,skill:3,
+  teach:'The most expensive mistake in business is spending a year building something nobody wanted. '
+   +'Try to take money — or at least a firm yes — before you build. If ten people will not commit, ten thousand will not either. '
+   +'A rejection this week is cheaper than a warehouse of stock next year.'},
+ {id:'h_pricing',th:'biz',e:'💲',n:'Charging Too Little Kills You',cash:600,skill:3,
+  teach:'New businesses almost always price too low, because low prices feel safe. Then there is nothing left for mistakes, marketing or growth, '
+   +'and the cheapest customers complain the most. '
+   +'Raising prices is usually the fastest profit lever there is, and it costs nothing to try.'},
+ {id:'h_ownership',th:'biz',e:'🔑',n:'Own, Do Not Just Earn',cash:800,skill:3,
+  teach:'Wages stop the day you do. Ownership does not — a share of a company, a rental, a book, a piece of software keeps paying. '
+   +'Nearly everyone who got seriously wealthy owned a piece of something rather than being paid by the hour. '
+   +'Ask of any work: at the end of this, do I own anything?'},
+];
+function themeForLevel(li){for(const t of THEMES)if(t.worlds.indexOf(li)>=0)return t.id;return 'basics'}
+function hiddenFound(){return Object.keys(G.hidden||{}).length}
+function hiddenFor(li){
+ const th=themeForLevel(li);
+ const pool=HIDDEN.filter(h=>h.th===th);
+ if(!pool.length)return[];
+ // spread a theme's lessons across the worlds that make up that theme
+ const t=THEMES.find(x=>x.id===th); const idx=t?Math.max(0,t.worlds.indexOf(li)):0;
+ const n=t?t.worlds.length:1;
+ return pool.filter((h,k)=>k%n===idx%n);
+}
+let hiddens=[];
+function spawnHidden(h,par){
+ const g=new THREE.Group();
+ const scroll=box(0.7,0.9,0.18,0xf3e6c4);g.add(scroll);
+ const bar=box(0.8,0.14,0.24,0xa371f7);bar.position.y=0.5;g.add(bar);
+ const bar2=bar.clone();bar2.position.y=-0.5;g.add(bar2);
+ const glow=new THREE.Mesh(new THREE.SphereGeometry(1.15,12,10),
+   new THREE.MeshBasicMaterial({color:0xa371f7,transparent:true,opacity:0.16}));g.add(glow);
+ g.position.set(h.x,h.y,h.z);par.add(g);h.mesh=g;
+ const sp=makeLabel('SECRET','📜');sp.position.set(h.x,h.y+1.5,h.z);sp.scale.set(4.6,2.5,1);par.add(sp);h.spr=sp;
+}
+function takeHidden(h){
+ if(G.hidden&&G.hidden[h.id])return;
+ G.hidden=G.hidden||{};G.hidden[h.id]=1;
+ addWealth(h.cash); G.skill=Math.min(SKILL_CAP,(G.skill||0)+(h.skill||0));
+ save();
+ if(h.mesh)worldGroup.remove(h.mesh); if(h.spr)worldGroup.remove(h.spr);
+ burst(h.x,h.y,h.z,0xa371f7); sfx('secret'); confetti();
+ paused=true;
+ $('secbody').innerHTML='<div class=p-badge style="background:linear-gradient(160deg,#a371f7,#3d8bff)">'+h.e+'</div>'
+  +'<div class=p-world>Hidden lesson '+hiddenFound()+' of '+HIDDEN.length+'</div>'
+  +'<div class=p-title>'+h.n+'</div>'
+  +'<p class=p-teach>'+h.teach+'</p>'
+  +'<div class=p-teach style="border-color:#3fb950;text-align:center"><b>+'+money(h.cash)+' · +'+(h.skill||0)+' skill</b>'
+  +'<div class=gd>Nobody was ever going to walk here by accident. That is the point — the useful things are rarely on the path.</div></div>'
+  +'<button class=pbtn onclick="hide(&#39;secret&#39;)">Keep going →</button>';
+ $('secret').classList.add('show');
+ if(typeof narrate==='function')try{narrate(h.n+'. '+h.teach)}catch(e){}
+}
 const keys={};function sk(k,v){keys[k]=v}
+/* ================= TOUCH: point-and-go + gestures ================= */
+let wantHeading=null, autoWalk=0, _tid=null, _tsx=0,_tsy=0,_tst=0,_tmoved=0,_lastTap=0,_twoFinger=false;
+function coachSeen(){return !!(G&&G.coach)}
+function showCoach(){ if(!isTouch()||coachSeen())return; $('coach').classList.add('show') }
+function closeCoach(){ $('coach').classList.remove('show'); G.coach=1; save(); $('gesthint').style.display='block';
+ setTimeout(()=>{$('gesthint').style.display='none'},6000) }
+function isTouch(){return matchMedia('(pointer:coarse)').matches||('ontouchstart' in window)}
+/* turn a screen drag into a world heading, whatever camera we are in */
+function headingFromDrag(dx,dy){
+ if(!camera)return null;
+ const cf=new THREE.Vector3();camera.getWorldDirection(cf);cf.y=0;
+ if(cf.lengthSq()<1e-6)return null;
+ cf.normalize();
+ const rx=cf.z, rz=-cf.x;                 // camera-right on the ground plane
+ const wx=cf.x*(-dy)+rx*dx, wz=cf.z*(-dy)+rz*dx;
+ if(wx*wx+wz*wz<1)return null;
+ return Math.atan2(wx,wz);
+}
+function stickAt(x,y,kx,ky){
+ const st=$('stick');st.style.left=x+'px';st.style.top=y+'px';st.classList.add('on');
+ st.firstElementChild.style.transform='translate('+kx+'px,'+ky+'px)';
+}
+function stickOff(){$('stick').classList.remove('on');$('stick').firstElementChild.style.transform=''}
+function endWalk(){autoWalk=0;wantHeading=null;sk('F',0);stickOff()}
+(function bindTouch(){
+ const cv=$('game');
+ if(!cv)return;
+ cv.addEventListener('touchstart',e=>{
+  if(paused)return;
+  if(e.touches.length>=2){_twoFinger=true;endWalk();return}
+  const t=e.touches[0];_tid=t.identifier;_tsx=t.clientX;_tsy=t.clientY;_tst=Date.now();_tmoved=0;_twoFinger=false;
+  stickAt(_tsx,_tsy,0,0);
+ },{passive:true});
+ cv.addEventListener('touchmove',e=>{
+  if(paused||_tid===null||_twoFinger)return;
+  let t=null;for(const x of e.touches)if(x.identifier===_tid)t=x;
+  if(!t)return;
+  const dx=t.clientX-_tsx, dy=t.clientY-_tsy, d=Math.hypot(dx,dy);
+  _tmoved=Math.max(_tmoved,d);
+  if(d<14){autoWalk=0;sk('F',0);stickAt(_tsx,_tsy,0,0);return}
+  const h=headingFromDrag(dx,dy);
+  if(h!==null){wantHeading=h;autoWalk=1;sk('F',1)}
+  const k=Math.min(1,d/56);
+  stickAt(_tsx,_tsy,dx/d*k*32,dy/d*k*32);
+ },{passive:true});
+ const finish=e=>{
+  if(_twoFinger){ if(e.touches.length===0){_twoFinger=false;setView(camMode+1);toast('👁 '+CAMNAMES[camMode])} return }
+  if(_tid===null)return;
+  const dt=Date.now()-_tst;
+  let t=null;for(const x of e.changedTouches)if(x.identifier===_tid)t=x;
+  const dx=t?t.clientX-_tsx:0, dy=t?t.clientY-_tsy:0;
+  _tid=null;endWalk();
+  if(paused)return;
+  // flick up = jump
+  if(dt<340&&dy<-64&&Math.abs(dx)<Math.abs(dy)){sk('JUMP',1);setTimeout(()=>sk('JUMP',0),90);return}
+  // tap, then a second tap = hit / go in
+  if(dt<250&&_tmoved<14){
+   const now=Date.now();
+   if(now-_lastTap<330){_lastTap=0;interact()}
+   else{_lastTap=now;
+    if(!G.coach){toast('Double-tap to hit. Drag to walk.')}}
+  }
+ };
+ cv.addEventListener('touchend',finish,{passive:true});
+ cv.addEventListener('touchcancel',()=>{_tid=null;_twoFinger=false;endWalk()},{passive:true});
+})();
+
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
  if(k==='arrowup'||k==='w')sk('F',1);if(k==='arrowdown'||k==='s')sk('B',1);if(k==='arrowleft'||k==='a')sk('TL',1);if(k==='arrowright'||k==='d')sk('TR',1);
  if(k===' ')sk('JUMP',1);if(k==='c')setView(camMode+1);if(k==='b')throwBomb();if(e.key==='Enter')interact()});
@@ -2241,6 +2675,25 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
  walls.filter(w=>w.kind==='ledge').forEach(l=>{const id='o'+li+'-'+(oi++);
   if(G.opps[id])return;
   const o={id,x:l.x,y:l.top+1.0,z:l.z,reward:250+li*150};spawnOpp(o,worldGroup);opps.push(o)});
+ // ---- hidden lessons: only ever on top of something, or behind something ----
+ hiddens=[];
+ {const spots=[];
+  walls.filter(w=>w.kind==='tower').forEach(w=>spots.push({x:w.x,y:w.top+1.2,z:w.z,hard:3}));
+  walls.filter(w=>w.kind==='ledge').forEach(w=>spots.push({x:w.x,y:w.top+1.2,z:w.z,hard:2}));
+  walls.filter(w=>w.kind==='bedrock').forEach(w=>spots.push({x:w.x,y:1.4,z:w.z+2.4,hard:3}));
+  // the far corner of the last room - somewhere you have no reason to walk
+  const last=roomCells[roomCells.length-1];
+  if(last)spots.push({x:last.x+HR-3.5,y:1.4,z:last.z+HR-3.5,hard:1});
+  const first=roomCells[0];
+  if(first)spots.push({x:first.x-HR+3.5,y:1.4,z:first.z+HR-3.5,hard:1});
+  spots.sort((a,b)=>b.hard-a.hard);
+  hiddenFor(li).forEach((h,k)=>{
+   if(G.hidden&&G.hidden[h.id])return;
+   const sp=spots[k%Math.max(1,spots.length)];
+   if(!sp)return;
+   const inst=Object.assign({},h,{x:sp.x,y:sp.y,z:sp.z});
+   spawnHidden(inst,worldGroup);hiddens.push(inst);});
+ }
  // signpost the climbing route so the mechanic is discoverable
  walls.filter(w=>w.kind==='step'&&w.top<3).forEach(st=>{
   const sp=makeLabel('CLIMB  ⤴ SPACE','🪜');sp.position.set(st.x,st.top+1.9,st.z);sp.scale.set(6,3,1);worldGroup.add(sp)});
@@ -2276,7 +2729,20 @@ function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worl
    const kind=roll<0.62?'coin':roll<0.9?'bill':'wad';
    const val=kind==='coin'?50:kind==='bill'?200:500;
    const m=makeMoney(x,z,kind,worldGroup);
-   coins.push({mesh:m,x,z,id,val,kind})}});
+   coins.push({mesh:m,x,z,y:0,id,val,kind})}});
+ // ---- the coins you have to work for. Height is paid for in effort, so it pays more. ----
+ {const addHigh=(x,y,z,val,kind)=>{const id='H'+li+'-'+(ci++);
+   if(G.coins[id])return;
+   const m=makeMoney(x,z,kind,worldGroup);m.position.y=y;
+   coins.push({mesh:m,x,z,y,id,val,kind,high:1})};
+  // a breadcrumb up every staircase, so climbing visibly pays
+  walls.filter(w=>w.kind==='step'&&!w.broken).forEach(st=>addHigh(st.x,st.top+0.7,st.z,80+li*20,'coin'));
+  // a note on each ledge - one jump away
+  walls.filter(w=>w.kind==='ledge'&&!w.broken).forEach(l=>addHigh(l.x,l.top+0.7,l.z,300+li*120,'bill'));
+  // a stack on top of the towers - climb, then jump, then jump again
+  walls.filter(w=>w.kind==='tower'&&!w.broken).forEach(tw=>{
+   for(let k=0;k<2;k++)addHigh(tw.x,tw.top+0.7+k*1.4,tw.z,700+li*250,'wad')});
+ }
  // hidden secrets, tucked in the far corners of later rooms
  curSecrets=SECRETS.filter(s=>s.world===wi);
  curSecrets.forEach((s,idx)=>{if(G.secrets[s.id])return;const rc=roomCells[Math.min(roomCells.length-1,1+idx)];
@@ -2413,6 +2879,9 @@ function updateCamera(t){if(!hero)return;const P=hero.position,fx=Math.sin(headi
 
 function update(t){if(!renderer)return;
  if(!paused){if(keys.TL)heading+=0.052;if(keys.TR)heading-=0.052;
+  if(wantHeading!==null){let d=wantHeading-heading;
+   while(d>Math.PI)d-=Math.PI*2; while(d<-Math.PI)d+=Math.PI*2;
+   heading+=Math.max(-0.17,Math.min(0.17,d*0.42));}
   const mv=(keys.F?1:0)-(keys.B?1:0),fx=Math.sin(heading),fz=Math.cos(heading);
   if(mv){const SP=0.18*(typeof vehSpeed==='function'?vehSpeed():1);const dx=fx*SP*mv,dz=fz*SP*mv;
    // auto-step: if the thing in your way is a short hop up, just climb it.
@@ -3429,29 +3898,30 @@ function openMap(){
    const st=levelStages(l);
    const d=st.filter(i=>G.done[i]).length;
    const beaten=d>=st.length;
-   return '<button class=opt style="text-align:left;padding:10px 12px;margin:4px 0;'
-    +(beaten?'border-color:#3fb950':'')+'" onclick="travelTo('+l+')">'
-    +'<b>'+w.prop+' '+w.name+'</b> <span class=p-note>'+(beaten?'✓ beaten':d+'/'+st.length+' rooms')+'</span></button>'
+   return '<button class="wbtn'+(beaten?' beat':'')+'" onclick="travelTo('+l+')">'
+    +'<span>'+w.prop+'</span><span class=wn2>'+w.name+'</span>'
+    +'<span class=wp>'+(beaten?'✓ beaten':d+'/'+st.length)+'</span></button>'
   }).join('');
-  return '<div class=gloss style="border-color:'+t.col+'">'
-   +'<b style="font-size:17px">'+t.e+' '+t.n+'</b>'
-   +'<div class=qp style="margin:6px 0"><i style="width:'+p.pct+'%;background:'+t.col+'"></i></div>'
-   +'<div class=gd>'+t.blurb+'</div>'
-   +'<div class=gd style="color:'+t.col+'">'+p.done+' of '+p.total+' rooms cleared</div>'
+  return '<div class=island style="border-color:'+t.col+'">'
+   +'<h4>'+t.e+' '+t.n+'</h4>'
+   +'<div class=ip><i style="width:'+p.pct+'%;background:'+t.col+'"></i></div>'
+   +'<div class=ic style="color:'+t.col+'">'+p.done+' of '+p.total+' rooms cleared</div>'
+   +'<div class=ib>'+t.blurb+'</div>'
    +worlds+'</div>'}).join('');
- const soon=SOON.map(s=>'<div class=gloss style="opacity:.5">'
-   +'<b>'+s.e+' '+s.n+'</b> <span class=p-note>· not built yet</span>'
-   +'<div class=gd>'+s.blurb+'</div></div>').join('');
+ const soon=SOON.map(s=>'<div class="island soon">'
+   +'<h4>'+s.e+' '+s.n+'</h4>'
+   +'<div class=ic style=color:#7b8aa3>not built yet</div>'
+   +'<div class=ib>'+s.blurb+'</div></div>').join('');
  let cleared=0,all=0;THEMES.forEach(t=>{const p=themeProgress(t);cleared+=p.done;all+=p.total});
- $('mapbody').innerHTML='<div class=p-badge>🗺️</div>'
-  +'<div class=p-world>Choose where to learn next</div><div class=p-title>The Map</div>'
-  +'<p class=p-teach>You are 18 with nothing. Every island here is a different way people actually build a life — '
+ $('mapbody').innerHTML='<div class=maphd><div class=p-badge>🗺️</div><div>'
+  +'<div class=p-world>Choose where to learn next</div>'
+  +'<div class=p-title style="margin:0">The Map</div>'
+  +'<div class=p-note>'+cleared+' of '+all+' rooms cleared</div></div></div>'
+  +'<p class=p-teach style="margin:12px 0 0">You are 18 with nothing. Every island here is a different way people actually build a life — '
   +'and every one of them ends at the same place: the month your money covers your life. '
   +'Go wherever you like, in any order.</p>'
-  +'<div class=p-teach style="border-color:#3fb950"><b>'+cleared+' of '+all+' rooms cleared</b></div>'
-  +cards
-  +'<div class=p-title style="font-size:16px;margin-top:14px">Coming next</div>'+soon
-  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;map&#39;)">← Back to Money World</button>';
+  +'<div class=mapgrid>'+cards+soon+'</div>'
+  +'<button class=pbtn style="margin-top:14px" onclick="hide(&#39;map&#39;)">← Back to Money World</button>';
  $('map').classList.add('show');}
 async function openTeam(){
  paused=true;
@@ -3524,35 +3994,29 @@ async function openBoard(){
   +'<div class=p-note style="margin-top:10px">Names and progress only. There is no way to contact anyone from here.</div>'
   +'<button class=pbtn style="margin-top:10px" onclick="openTeam()">👥 Your team</button>'
   +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;team&#39;)">← Back to Money World</button>';}
-function openProfile(){
- paused=true;
+function openProfile(){openSide('you')}
+function _stat(l,v,c){return '<div style="flex:1 1 44%;min-width:120px;background:#0d1420;border:1px solid #2b3654;border-radius:10px;padding:9px 11px">'
+   +'<div style="font-size:11px;color:#7b8aa3;text-transform:uppercase;letter-spacing:.06em">'+l+'</div>'
+   +'<div style="font-size:19px;font-weight:800;color:'+(c||'#eaf1ff')+'">'+v+'</div></div>'}
+function sideYou(){
  const p=tParts(),tier=wageTier(),st=predStats(),fn=freedomNumber(),nw=netWorth();
  const pct=Math.max(0,Math.min(999,Math.round(nw/fn*1000)/10));
- const earned=BADGES.filter(b=>{try{return b.test(G)}catch(e){return false}});
- const locked=BADGES.filter(b=>!earned.includes(b));
- const a=G.acts||{};
+ const a=G.acts||{}, stat=_stat;
  const rooms=Object.keys(G.done||{}).length;
- const stat=(l,v,c)=>'<div style="flex:1 1 44%;min-width:130px;background:#0d1420;border:1px solid #2b3654;border-radius:10px;padding:9px 11px">'
-   +'<div style="font-size:11px;color:#7b8aa3;text-transform:uppercase;letter-spacing:.06em">'+l+'</div>'
-   +'<div style="font-size:19px;font-weight:800;color:'+(c||'#eaf1ff')+'">'+v+'</div></div>';
  const invTiers=CAT?Object.keys(CAT.classes).map(c=>{const cl=CAT.classes[c],{t}=tierFor(c),tr=TIERS[t];
    return '<div class=trow><span class=ti>'+cl.icon+'</span><span class=tn>'+cl.name+'</span>'
      +'<span class=tr style=color:'+tr.c+'>'+tr.ic+' '+tr.n+'</span></div>'}).join(''):'';
- const vault=SECRETS.filter(x=>G.secrets[x.id]).map(x=>x.e+' '+x.name)
-   .concat(SHOP.filter(x=>x.url&&owns(x.id)).map(x=>x.e+' '+x.n));
- $('profbody').innerHTML=
-  '<div class=p-badge>'+curHome().e+'</div>'
-  +'<div class=p-world>Your life so far</div>'
-  +'<div class=p-title>'+tier.n+' · age '+p.age+'</div>'
-  +'<div class=p-note style="margin-bottom:10px">'+dateStr()+' · day '+(p.totalDays+1)+' of the story</div>'
+ return '<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'
+  +'<div class=p-badge style="width:56px;height:56px;font-size:28px;margin:0;border-radius:16px">'+curHome().e+'</div>'
+  +'<div><div class=p-title style="font-size:18px;margin:0">'+tier.n+' · age '+p.age+'</div>'
+  +'<div class=p-note>'+dateStr()+' · day '+(p.totalDays+1)+'</div></div></div>'
 
-  +'<div class=p-teach style="border-color:'+(pct>=100?'#3fb950':pct>=25?'#f0b429':'#3d8bff')+'">'
+  +'<div class=p-teach style="margin-bottom:12px;border-color:'+(pct>=100?'#3fb950':pct>=25?'#f0b429':'#3d8bff')+'">'
   +'<b>Financial freedom: '+pct+'%</b><div class=qp style="margin-top:6px;height:8px"><i style="width:'+Math.min(100,pct)+'%"></i></div>'
   +'<div class=gd style="margin-top:6px">You burn '+money(monthlyBurn())+' a month, so freedom costs '+money(fn)+'. '
   +(pct>=100?'You are already there — your money covers your life.':'You need '+money(Math.max(0,fn-nw))+' more.')+'</div></div>'
 
-  +'<div class=p-title style="font-size:16px;margin-top:14px">💰 Money</div>'
-  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +'<div class=sechd>💰 Money</div><div style="display:flex;flex-wrap:wrap;gap:7px">'
   +stat('Net worth',money(nw),'#3fb950')+stat('Cash',money(G.wealth||0))
   +stat('Home equity',money(G.equity||0))+stat('Monthly burn',money(monthlyBurn()),'#f0b429')
   +stat('Investments',money(typeof portVal==='function'?portVal():0),(typeof portVal==='function'&&portVal()>0)?'#3fb950':'#7b8aa3')
@@ -3560,35 +4024,110 @@ function openProfile(){
   +stat('Passive income',money(passiveIncome()),passiveIncome()>0?'#3fb950':'#7b8aa3')
   +stat('A shift pays',money(wage()))+'</div>'
 
-  +'<div class=p-title style="font-size:16px;margin-top:14px">🧠 What you know</div>'
-  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +'<div class=sechd>🧠 What you know</div><div style="display:flex;flex-wrap:wrap;gap:7px">'
   +stat('Skill',(G.skill||0)+' / '+SKILL_CAP)+stat('Wage tier',tier.n,'#3d8bff')
   +stat('Rooms cleared',rooms+' / '+STAGES.length)+stat('Words learned',Object.keys(G.glossary||{}).length)
-  +stat('Willpower',(G.willpower||0)+' 💪')+stat('Street smarts',Math.round(streetSmarts()*10)/10)+'</div>'
+  +stat('Willpower',(G.willpower||0)+' 💪')+stat('Street smarts',Math.round(streetSmarts()*10)/10)
+  +stat('Hidden lessons',(typeof hiddenFound==='function'?hiddenFound():0)+' / '+(typeof HIDDEN!=='undefined'?HIDDEN.length:0),'#a371f7')
+  +stat('Coins picked up',(G.coinCount||0),'#f0b429')
+  +stat('Hard-to-reach coins',(G.highCoins||0),'#f0b429')+'</div>'
 
-  +'<div class=p-title style="font-size:16px;margin-top:14px">⏳ Where the hours went</div>'
-  +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
+  +'<div class=sechd>⏳ Where the hours went</div><div style="display:flex;flex-wrap:wrap;gap:7px">'
   +stat('Shifts worked',(a.work||0))+stat('Study sessions',(a.study||0))
   +stat('Projects finished',projectsDone())+stat('Hours scrolled away',(G.wasted||0),(G.wasted||0)>12?'#f85149':'#7b8aa3')
   +'</div>'
 
-  +'<div class=p-title style="font-size:16px;margin-top:14px">🏠 Home</div>'
+  +'<div class=sechd>🏠 Home</div>'
   +'<div class=gloss><b>'+curHome().e+' '+curHome().n+'</b><div class=gd>'+curHome().note+'</div>'
   +'<div class=gd>Furniture: '+(Object.keys(G.furn||{}).length?FURN.filter(f=>ownsF(f.id)).map(f=>f.e).join(' '):'nothing yet')+'</div></div>'
 
-  +'<div class=p-title style="font-size:16px;margin-top:14px">📈 Market record</div>'
+  +'<div class=sechd>📈 Market record</div>'
   +'<div class=gloss><b>'+(st.resolved?(st.right+' of '+st.resolved+' calls right · '+st.acc+'% accurate'):'No calls settled yet')+'</b>'
   +(st.open?'<div class=gd>'+st.open+' still open</div>':'')+'</div>'+invTiers
-
-  +'<div class=p-title style="font-size:16px;margin-top:14px">🏆 Accomplishments <span class=p-note>· '+earned.length+' of '+BADGES.length+'</span></div>'
+  +'<button class=pbtn style="margin-top:14px" onclick="closeSide()">← Back to Money World</button>';
+}
+function sideBadges(){
+ const earned=BADGES.filter(b=>{try{return b.test(G)}catch(e){return false}});
+ const locked=BADGES.filter(b=>!earned.includes(b));
+ const vault=SECRETS.filter(x=>G.secrets[x.id]).map(x=>x.e+' '+x.name)
+   .concat(SHOP.filter(x=>x.url&&owns(x.id)).map(x=>x.e+' '+x.n));
+ const hid=(typeof HIDDEN!=='undefined')?HIDDEN.filter(h=>G.hidden&&G.hidden[h.id]):[];
+ return '<div class=sechd>🏆 Accomplishments <span class=p-note>· '+earned.length+' of '+BADGES.length+'</span></div>'
   +'<div class=badges>'+earned.map(b=>'<div class=bg><div class=i>'+b.ic+'</div><div class=n>'+b.n+'</div></div>').join('')
   +locked.map(b=>'<div class="bg off"><div class=i>'+b.ic+'</div><div class=n>'+b.n+'</div></div>').join('')+'</div>'
-
-  +'<div class=p-title style="font-size:16px;margin-top:14px">📚 Vault <span class=p-note>· '+vault.length+'</span></div>'
-  +(vault.length?vault.map(v=>'<div class=gloss><b>'+v+'</b></div>').join(''):'<div class=p-note>Nothing found yet — explore the far corners.</div>')
-
-  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;profile&#39;)">← Back to Money World</button>';
- $('profile').classList.add('show')}
+  +'<div class=sechd>🔮 Hidden lessons <span class=p-note>· '+hid.length+' of '+(typeof HIDDEN!=='undefined'?HIDDEN.length:0)+'</span></div>'
+  +(hid.length?hid.map(h=>'<div class=gloss><b>'+h.e+' '+h.n+'</b><div class=gd>'+h.teach+'</div></div>').join('')
+    :'<div class=p-note>None yet. They are not on the path — look up, look behind, and break things that seem solid.</div>')
+  +'<div class=sechd>📚 Vault <span class=p-note>· '+vault.length+'</span></div>'
+  +(vault.length?vault.map(v=>'<div class=gloss><b>'+v+'</b></div>').join(''):'<div class=p-note>Nothing found yet — explore the far corners.</div>');
+}
+function sideLife(){
+ const p=tParts(),nw=netWorth();
+ const beats=[];
+ beats.push({e:'🏁',t:'Day one',d:'You woke up at Mum and Dad’s with nothing but time. That is the only thing everybody starts with the same amount of.'});
+ if((G.acts||{}).work)beats.push({e:'💼',t:'First shift',d:'You traded hours for money for the first time. It works, and it does not scale.'});
+ if((G.skill||0)>=5)beats.push({e:'📚',t:'You started learning',d:'Skill '+(G.skill||0)+'. Every point moved your wage, permanently.'});
+ if((typeof portVal==='function'?portVal():0)>0)beats.push({e:'📈',t:'Money went to work',d:'You bought your first investment. From here money earns while you sleep.'});
+ if(G.biz)beats.push({e:'🚀',t:'You built something',d:'A business pays whether or not you turn up. That is the difference.'});
+ if((G.home||0)>0)beats.push({e:'🏠',t:'You moved out',d:'Every rung up the housing ladder raises the number you need for freedom. Worth knowing before you climb.'});
+ if(Object.keys(G.done||{}).length>=10)beats.push({e:'🗺️',t:'You have travelled',d:Object.keys(G.done||{}).length+' rooms cleared across the islands.'});
+ if(typeof isFree==='function'&&isFree())beats.push({e:'🗽',t:'Free',d:'Your money covers your life. Work became a choice.'});
+ return '<p class=p-teach>You are 18 with nothing. Every island on the map is a different way people actually build a life — and they all end at the same place: the month your money covers your bills. This is your run so far.</p>'
+  +beats.map(b=>'<div class=gloss><b>'+b.e+' '+b.t+'</b><div class=gd>'+b.d+'</div></div>').join('')
+  +'<div class=sechd>Where you are</div>'
+  +'<div class=gloss><b>'+dateStr()+'</b><div class=gd>Age '+p.age+' · day '+(p.totalDays+1)+' · net worth '+money(nw)+'</div></div>'
+  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;map&#39;);closeSide();openMap()">🗺️ Open the map</button>';
+}
+/* ---- LOOK tab: the free stuff ---- */
+function sideLook(){
+ const c=ch();
+ const sw=(arr,kind,cur)=>'<div class=swrow>'+arr.map((col,k)=>
+  '<span class="sw'+(cur===k?' on':'')+'" onclick="buyLook(&#39;'+kind+'&#39;,'+k+',0)" '
+  +'style="background:#'+col.toString(16).padStart(6,'0')+'"></span>').join('')+'</div>';
+ return '<p class=slotnote>Your body, your skin, your hair and your eyes are free, and they always will be. Tap 👁 at the top to watch yourself change.</p>'
+  +'<div class=sechd>Body</div>'
+  +'<div class=calls><button class="'+(c.sex==='m'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;m&#39;,0)">👦 Boy</button>'
+  +'<button class="'+(c.sex==='f'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;f&#39;,0)">👧 Girl</button></div>'
+  +'<div class=sechd>Skin</div>'+sw(SKINS,'skin',c.skin)
+  +'<div class=sechd>Eyes</div>'+sw(EYECOL,'eyecol',c.eyecol)
+  +'<div class=sechd>Hair colour</div>'+sw(HAIRCOL,'haircol',c.haircol)
+  +'<div class=sechd>Hair style</div>'+slotRow(HAIRSTYLES,'hair',c.hair);
+}
+/* ---- WARDROBE tab: the stuff that costs ---- */
+function sideFit(){
+ const c=ch();
+ const bonus=lookWage();
+ return '<div class=p-world style="margin-bottom:6px">Cash '+money(G.wealth||0)+'</div>'
+  +'<p class=slotnote>Clothes cost money and mostly give nothing back — that is true here and true outside. '
+  +'The few pieces marked <b style=color:#3fb950>+skill</b> are gear for a job, and they are always the cheap ones. That is not a coincidence.'
+  +(bonus?'<br><br><b style=color:#3fb950>What you are wearing is worth +'+bonus+' skill at work.</b>':'')+'</p>'
+  +'<div class=sechd>🎩 Hat</div>'+slotRow(HATS,'hat',c.hat)
+  +'<div class=sechd>👕 Clothes</div>'+slotRow(OUTFITS,'outfit',c.outfit)
+  +'<div class=sechd>🧤 Gloves</div>'+slotRow(GLOVES,'glove',c.glove)
+  +'<div class=sechd>👟 Shoes</div>'+slotRow(SHOES,'shoe',c.shoe)
+  +'<div class=sechd>👓 Face</div>'+slotRow(FACEGEAR,'face',c.face);
+}
+function slotRow(items,kind,cur){
+ return '<div class=slotgrid>'+items.map(it=>{
+  const owned=it.cost===0||ownedLook(it.id), on=cur===it.id;
+  const cls='slotit'+(on?' on':owned?' owned':' locked');
+  return '<div class="'+cls+'" onclick="pickLook(&#39;'+kind+'&#39;,&#39;'+it.id+'&#39;,'+(owned?0:it.cost)+')">'
+   +(on?'<span class=tick>●</span>':'')
+   +'<span class=se>'+(it.e||'·')+'</span><span class=sn>'+it.n+'</span>'
+   +'<span class="sc'+(it.cost===0?' free':'')+'">'+(on?'wearing':owned?'owned':money(it.cost))+'</span>'
+   +'</div>'}).join('')+'</div>'
+  +(function(){const d=items.find(x=>x.id===cur);if(!d)return'';
+    let n=d.note?d.note:'';
+    if(d.wage)n+=(n?' ':'')+'<b style=color:#3fb950>Counts as +'+d.wage+' skill while you wear it.</b>';
+    if(d.hit)n+=(n?' ':'')+'<b style=color:#f0b429>You hit harder wearing these.</b>';
+    if(d.speed&&d.speed!==1)n+=(n?' ':'')+'<b style=color:#7fb4ff>Walk speed '+Math.round(d.speed*100)+'%.</b>';
+    return n?'<div class=slotnote>'+n+'</div>':''})();
+}
+function pickLook(kind,id,cost){
+ if(cost>0&&(G.wealth||0)<cost){toast('That costs '+money(cost)+'. You have '+money(G.wealth||0)+'.');sfx('bad');return}
+ buyLook(kind,id,cost);
+}
+function openCharacter(){openSide('look')}
 function openShop(){paused=true;
  const rows=SHOP.map(it=>{const has=owns(it.id),afford=(G.wealth||0)>=it.price;
   return '<div class=gloss style="'+(has?'border-color:#3fb950':'')+'">'
@@ -3690,7 +4229,7 @@ const WAGE_TIERS=[
  {s:0, w:140,n:'Entry level'},{s:5, w:200,n:'Junior'},{s:12,w:300,n:'Skilled'},
  {s:22,w:450,n:'Senior'},   {s:35,w:650,n:'Expert'},{s:50,w:900,n:'In demand'}];
 const SKILL_CAP=50;
-function effSkill(){return (G.skill||0)+((typeof outfitDef==='function'&&outfitDef().wage)?1:0)}
+function effSkill(){return (G.skill||0)+((typeof lookWage==='function')?lookWage():0)}
 function wageTier(){let t=WAGE_TIERS[0];for(const x of WAGE_TIERS)if(effSkill()>=x.s)t=x;return t}
 function wage(){return wageTier().w}
 function nextTier(){return WAGE_TIERS.find(x=>x.s>(G.skill||0))||null}
@@ -3846,9 +4385,101 @@ const ACCESSORIES=[
  {id:'shades',e:'🕶️',n:'Sunglasses',cost:150},
  {id:'crown',e:'👑',n:'Crown',      cost:9000},
 ];
+/* ============ SIDE PANEL ============ */
+const SIDETABS=[
+ {id:'you',   e:'👤',n:'You'},
+ {id:'look',  e:'🧍',n:'Look'},
+ {id:'fit',   e:'👕',n:'Wardrobe'},
+ {id:'badges',e:'🏆',n:'Badges'},
+ {id:'life',  e:'📜',n:'Story'},
+];
+let sideTab='you', _sideScroll={};
+function openSide(tab){
+ paused=true; sideTab=tab||sideTab||'you';
+ $('sidetabs').innerHTML=SIDETABS.map(t=>
+  '<button class="'+(t.id===sideTab?'on':'')+'" onclick="switchSide(&#39;'+t.id+'&#39;)">'+t.e+' '+t.n+'</button>').join('');
+ $('sidep').classList.remove('peek');$('sidep').classList.add('show');
+ if(window.innerWidth>820)$('sideveil').classList.add('show');
+ renderSide();
+}
+function switchSide(t){ _sideScroll[sideTab]=$('sidebody').scrollTop; sideTab=t; openSide(t);
+ $('sidebody').scrollTop=_sideScroll[t]||0; }
+function closeSide(){ $('sidep').classList.remove('show','peek');$('sideveil').classList.remove('show');paused=false }
+function peekSide(){ $('sidep').classList.add('peek');$('sideveil').classList.remove('show') }
+function unpeekSide(){ $('sidep').classList.remove('peek'); if(window.innerWidth>820)$('sideveil').classList.add('show') }
+function reSide(){ if($('sidep').classList.contains('show')){const y=$('sidebody').scrollTop;renderSide();$('sidebody').scrollTop=y} }
+function renderSide(){
+ const tab=SIDETABS.find(t=>t.id===sideTab)||SIDETABS[0];
+ $('sidetitle').textContent=tab.e+' '+tab.n;
+ const b=$('sidebody');
+ if(sideTab==='you')        b.innerHTML=sideYou();
+ else if(sideTab==='look')  b.innerHTML=sideLook();
+ else if(sideTab==='fit')   b.innerHTML=sideFit();
+ else if(sideTab==='badges')b.innerHTML=sideBadges();
+ else                       b.innerHTML=sideLife();
+}
+/* ============ CHARACTER SLOTS ============ */
+const HATS=[
+ {id:'none',  e:'—', n:'No hat',      cost:0,   note:'Your own head. Weatherproof enough.'},
+ {id:'cap',   e:'🧢',n:'Cap',         cost:40},
+ {id:'beanie',e:'🎿',n:'Beanie',      cost:40},
+ {id:'hard',  e:'⛑️',n:'Hard Hat',    cost:70,  wage:1,
+  note:'Required on real sites. Kit you need for the job pays for itself — that is the difference between a cost and a tool.'},
+ {id:'chef',  e:'👨‍🍳',n:'Chef Hat',  cost:110},
+ {id:'cowboy',e:'🤠',n:'Cowboy Hat',  cost:220},
+ {id:'phones',e:'🎧',n:'Headphones',  cost:300, note:'Three hundred dollars of sound. Enjoy them — just log them as spending, not as an upgrade to you.'},
+ {id:'top',   e:'🎩',n:'Top Hat',     cost:1400},
+ {id:'crown', e:'👑',n:'Crown',       cost:9000,note:'Nine grand. In an index fund at 7% that is roughly $70,000 by the time you are 50. The crown will still be a hat.'},
+];
+const GLOVES=[
+ {id:'none', e:'—', n:'Bare hands', cost:0,  note:'Free. Slightly cold.'},
+ {id:'work', e:'🧤',n:'Work Gloves',cost:35, wage:1,
+  note:'Thirty-five dollars that makes you better at a paying job. That is the cheapest upgrade in the whole game.'},
+ {id:'winter',e:'🧣',n:'Winter Gloves',cost:60},
+ {id:'box',  e:'🥊',n:'Boxing Gloves',cost:240,hit:1,
+  note:'You hit walls harder wearing these. Some spending really does buy capability — most does not.'},
+ {id:'gold', e:'💫',n:'Gold Gauntlets',cost:5000},
+];
+const SHOES=[
+ {id:'trainer',e:'👟',n:'Old Trainers',cost:0,  speed:1.00,note:'The ones you already own. Free, and they still get you there.'},
+ {id:'boots', e:'🥾',n:'Work Boots',   cost:90, speed:1.02,wage:1,
+  note:'Bought to work in. Notice how the cheap stuff on this list is the stuff that earns.'},
+ {id:'run',   e:'🏃',n:'Running Shoes',cost:180,speed:1.10,note:'You genuinely move faster. Worth it if you use them.'},
+ {id:'dress', e:'👞',n:'Dress Shoes',  cost:320,speed:0.98,note:'Slower and pricier. They open one particular kind of door.'},
+ {id:'hyped', e:'👟',n:'Hyped Sneakers',cost:1400,speed:1.05,
+  note:'$1,400 for shoes because other people want them. This is the single most common way young people leak money.'},
+ {id:'gold',  e:'✨',n:'Gold Sneakers',cost:7000,speed:1.12},
+];
+const FACEGEAR=[
+ {id:'none',  e:'—', n:'Nothing',    cost:0},
+ {id:'glasses',e:'👓',n:'Glasses',   cost:90},
+ {id:'shades',e:'🕶️',n:'Sunglasses',cost:150},
+ {id:'monocle',e:'🧐',n:'Monocle',   cost:600},
+ {id:'mask',  e:'😷',n:'Face Mask',  cost:25},
+];
+const EYECOL=[0x22303a,0x3a6a4a,0x4a6a9a,0x6a4a2a,0x7a3a5a];
+function slotDef(arr,id){return arr.find(x=>x.id===id)||arr[0]}
+function hatDef(){return slotDef(HATS,ch().hat)}
+function gloveDef(){return slotDef(GLOVES,ch().glove)}
+function shoeDef(){return slotDef(SHOES,ch().shoe)}
+function faceDef(){return slotDef(FACEGEAR,ch().face)}
+/* the outfit/hat/glove/shoe bonuses, read by the wage + speed + smash code */
+function lookWage(){let n=0;[outfitDef(),hatDef(),gloveDef(),shoeDef()].forEach(d=>{if(d&&d.wage)n+=d.wage});return n}
+function lookSpeed(){const d=shoeDef();return d&&d.speed?d.speed:1}
+function lookHit(){const d=gloveDef();return d&&d.hit?d.hit:0}
 function ch(){G.char=G.char||{};const c=G.char;
  if(!c.sex)c.sex='m';if(c.skin==null)c.skin=0;if(!c.hair)c.hair='short';
- if(c.haircol==null)c.haircol=0;if(!c.outfit)c.outfit='tee';if(!c.acc)c.acc='none';return c}
+ if(c.haircol==null)c.haircol=0;if(!c.outfit)c.outfit='tee';if(!c.acc)c.acc='none';
+ if(c.eyecol==null)c.eyecol=0;
+ if(!c.hat||!c.glove||!c.shoe||!c.face){
+  // migrate the single old "accessory" slot into the four real ones
+  const old=c.acc||'none';
+  if(!c.hat)  c.hat  = (old==='cap'||old==='beanie'||old==='crown')?old:'none';
+  if(!c.face) c.face = (old==='glasses'||old==='shades')?old:'none';
+  if(!c.glove)c.glove='none';
+  if(!c.shoe) c.shoe ='trainer';
+ }
+ return c}
 function outfitDef(){return OUTFITS.find(o=>o.id===ch().outfit)||OUTFITS[0]}
 function ownedLook(id){return !!(G.look&&G.look[id])}
 function buyLook(kind,id,cost){
@@ -3860,39 +4491,17 @@ function buyLook(kind,id,cost){
  if(kind==='hair')c.hair=id; else if(kind==='outfit')c.outfit=id;
  else if(kind==='acc')c.acc=id; else if(kind==='skin')c.skin=id;
  else if(kind==='haircol')c.haircol=id; else if(kind==='sex')c.sex=id;
- save();renderHUD();rebuildHero();openCharacter();}
+ else if(kind==='hat')c.hat=id; else if(kind==='glove')c.glove=id;
+ else if(kind==='shoe')c.shoe=id; else if(kind==='face')c.face=id;
+ else if(kind==='eyecol')c.eyecol=id;
+ save();renderHUD();rebuildHero();reSide();}
 function rebuildHero(){
  if(!hero||!scene)return;
  const p=hero.position.clone(),r=hero.rotation.y;
  scene.remove(hero);heroLegs=[];heroArms=[];heroHand=null;heroMouth=null;heroRide=null;
  hero=buildHero();hero.position.copy(p);hero.rotation.y=r;scene.add(hero);
  if(typeof buildRide==='function')buildRide();}
-function openCharacter(){
- paused=true;const c=ch(),of=outfitDef();
- const swatch=(arr,kind,cur)=>arr.map((col,k)=>
-  '<span onclick="buyLook(&#39;'+kind+'&#39;,'+k+',0)" style="display:inline-block;width:34px;height:34px;margin:3px;border-radius:9px;cursor:pointer;'
-  +'background:#'+col.toString(16).padStart(6,'0')+';border:3px solid '+(cur===k?'#3d8bff':'#2b3654')+'"></span>').join('');
- const row=(items,kind,cur)=>items.map(it=>{const owned=it.cost===0||ownedLook(it.id),on=cur===it.id;
-  return '<div class=gloss style="'+(on?'border-color:#3d8bff':owned?'border-color:#3fb950':'')+'">'
-   +'<b>'+(it.e?it.e+' ':'')+it.n+'</b>'+(on?' <span class=p-note style=color:#3d8bff>· wearing</span>':'')
-   +(it.note?'<div class=gd>'+it.note+'</div>':'')
-   +(it.wage?'<div class=gd style=color:#3fb950>Counts as +1 skill while you wear it.</div>':'')
-   +(on?'':'<button class=pbtn style="margin-top:6px" onclick="buyLook(&#39;'+kind+'&#39;,&#39;'+it.id+'&#39;,'+(owned?0:it.cost)+')">'
-      +(owned?'Wear this':'Buy · '+money(it.cost))+'</button>')
-   +'</div>'}).join('');
- $('shopbody').innerHTML='<div class=p-title>🧍 Your character</div>'
-  +'<div class=p-world style=margin-bottom:8px>Cash '+money(G.wealth||0)+'</div>'
-  +'<p class=p-teach>Body and skin are free, and always will be. Clothes cost money and mostly give nothing back — that is true here and true outside.</p>'
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Body</div>'
-  +'<div class=calls><button class="'+(c.sex==='m'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;m&#39;,0)">👦 Boy</button>'
-  +'<button class="'+(c.sex==='f'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;f&#39;,0)">👧 Girl</button></div>'
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Skin <span class=p-note>· free</span></div><div>'+swatch(SKINS,'skin',c.skin)+'</div>'
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Hair colour <span class=p-note>· free</span></div><div>'+swatch(HAIRCOL,'haircol',c.haircol)+'</div>'
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Hair style</div>'+row(HAIRSTYLES,'hair',c.hair)
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Clothes</div>'+row(OUTFITS,'outfit',c.outfit)
-  +'<div class=p-title style="font-size:16px;margin-top:12px">Accessory</div>'+row(ACCESSORIES,'acc',c.acc)
-  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
- $('shop').classList.add('show');}
+/* old modal character screen replaced by the side panel */
 const VEHICLES=[
  {id:'feet',e:'👟',n:'Your own two feet',buy:0,monthly:0,depr:0,speed:1.00,
   note:'Free forever. Slow, but nothing has ever repossessed a foot.'},
@@ -3921,7 +4530,7 @@ const VEHICLES=[
 ];
 function vehOwned(id){return id==='feet'||!!(G.veh&&G.veh[id])}
 function curVeh(){const v=VEHICLES.find(x=>x.id===(G.riding||'feet'));return v||VEHICLES[0]}
-function vehSpeed(){return curVeh().speed}
+function vehSpeed(){return curVeh().speed*((typeof lookSpeed==='function')?lookSpeed():1)}
 function vehMonthly(){let t=0;VEHICLES.forEach(v=>{if(v.id!=='feet'&&vehOwned(v.id))t+=v.monthly});return t}
 function vehValue(){let t=0;VEHICLES.forEach(v=>{if(v.id!=='feet'&&vehOwned(v.id))t+=(G.vehVal&&G.vehVal[v.id])||0});return Math.round(t)}
 function buyVehicle(id){
@@ -4172,18 +4781,26 @@ function updateExtras(t){
   for(let i=coins.length-1;i>=0;i--){const c=coins[i];
    c.mesh.rotation.y+=(c.kind==='coin'?0.075:0.03);
    const dx=pos.x-c.x,dz=pos.z-c.z,dist=Math.hypot(dx,dz);
-   // money comes to you. it should feel greedy and good.
-   if(dist<7.5&&dist>0.1){const pull=Math.min(0.42,(7.5-dist)*0.055);
+   const cy=c.y||0, reach=Math.abs((heroY||0)-cy)<1.9;
+   if(c.high){
+    // these do not come to you. you go to them.
+    c.mesh.position.y=cy+Math.sin(t*0.003+c.x)*0.13;
+    c.mesh.scale.setScalar(reach&&dist<4?1.16:1);
+   } else if(dist<7.5&&dist>0.1){   // money comes to you. it should feel greedy and good.
+    const pull=Math.min(0.42,(7.5-dist)*0.055);
     c.x+=dx/dist*pull;c.z+=dz/dist*pull;
     c.mesh.position.x=c.x;c.mesh.position.z=c.z;
-    c.mesh.scale.setScalar(1+ (7.5-dist)*0.05);}
-   c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16+(dist<7.5?(7.5-dist)*0.09:0);
-   if(dist<2.0){          // roomier grab radius - it should feel greedy
+    c.mesh.scale.setScalar(1+ (7.5-dist)*0.05);
+    c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16+(7.5-dist)*0.09;
+   } else { c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16 }
+   if(dist<(c.high?1.7:2.0)&&reach){
     worldGroup.remove(c.mesh);coins.splice(i,1);G.coins[c.id]=1;
     G.coinCount=(G.coinCount||0)+1;
-    const v=c.val||50;addWealth(v);sfx('hit');
-    burst(c.x,1,c.z,c.kind==='coin'?0xf0c419:0x3fa35a);
-    if(v>=500)toast('💵 '+money(v)+'! Nice find.');
+    if(c.high)G.highCoins=(G.highCoins||0)+1;
+    const v=c.val||50;addWealth(v);sfx(c.high?'coin':'hit');
+    burst(c.x,cy+1,c.z,c.kind==='coin'?0xf0c419:0x3fa35a);
+    if(c.high){toast('🪙 '+money(v)+' — up where nobody bothers to look. That is usually where the money is.');confetti&&confetti()}
+    else if(v>=500)toast('💵 '+money(v)+'! Nice find.');
    }}
   for(const tm of tempts){if(G.tempts[tm.id]||tm.x==null)continue;if(tm.spr)tm.spr.position.y=1.5+Math.sin(t*0.003+tm.x)*0.2;if(Math.hypot(tm.x-pos.x,tm.z-pos.z)<2.5){openTempt(tm);break}}
   // the piggy bank: walk into it and it breaks. no reading required.
@@ -4198,6 +4815,10 @@ function updateExtras(t){
    $('hint').classList.add('show');$('hint').textContent='😴 Press ↵ ENTER to sleep until morning';$('bE').classList.add('on')}
   if(atHome&&homeDoor&&Math.hypot(homeDoor.x-pos.x,homeDoor.z-pos.z)<2.4){goOutside();return}
   // opportunities: only reachable if you climbed up to them
+  // hidden lessons + coins
+  for(const h of hiddens){if(!h.mesh||(G.hidden&&G.hidden[h.id]))continue;
+   h.mesh.rotation.y+=0.02; h.mesh.position.y=h.y+Math.sin(t*0.0026)*0.22;
+   if(Math.hypot(h.x-pos.x,h.z-pos.z)<2.1&&Math.abs(heroY+1.4-h.mesh.position.y)<2.2)takeHidden(h)}
   for(const o of opps){if(G.opps[o.id])continue;
    if(o.mesh){o.mesh.rotation.y+=0.03;o.mesh.position.y=o.y+Math.sin(t*0.004+o.x)*0.15}
    if(Math.hypot(o.x-pos.x,o.z-pos.z)<1.9&&heroY>o.y-1.7)takeOpp(o)}
