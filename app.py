@@ -84,20 +84,39 @@ _USER_RE = _re.compile(r"^[A-Za-z0-9_-]{3,20}$")
 _attempts: dict = {}
 
 
+_SECRET_CACHE = None
+
+
 def _session_secret() -> bytes:
+    """Prefer SESSION_SECRET from the environment.
+
+    The old behaviour wrote a random secret to a file next to app.py. On Render
+    that disk is wiped on every deploy, so each deploy minted a fresh secret and
+    silently signed every player out. A file is still used as a fallback for
+    local dev, but a warning is logged so a deployment without SESSION_SECRET
+    set is never quietly wrong.
+    """
+    global _SECRET_CACHE
+    if _SECRET_CACHE is not None:
+        return _SECRET_CACHE
     s = os.getenv("SESSION_SECRET")
-    if s:
-        return s.encode()
+    if s and len(s) >= 16:
+        _SECRET_CACHE = s.encode()
+        return _SECRET_CACHE
     f = pathlib.Path(__file__).resolve().parent / ".session_secret"
     if f.exists():
-        return f.read_bytes()
-    b = secrets.token_bytes(32)
-    f.write_bytes(b)
-    try:
-        f.chmod(0o600)
-    except Exception:
-        pass
-    return b
+        _SECRET_CACHE = f.read_bytes()
+    else:
+        b = secrets.token_bytes(32)
+        try:
+            f.write_bytes(b)
+            f.chmod(0o600)
+        except Exception:
+            pass
+        _SECRET_CACHE = b
+    print("[game] SESSION_SECRET not set - using a local file. On a hosted "
+          "deploy set SESSION_SECRET or every deploy logs all players out.")
+    return _SECRET_CACHE
 
 
 def _hash_pw(pw: str, salt: bytes) -> str:
@@ -208,7 +227,9 @@ def _set_cookie(resp: Response, uid: str):
 async def auth_signup(req: Request, resp: Response):
     d = await req.json()
     uname = str(d.get("username", "")).strip()
-    pw = str(d.get("password", ""))
+    # trim the password too: an autofilled trailing space silently rejected a
+    # correct password, which is indistinguishable from "wrong password"
+    pw = str(d.get("password", "")).strip()
     if not _USER_RE.match(uname):
         raise HTTPException(400, "Pick a name 3-20 characters: letters, numbers, - and _ only.")
     if len(pw) < 6:
@@ -225,7 +246,7 @@ async def auth_signup(req: Request, resp: Response):
 async def auth_login(req: Request, resp: Response):
     d = await req.json()
     uname = str(d.get("username", "")).strip().lower()
-    pw = str(d.get("password", ""))
+    pw = str(d.get("password", "")).strip()
     if _throttle(uname):
         raise HTTPException(429, "Too many tries. Wait a few minutes.")
     doc = _find_player(uname)
