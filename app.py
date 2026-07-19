@@ -1157,6 +1157,7 @@ body.bigtext .helpbox{font-size:17px}
  <span class="mrow clk" id=hteam>👥 Team</span>
  <span class="mrow clk" id=hchar>🧍 Your character</span>
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
+ <span class="mrow clk" id=hbuild>🏗️ Your business</span>
  <span class="mrow clk" id=hbench>🤖 Prompt Bench <i>paid jobs</i></span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
  <span class="mrow clk" id=hact>⏳ Spend your day</span>
@@ -1539,7 +1540,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -1610,7 +1611,7 @@ let paused=false,nearGate=-1,shownWorld=-1;
 let blocks=[],curSecrets=[],coins=[],tempts=[],walls=[],npcs=[],dayT=0,nearNPC=null,curTempt=null,curWi=0;
 let BND={x0:-42,x1:42,z0:-42,z1:42},roomCells=[],gateSpots=[],mines=[],opps=[],ambLight=null,sunLight=null,lampLight=null;
 let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0,homeSmash=null,_pigCool=0;
-let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],rideProp=null,_land=0;
+let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],rideProp=null,_land=0,bizMesh=null;
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
@@ -1816,6 +1817,7 @@ $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
 $('hbench').addEventListener('click',()=>openPromptBench(0));
+$('hbuild').addEventListener('click',openBuild);
 $('hprof').addEventListener('click',openProfile);
 $('hchar').addEventListener('click',openCharacter);
 $('hteam').addEventListener('click',openTeam);
@@ -2123,6 +2125,7 @@ function loadHome(){
    const zz=makeLabel('SLEEP','😴');zz.position.set(sp[0],2.6,sp[1]);zz.scale.set(4.5,2.4,1);worldGroup.add(zz)}});
  pos={x:0,z:D/2-3};heading=Math.PI;heroY=0;heroVY=0;onGround=true;hero.position.set(pos.x,0,pos.z);
  spawnPiggy(0,D/2-8);
+ if(typeof buildBiz==='function')buildBiz();
  shownWorld=-1;renderHUD()}
 function maybeAdvanceWorld(){if(pendingWorld!=null){const w=pendingWorld;pendingWorld=null;if(w<LEVELS.length)loadWorld(w)}}
 
@@ -2610,6 +2613,9 @@ function buyItem(id){const it=SHOP.find(x=>x.id===id);if(!it||owns(id))return;
 // whole game in one function: what is left over is what compounds.
 function passMonth(){
  const H=curHome();G.month=(G.month||0)+1;const _p=tParts();
+ const bi=(typeof bizIncome==='function')?bizIncome():0;
+ if(bi>0){G.wealth=(G.wealth||0)+bi;
+  setTimeout(()=>toast('🏪 '+bizName()+' took '+money(bi)+' this month.'),1700)}
  const inc=passiveIncome();
  if(inc>0){G.wealth=(G.wealth||0)+inc;
   setTimeout(()=>toast('🚀 Your '+projectsDone()+' side project(s) paid $'+inc.toLocaleString()+' — you worked zero hours for it.'),1400)}
@@ -2773,6 +2779,118 @@ function gradePrompt(){
   +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;shop&#39;)">← Back</button>';
  $('shopbody').innerHTML=html;
  speak(score>=4?'Great prompt. Task, context, format and a guardrail.':'Not quite. Look at what is missing.');}
+// ============ BUILD YOUR OWN BUSINESS ============
+// This is the players-contribute-content feature, shaped so it can never
+// become a message channel. Every part is a CHOICE from a fixed list - the
+// name is assembled from two word lists, never typed. There is no text input
+// anywhere in here, so there is nothing for a stranger to write to a child.
+const BIZ_TYPES=[
+ {id:'stall',e:'🍋',n:'Lemonade Stall',cost:150,base:60,
+  note:'Cheap to start, small returns. Almost every big business began as something this size.'},
+ {id:'mow',e:'🌱',n:'Lawn Service',cost:400,base:140,
+  note:'You own the tools, not a shop. Low costs, real customers, scales with your time.'},
+ {id:'bakery',e:'🥐',n:'Bakery',cost:1800,base:420,
+  note:'Real premises, real stock. Higher takings, and higher costs to match.'},
+ {id:'shop',e:'🏪',n:'Corner Shop',cost:6000,base:1100,
+  note:'Serious money in, serious money out. Profit is what is left, not what comes through the till.'},
+ {id:'studio',e:'💻',n:'Software Studio',cost:9000,base:1900,
+  note:'Costs almost nothing to copy what you build. That is leverage - the same work sold many times.'},
+];
+const BIZ_ADJ=['Sunny','Golden','Busy','Little','Brave','Honest','Swift','Cosy','Bright','Steady','Lucky','Bold'];
+const BIZ_NOUN=['Corner','Lane','Basket','Bench','Barrel','Willow','Harbour','Meadow','Anchor','Lantern','Robin','Acorn'];
+const BIZ_COLS=[0xd64f6a,0x3fb950,0x3d8bff,0xf0b429,0xa371f7,0xf0803a,0x2a9a92,0xe8e2c8];
+const BIZ_UPGRADES=[
+ {id:'sign',e:'🪧',n:'A proper sign',cost:120,mult:1.15,
+  why:'People cannot buy from a shop they did not notice. Cheap, and it pays for itself.'},
+ {id:'quality',e:'⭐',n:'Better ingredients',cost:400,mult:1.3,
+  why:'Costs more per sale and brings people back. Repeat customers are the cheapest customers.'},
+ {id:'staff',e:'🧑‍🍳',n:'Hire some help',cost:900,mult:1.45,
+  why:'Your takings stop being capped by your own hours. This is where a job becomes a business.'},
+ {id:'online',e:'🌐',n:'Sell online too',cost:700,mult:1.5,
+  why:'Open while you sleep. The same work reaching more people is the whole idea.'},
+ {id:'cheapjunk',e:'🎈',n:'Balloons and bunting',cost:300,mult:1.0,
+  why:'Looks lovely. Changes nothing. Not every purchase is an investment, and that is fine as long as you know which it is.'},
+];
+function bizDef(){return BIZ_TYPES.find(b=>b.id===(G.biz&&G.biz.type))||null}
+function bizIncome(){
+ const d=bizDef();if(!d)return 0;
+ let m=1;(G.biz.up||[]).forEach(u=>{const x=BIZ_UPGRADES.find(y=>y.id===u);if(x)m*=x.mult});
+ return Math.round(d.base*m);}
+function bizName(){const b=G.biz||{};
+ return (BIZ_ADJ[b.adj||0])+' '+(BIZ_NOUN[b.noun||0]);}
+function startBiz(id){
+ const d=BIZ_TYPES.find(x=>x.id===id);if(!d)return;
+ if((G.wealth||0)<d.cost){toast('You cannot afford to start that yet.');return}
+ G.wealth-=d.cost;
+ G.biz={type:id,adj:Math.floor(Math.random()*BIZ_ADJ.length),noun:Math.floor(Math.random()*BIZ_NOUN.length),
+        col:Math.floor(Math.random()*BIZ_COLS.length),up:[]};
+ save();renderHUD();sfx('secret');confetti();buildBiz();openBuild();}
+function rerollName(which){const b=G.biz;if(!b)return;
+ if(which==='adj')b.adj=(b.adj+1)%BIZ_ADJ.length; else b.noun=(b.noun+1)%BIZ_NOUN.length;
+ save();buildBiz();openBuild();}
+function cycleCol(){const b=G.biz;if(!b)return;b.col=(b.col+1)%BIZ_COLS.length;save();buildBiz();openBuild();}
+function buyUpgrade(id){
+ const u=BIZ_UPGRADES.find(x=>x.id===id),b=G.biz;if(!u||!b)return;
+ if((b.up||[]).indexOf(id)>=0)return;
+ if((G.wealth||0)<u.cost){toast('Not enough money for that yet.');return}
+ G.wealth-=u.cost;b.up=(b.up||[]).concat([id]);save();renderHUD();sfx('hit');buildBiz();openBuild();}
+function openBuild(){
+ paused=true;
+ if(!G.biz){
+  $('shopbody').innerHTML='<div class=p-title>🏗️ Build something of your own</div>'
+   +'<p class=p-teach>Everything so far has been about money you earn or invest. This is the other way: '
+   +'build a thing that earns while you are not there.</p>'
+   +BIZ_TYPES.map(t=>'<div class=gloss><b>'+t.e+' '+t.n+'</b>'
+     +'<div class=gd>'+t.note+'</div>'
+     +'<div class=gd>Costs '+money(t.cost)+' to start · earns about '+money(t.base)+' a month before upgrades</div>'
+     +'<button class=pbtn style="margin-top:6px'+((G.wealth||0)>=t.cost?'':';opacity:.5')+'" onclick="startBiz(&#39;'+t.id+'&#39;)">Start it · '+money(t.cost)+'</button></div>').join('')
+   +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;shop&#39;)">← Back</button>';
+  $('shop').classList.add('show');return}
+ const d=bizDef(),b=G.biz;
+ const ups=BIZ_UPGRADES.map(u=>{const owned=(b.up||[]).indexOf(u.id)>=0;
+  return '<div class=gloss style="'+(owned?'border-color:#3fb950':'')+'">'
+   +'<b>'+u.e+' '+u.n+'</b> <span class=p-note>'+(u.mult>1?('· ×'+u.mult+' takings'):'· no effect on takings')+'</span>'
+   +'<div class=gd>'+u.why+'</div>'
+   +(owned?'<div style="color:#3fb950;font-weight:700">✓ Done</div>'
+          :'<button class=pbtn style="margin-top:6px" onclick="buyUpgrade(&#39;'+u.id+'&#39;)">Buy · '+money(u.cost)+'</button>')
+   +'</div>'}).join('');
+ $('shopbody').innerHTML='<div class=p-badge style="font-size:52px">'+d.e+'</div>'
+  +'<div class=p-world>Your business</div><div class=p-title>'+bizName()+'</div>'
+  +'<div class=p-teach style="border-color:#3fb950"><b>Earning '+money(bizIncome())+' every month</b>'
+  +'<div class=gd>Paid on the 1st, whether you show up or not.</div></div>'
+  +'<div class=p-title style="font-size:15px;margin-top:10px">Name &amp; colour</div>'
+  +'<div class=calls><button onclick="rerollName(&#39;adj&#39;)">'+BIZ_ADJ[b.adj]+' ↻</button>'
+  +'<button onclick="rerollName(&#39;noun&#39;)">'+BIZ_NOUN[b.noun]+' ↻</button>'
+  +'<button onclick="cycleCol()">🎨 colour</button></div>'
+  +'<div class=p-note>Names are picked from a list, not typed. Nothing here can be written by hand.</div>'
+  +'<div class=p-title style="font-size:15px;margin-top:12px">Make it earn more</div>'+ups
+  +'<div class=p-note style="margin-top:8px">Your shop is standing outside your front door. Go and look at it.</div>'
+  +'<button class=pbtn style="margin-top:8px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
+ $('shop').classList.add('show');}
+// the thing you built, standing in the world
+function buildBiz(){
+ if(!worldGroup||!G.biz||!atHome)return;
+ if(bizMesh){worldGroup.remove(bizMesh);bizMesh=null}
+ const d=bizDef();if(!d)return;
+ const col=BIZ_COLS[G.biz.col||0];
+ const g=new THREE.Group();
+ const body=box(5,3,3.4,col);body.position.y=1.5;g.add(body);
+ const roof=box(5.6,0.5,4,0x6b4a2a);roof.position.y=3.25;g.add(roof);
+ const counter=box(4.4,0.9,0.5,0xe8e2c8);counter.position.set(0,0.95,1.8);g.add(counter);
+ if((G.biz.up||[]).indexOf('sign')>=0){
+  const sign=makeLabel(bizName(),d.e);sign.position.set(0,4.3,0);sign.scale.set(9,3.6,1);g.add(sign);
+ } else { const sp=makeLabel('','❔');sp.position.set(0,4.1,0);sp.scale.set(2,2,1);g.add(sp); }
+ if((G.biz.up||[]).indexOf('staff')>=0){const h=buildNPC({e:'🧑‍🍳',name:'Your helper'},0xe8b892);
+  h.position.set(2.6,0,1.2);h.scale.setScalar(0.85);g.add(h);}
+ if((G.biz.up||[]).indexOf('online')>=0){const scr=box(1.2,0.9,0.1,0x11151c);scr.position.set(-1.6,1.7,1.75);g.add(scr);
+  const glow=box(1.05,0.75,0.03,0x3d8bff);glow.position.set(-1.6,1.7,1.82);g.add(glow);}
+ if((G.biz.up||[]).indexOf('cheapjunk')>=0){[-2,-1,0,1,2].forEach((x,k)=>{
+   const bal=new THREE.Mesh(new THREE.SphereGeometry(0.34,10,8),
+     new THREE.MeshLambertMaterial({color:BIZ_COLS[(k+2)%BIZ_COLS.length]}));
+   bal.position.set(x,4.0+Math.sin(k)*0.3,1.4);g.add(bal)});}
+ const H=curHome();
+ g.position.set(-H.w/2-7,0,H.d/2-4);
+ worldGroup.add(g);bizMesh=g;}
 function openMarket(){
  paused=true;
  if(!CAT){$('marketbody').innerHTML='<div class=p-title>📈 Market Desk</div><p class=p-teach>Live prices have not loaded yet. Close this and try again in a moment.</p><button class=pbtn onclick="hide(&#39;market&#39;)">← Back</button>';$('market').classList.add('show');return}
