@@ -1530,7 +1530,8 @@ const BADGES=[
  {id:'home',ic:'🏡',n:'Down Payment',test:g=>(g.wealth||0)>=60000},
  {id:'mill',ic:'🏰',n:'Millionaire',test:g=>(g.wealth||0)>=1000000},
  {id:'dev',ic:'💻',n:'The Developer',test:g=>bossDone(5)},
- {id:'free',ic:'🗽',n:'Financially Free',test:g=>bossDone(5)&&Object.keys(g.glossary||{}).length>=14},
+ {id:'free',ic:'🗽',n:'Financially Free',test:g=>!!g.freedAt},
+ {id:'earlyfree',ic:'🌅',n:'Free Before 30',test:g=>!!g.freedAt&&g.freedAt.age<30},
 ];
 let CAT=null;
 const $=id=>document.getElementById(id);
@@ -1541,7 +1542,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -2646,7 +2647,8 @@ function passMonth(){
   if(i>0){G.home=HOMES[i-1].id;G.wealth=0;
    setTimeout(()=>{sfx('hit');toast('📦 You could not cover the bills and had to move back to '+curHome().n+'.')},1800)}
   else {G.wealth=0;setTimeout(()=>toast('😬 Bills ate everything. You are at $0 — no cushion at all.'),1800)}}
- save();renderHUD();}
+ save();renderHUD();
+ if(typeof checkFreedom==='function')setTimeout(checkFreedom,2600);}
 function birthday(p){paused=true;sfx('tool');confetti();
  const yearsLeft=Math.max(0,65-p.age);const fn=freedomNumber();
  const seed=Math.max(0,netWorth());
@@ -2941,6 +2943,40 @@ function growPortfolio(){
  if(!detail.length)return null;
  G.portHist=(G.portHist||[]).concat([Math.round(portVal())]).slice(-24);
  return{moved:Math.round(moved),detail};}
+// ============ THE ACTUAL WIN ============
+// Beating ten bosses is not the goal - the goal is the moment your money
+// covers your life without you. That moment now exists, gets celebrated, and
+// then invites you to test it by actually stopping work.
+function passiveMonthly(){
+ const fromPort=Math.round(portVal()*0.04/12);      // the 4% rule, monthly
+ const fromBiz=(typeof bizIncome==='function')?bizIncome():0;
+ const fromProj=(typeof passiveIncome==='function')?passiveIncome():0;
+ return fromPort+fromBiz+fromProj;}
+function isFree(){return passiveMonthly()>=monthlyBurn()&&monthlyBurn()>0}
+function checkFreedom(){
+ if(!isFree()||G.freedAt)return;
+ const p=tParts();
+ G.freedAt={age:p.age,year:p.year,nw:Math.round(netWorth()),
+            passive:passiveMonthly(),burn:monthlyBurn()};
+ save();
+ paused=true;stopSpeak();
+ confetti();setTimeout(confetti,500);setTimeout(confetti,1000);setTimeout(confetti,1500);
+ sfx('win');
+ $('minebody').innerHTML='<div class=p-badge style="font-size:64px">🗽</div>'
+  +'<div class=p-world>This is the one that counts</div>'
+  +'<div class=p-title>You are financially free</div>'
+  +'<p class=p-teach>Your money now earns <b>'+money(passiveMonthly())+'</b> a month. Your life costs <b>'
+  +money(monthlyBurn())+'</b>. You reached it at <b>'+G.freedAt.age+'</b>.</p>'
+  +'<p class=p-teach style="border-color:#3fb950">You never have to work for money again. You can still choose to — '
+  +'the difference is that from today it is a choice.</p>'
+  +'<p class=p-teach style="border-color:#7fb4ff"><b>How you did it:</b> investments '+money(Math.round(portVal()*0.04/12))
+  +'/mo · business '+money((typeof bizIncome==="function")?bizIncome():0)+'/mo · side projects '
+  +money((typeof passiveIncome==="function")?passiveIncome():0)+'/mo.</p>'
+  +'<div class=p-note>Now try the real test: stop working and see if it holds.</div>'
+  +'<button class=pbtn onclick="hide(&#39;mine&#39;);openProfile()">See everything you did →</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;mine&#39;)">Keep playing</button>';
+ $('mine').classList.add('show');
+ speak('You are financially free. Your money earns more than your life costs.');}
 function openInvest(){
  paused=true;
  const pv=portVal(),inv=portIn(),gain=pv-inv;
@@ -2965,6 +3001,10 @@ function openInvest(){
   +(inv>0?(' ('+(gain>=0?'+':'')+Math.round(gain/inv*1000)/10+'%)'):'')+'</div>'+spark+'</div>'
   +'<p class=p-teach>Cash in your pocket does nothing at all. Money in here compounds every month whether you are playing or not '
   +'— and the bumpy ones really do fall some months. That is the price of the higher return, not a bug.</p>'
+  +'<div class=p-teach style="border-color:'+(isFree()?'#3fb950':'#3d8bff')+'">'
+  +'<b>'+(isFree()?'🗽 Your money already covers your life':'The number that actually matters')+'</b>'
+  +'<div class=gd>Your money earns <b>'+money(passiveMonthly())+'</b> a month. Your life costs <b>'+money(monthlyBurn())+'</b>.'
+  +(isFree()?' You are free.':' You need '+money(Math.max(0,monthlyBurn()-passiveMonthly()))+' a month more — or a cheaper life.')+'</div></div>'
   +'<div class=p-world style="margin:8px 0">Spare cash: '+money(G.wealth||0)+'</div>'
   +rows
   +'<button class=pbtn style="margin-top:10px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
@@ -3133,6 +3173,7 @@ function openProfile(){
   +stat('Net worth',money(nw),'#3fb950')+stat('Cash',money(G.wealth||0))
   +stat('Home equity',money(G.equity||0))+stat('Monthly burn',money(monthlyBurn()),'#f0b429')
   +stat('Investments',money(typeof portVal==='function'?portVal():0),(typeof portVal==='function'&&portVal()>0)?'#3fb950':'#7b8aa3')
+  +stat('Money earns / mo',money(typeof passiveMonthly==='function'?passiveMonthly():0),(typeof isFree==='function'&&isFree())?'#3fb950':'#f0b429')
   +stat('Passive income',money(passiveIncome()),passiveIncome()>0?'#3fb950':'#7b8aa3')
   +stat('A shift pays',money(wage()))+'</div>'
 
