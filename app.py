@@ -1151,7 +1151,7 @@ body.bigtext .helpbox{font-size:17px}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/13</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/14</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
  <span class="mrow clk" id=hteam>👥 Team</span>
@@ -1238,6 +1238,7 @@ const WORLDS=[
  {name:'Scam Alley',ground:'#4a2a2a',tint:'#6a3c3c',prop:'🎭'},
  {name:'Property Peak',ground:'#4a4030',tint:'#6a5a44',prop:'🏘️'},
  {name:'The Long View',ground:'#2a4a4a',tint:'#3d6a6a',prop:'⏳'},
+ {name:'The Plan Room',ground:'#3a4a2a',tint:'#55683d',prop:'📋'},
 ];
 const LEVELS=[
  {world:0,diff:1,rooms:[
@@ -1555,7 +1556,44 @@ const LEVELS=[
    {q:'A currency has value because...',choices:['People trust and accept it','It is backed by gold','It is printed on special paper','A law says so'],a:0},
    {q:'Investing steadily through ups and downs usually...',choices:['Beats waiting for the perfect moment','Loses money','Only works when rich','Is illegal'],a:0},
    {q:'The best time to start was 20 years ago. The second best is...',choices:['Now','When you are older','When you earn more','After the next crash'],a:0},
-   {q:'Financial freedom is really about...',choices:['Owning your own time','Owning the most things','Never working again','Beating other people'],a:0}]}}
+   {q:'Financial freedom is really about...',choices:['Owning your own time','Owning the most things','Never working again','Beating other people'],a:0}]}},
+ {world:13,diff:5,rooms:[
+   {type:'vocab',ic:'🎯',title:'Word: A Real Goal',term:'SMART GOAL',
+    choices:['A goal with a number and a date attached','Wanting to be rich one day','A wish','A budget'],a:0,
+    word:{t:'SMART Goal',d:'Specific, Measurable, and with a date. "Save $2,000 by December" is a goal you can check. "Be good with money" is a feeling you cannot.'}},
+   {type:'mc',ic:'📝',title:'Written Down or It Is Not Real',
+    teach:'A plan in your head changes shape to suit your mood. A plan on paper does not. That is most of why writing it down works.',
+    q:'Why does writing a money goal down help so much?',
+    choices:['It stops the goal quietly changing to match how you feel today','It makes it legally binding','It impresses people','It earns interest'],a:0},
+   {type:'mc',ic:'🤖',title:'Boring and Mechanical Wins',
+    teach:'The plan that actually works is dull: put a fixed amount into a broad index fund on the same day every month, and do not touch it. It is not clever. It is not exciting. It beats almost everyone who tries to be clever.',
+    q:'Why does a boring automatic plan usually beat an exciting one?',
+    choices:['It keeps working on the days you cannot be bothered or are scared','It earns a higher rate','It has no fees ever','It is guaranteed by law'],a:0,
+    word:{t:'Automation',d:'Setting money to move on its own, on a date, without you deciding each time. It removes willpower from the equation - and willpower is the part that fails.'}},
+   {type:'mc',ic:'💧',title:'Pay Yourself First',
+    teach:'Most people spend, then save whatever survives. Almost nothing survives. Flip the order: the saving leaves your account the day you get paid, and you live on the rest.',
+    q:'What does paying yourself first actually mean?',
+    choices:['The saving moves out first, and you live on what remains','Buying yourself a treat before bills','Paying your debts first','Taking a wage from your job'],a:0,
+    word:{t:'Pay Yourself First',d:'Move the saving out the moment money arrives, before anything else can claim it. Whatever is left is your spending money, and it always somehow stretches.'}},
+   {type:'scenario',ic:'📉',title:'The Month It Drops',
+    setup:'Your automatic plan has run for a year. This month the market falls 18% and your balance is down thousands.',
+    options:[{label:'🛑 Stop the payments until it recovers',ok:false,outcome:'You just cancelled the discount. The automatic payment during a fall is buying the same fund cheaper, and it is where a large share of long-term returns comes from.'},
+             {label:'⏳ Let it keep running',ok:true}],
+    word:{t:'Dollar-Cost Averaging',d:'Investing the same amount on a schedule regardless of price. When markets fall your fixed payment buys more units, so the falls quietly work for you.'}},
+   {type:'tf',ic:'🔧',title:'Do Not Redesign It Monthly',
+    teach:'Checking a long-term plan every day and tweaking it is how people turn a good plan into a bad one. Review it once or twice a year, not once a week.',
+    q:'A good long-term plan should be reviewed and adjusted every week.',a:false},
+   {type:'mc',ic:'🪜',title:'The Order That Works',
+    teach:'There is a boring, widely agreed order: a small emergency fund, then any employer match, then high-interest debt, then a bigger cushion, then invest the rest. It is not glamorous and it almost never goes wrong.',
+    q:'Before investing spare cash, what usually comes first?',
+    choices:['A small emergency fund and grabbing any employer match','Buying individual stocks','A new car','Paying off a 0% loan early'],a:0}],
+  boss:{name:'The Complicator',enemy:'🌀',intro:'It sells thrilling strategies with many moving parts, because a simple plan needs no salesman.',questions:[
+   {q:'A real goal has...',choices:['A number and a date','A good feeling','A long description','A logo'],a:0},
+   {q:'Automating your saving works because...',choices:['It runs on the days your willpower does not','It earns more interest','It avoids tax','It is required'],a:0},
+   {q:'Paying yourself first means...',choices:['Saving leaves your account before you can spend it','Treating yourself first','Paying debts first','Taking a bonus'],a:0},
+   {q:'When the market falls, an automatic payment...',choices:['Buys the same fund cheaper','Should be stopped','Loses the most','Is refunded'],a:0},
+   {q:'A long-term plan should be reviewed...',choices:['Once or twice a year','Every day','Every week','Never again'],a:0},
+   {q:'The boring plan usually beats the exciting one because...',choices:['It keeps running when you are scared or busy','It is faster','It has no risk','Experts recommend it'],a:0}]}}
 ];
 const STAGES=[];
 LEVELS.forEach((L,li)=>{L.rooms.forEach((r,ri)=>STAGES.push(Object.assign({},r,{wi:L.world,level:li,room:ri,diff:L.diff,isBoss:false})));
@@ -1712,9 +1750,9 @@ let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],r
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
-const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6,0x4a4f80,0x6a4040,0xc8b48a,0x7ac4c4];
-const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a,0x3d4370,0x6a3c3c,0x6a5a44,0x3d6a6a];
-const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a,0x2a2f52,0x4a2a2a,0x4a4030,0x2a4a4a];
+const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6,0x4a4f80,0x6a4040,0xc8b48a,0x7ac4c4,0x9ab86a];
+const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a,0x3d4370,0x6a3c3c,0x6a5a44,0x3d6a6a,0x55683d];
+const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a,0x2a2f52,0x4a2a2a,0x4a4030,0x2a4a4a,0x3a4a2a];
 const BSTATE={done:0xf0b429,open:0x3d8bff,boss:0xf05a4a,lock:0x59647c};
 const CAMNAMES=['Overhead','3rd Person','1st Person','Cinematic'];
 const TOOLS=[{id:'fist',e:'👊',n:'Bare Hands',dmg:1},{id:'pick',e:'⛏️',n:'Pickaxe',dmg:2},{id:'hammer',e:'🔨',n:'Sledgehammer',dmg:3},{id:'drill',e:'🛠️',n:'Power Drill',dmg:5},{id:'tnt',e:'🧨',n:'Dynamite',dmg:9}];
@@ -1732,6 +1770,15 @@ const SECRETS=[
  {id:'roth',world:5,e:'🌱',name:'Roth IRA & HSA',insight:'A Roth IRA grows TAX-FREE forever. An HSA is the only account with a triple tax break — deductible going in, growing tax-free, tax-free coming out for medical costs. These are the legal loopholes hiding in plain sight.',url:'https://www.investor.gov/introduction-investing/investing-basics/glossary/roth-iras'},
  {id:'capgains',world:5,e:'⚖️',name:'Why the Rich Own Things',insight:'Wages are taxed at up to 37%. Long-term capital gains are taxed at 0-20%. That gap is the single biggest structural reason wealthy people OWN assets instead of only earning a paycheck.',url:'https://www.irs.gov/taxtopics/tc409'},
  {id:'fees',world:5,e:'🪙',name:'The Fee Trap',insight:'A 1% yearly fee sounds tiny. Over 40 years it can quietly eat roughly a quarter of your final balance. Low-cost index funds exist precisely because of this maths.',url:'https://tools.finra.org/fund_analyzer/'},
+ {id:'brokercheck',world:10,e:'🔎',name:'FINRA BrokerCheck',insight:'Type any financial adviser or firm into this and see their real record — every complaint, fine and suspension. It is free, it is official, and almost nobody checks it before handing someone their savings.',url:'https://brokercheck.finra.org/'},
+ {id:'creditreport',world:6,e:'📋',name:'AnnualCreditReport.com',insight:'The ONLY site federally authorised to give you your credit report free. Every other "free credit report" site is selling you something. Check yours for errors — mistakes on it cost people thousands in higher interest.',url:'https://www.annualcreditreport.com/index.action'},
+ {id:'treasury',world:12,e:'🏦',name:'TreasuryDirect',insight:'Buy government bonds straight from the source with no broker, no fund and no fee in the middle. Most people have no idea they can lend to the government directly.',url:'https://www.treasurydirect.gov/'},
+ {id:'ssa',world:7,e:'🧾',name:'Your Social Security Record',insight:'Log in and see every dollar your employers have ever reported for you, plus what you would receive. Employers do get it wrong, and only you will ever notice.',url:'https://www.ssa.gov/myaccount/'},
+ {id:'cfpb',world:10,e:'📢',name:'CFPB Complaint Database',insight:'Search real complaints against any bank, lender or card company before you sign with them — and file one yourself if a company mistreats you. Companies answer these, because a regulator is watching.',url:'https://www.consumerfinance.gov/data-research/consumer-complaints/search/'},
+ {id:'freefile',world:7,e:'🆓',name:'IRS Free File',insight:'Most people can file their taxes completely free through this, and instead pay for software that steers them away from it. The free option is the law; it is just not advertised.',url:'https://www.irs.gov/filing/irs-free-file-do-your-taxes-for-free'},
+ {id:'pv',world:13,e:'🧪',name:'Portfolio Visualizer',insight:'Test any mix of investments against decades of real history before you risk a penny. Professionals pay for tools that do less than this free one.',url:'https://www.portfoliovisualizer.com/'},
+ {id:'alerts',world:10,e:'🚨',name:'SEC Investor Alerts',insight:'The regulator publishes warnings about the exact scams running right now. Reading these once a year is the cheapest fraud insurance there is.',url:'https://www.investor.gov/introduction-investing/general-resources/news-alerts/alerts-bulletins'},
+ {id:'mymoney',world:13,e:'🗺️',name:'MyMoney.gov',insight:'The plain government guide to earning, saving, protecting and spending — no product to sell you at the end of it.',url:'https://www.mymoney.gov/'},
  {id:'sec',world:4,e:'🏛️',name:'investor.gov (SEC)',insight:'The official free government site to check any investment and dodge scams before you put in a dime.',url:'https://www.investor.gov'},
 ];
 const NPCS=[
@@ -2374,7 +2421,7 @@ function bigWall(x,z,w,d,opts){opts=opts||{};const H=opts.h||6,gate=(opts.gateFo
  if(wall.gateFor!=null&&G.done[wall.gateFor]){wall.broken=true;worldGroup.remove(m);worldGroup.remove(cap)}
  walls.push(wall);return wall}
 // rooms you actually walk through — a home, a school, a store, an office, a bank
-const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4,0x7a80b8,0x9a6a6a,0xb8a684,0x7ab0b0];
+const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4,0x7a80b8,0x9a6a6a,0xb8a684,0x7ab0b0,0xa8bc8a];
 const VENUE=[
  {v:'Home',   rooms:['Bedroom','Kitchen','Living Room','Garage','Back Yard','Attic','Basement']},
  {v:'School', rooms:['Classroom','Library','Cafeteria','Gym','Science Lab','Hallway','Auditorium']},
@@ -2389,6 +2436,7 @@ const VENUE=[
  {v:'Back Alley',rooms:['Fake Front','Cold Call Booth','Pop-Up Shop','The Hook','Pressure Room','Locked Door','Way Out']},
  {v:'Estate',  rooms:['Viewing Room','Survey Office','Mortgage Desk','The Roof','Rental Flat','Repairs Yard','Closing Table']},
  {v:'Observatory',rooms:['Time Room','Vault of Years','Currency Hall','Orchard','Long Gallery','Quiet Room','Horizon']},
+ {v:'Planner',  rooms:['Goal Desk','Whiteboard','Standing Order','Autopilot','Storm Room','Review Bench','Checklist']},
 ];
 // ============ WHAT EACH PLACE LOOKS LIKE ============
 // The rooms were named Classroom and Trading Floor and then all looked
@@ -2654,6 +2702,24 @@ const READCHECK={
    a:['Checking an investment is legitimate before you put money in','Buying shares','Free stock tips','Filing your taxes'],reward:600},
  'financial-term-dictionary':{q:'What do you use that dictionary for?',
    a:['Looking up any money word you do not know','Comparing bank fees','Buying crypto','Filing taxes'],reward:600},
+ 'brokercheck':{q:'What can you look up on BrokerCheck?',
+   a:['Any adviser or firm’s real record of complaints and fines','Share prices','Interest rates','Your credit score'],reward:900},
+ 'annualcreditreport':{q:'What makes that site different from other free credit report sites?',
+   a:['It is the only one federally authorised to be genuinely free','It is prettier','It is faster','It gives you money'],reward:900},
+ 'treasurydirect':{q:'What can you do on TreasuryDirect?',
+   a:['Buy government bonds directly, with nobody in the middle','Buy shares','Get a mortgage','File taxes'],reward:900},
+ 'ssa.gov':{q:'Why check your Social Security record?',
+   a:['Employers report earnings wrongly and only you will spot it','It pays interest','It is required yearly','It raises your score'],reward:900},
+ 'consumer-complaints':{q:'What is that database for?',
+   a:['Checking real complaints against a company before you sign with them','Buying products','Comparing prices','Filing taxes'],reward:900},
+ 'free-file':{q:'What does IRS Free File let most people do?',
+   a:['File their taxes completely free','Skip paying tax','Get a bigger refund','Delay filing'],reward:900},
+ 'portfoliovisualizer':{q:'What does Portfolio Visualizer let you do?',
+   a:['Test an investment mix against decades of real history','Buy shares','Predict next year','Open an account'],reward:900},
+ 'alerts-bulletins':{q:'What is published there?',
+   a:['Official warnings about scams running right now','Stock tips','Tax forms','Job listings'],reward:900},
+ 'mymoney':{q:'What is MyMoney.gov?',
+   a:['A plain government guide with nothing to sell you','A bank','An investing app','A tax service'],reward:600},
  'fred':{q:'What is FRED?',
    a:['Free official economic data — inflation, rates and more','A stock picker','A trading app','A budgeting tool'],reward:600},
 };
