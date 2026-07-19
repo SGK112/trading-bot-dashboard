@@ -1565,7 +1565,7 @@ let paused=false,nearGate=-1,shownWorld=-1;
 let blocks=[],curSecrets=[],coins=[],tempts=[],walls=[],npcs=[],dayT=0,nearNPC=null,curTempt=null,curWi=0;
 let BND={x0:-42,x1:42,z0:-42,z1:42},roomCells=[],gateSpots=[],mines=[],opps=[],ambLight=null,sunLight=null,lampLight=null;
 let atHome=false,homeDoor=null,bigGround=null,homeBed=null,_lastT=0,homeSmash=null,_pigCool=0;
-let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],rideProp=null;
+let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],rideProp=null,_land=0;
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
@@ -2116,11 +2116,32 @@ function update(t){if(!renderer)return;
    else if(!w)pos.z+=dz;else ram(w);
    walkPhase+=0.3}
   if(keys.JUMP&&onGround){heroVY=0.42;onGround=false;sfx('hit')}
-  heroVY-=0.028;heroY+=heroVY;onGround=false;if(heroY<=0){heroY=0;heroVY=0;onGround=true}
+  const wasAir=!onGround;
+  heroVY-=0.028;heroY+=heroVY;onGround=false;
+  if(heroY<=0){heroY=0;if(wasAir&&heroVY<-0.18){_land=9;sfx('hit');burst(pos.x,0.2,pos.z,0xcfd6e0)}heroVY=0;onGround=true}
   for(const w of walls){if(w.broken)continue;if(Math.abs(pos.x-w.x)<w.hw&&Math.abs(pos.z-w.z)<w.hd&&heroVY<=0&&heroY<=w.top+0.05&&heroY>=w.top-0.9){heroY=w.top;heroVY=0;onGround=true}}
   pos.x=Math.max(BND.x0,Math.min(BND.x1,pos.x));pos.z=Math.max(BND.z0,Math.min(BND.z1,pos.z));
   hero.position.set(pos.x,heroY,pos.z);hero.rotation.y=heading;
-  const sw=mv?Math.sin(walkPhase)*0.7:0;if(heroLegs[0]){heroLegs[0].rotation.x=sw;heroLegs[1].rotation.x=-sw;heroArms[0].rotation.x=-sw;heroArms[1].rotation.x=sw}
+  // legs and arms in opposition, a lean into the run, breathing when still,
+  // a tuck in the air and a squash on landing
+  const speedMul=(typeof vehSpeed==='function'?vehSpeed():1);
+  const sw=mv?Math.sin(walkPhase)*(0.72+speedMul*0.12):0;
+  if(heroLegs[0]){
+   if(!onGround){                                   // airborne: tuck
+    heroLegs[0].rotation.x=-0.7;heroLegs[1].rotation.x=0.35;
+    if(_swing<=0){heroArms[0].rotation.x=-1.5;heroArms[1].rotation.x=-1.2}
+   } else {
+    heroLegs[0].rotation.x=sw;heroLegs[1].rotation.x=-sw;
+    if(_swing<=0){heroArms[0].rotation.x=-sw*0.9;heroArms[1].rotation.x=sw*0.9}
+   }
+   if(mv){hero.rotation.x=-0.055*speedMul;                        // lean into the run
+          hero.position.y=heroY+Math.abs(Math.sin(walkPhase))*0.07}
+   else {hero.rotation.x*=0.82;
+         hero.position.y=heroY+Math.sin(t*0.0022)*0.035;          // breathing
+         if(heroLegs[0]){heroLegs[0].rotation.x*=0.8;heroLegs[1].rotation.x*=0.8}}
+   if(_land>0){_land--;const q=_land/9;                            // landing squash
+    hero.scale.set(1+q*0.22,1-q*0.26,1+q*0.22);}else hero.scale.set(1,1,1);
+  }
   updatePoss();
   // reveal: the current target is always shown; other hidden blocks reveal when you get close
   for(const b of blocks){const d=b.userData.d;if(b.visible)continue;const isTarget=unlocked(d.i)&&!G.done[d.i];
@@ -2146,7 +2167,10 @@ function update(t){if(!renderer)return;
    :(Object.keys(G.done).length>=STAGES.length?'🏆 All worlds beaten — now grow that 🗽 number!':'🏆 World cleared! Beat the boss to move on.');
   if(!atHome){const cw=LEVELS[curLevel].world;if(cw!==shownWorld){shownWorld=cw;showBanner(cw)}}
  }
- for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;d.cube.rotation.y+=0.008;let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
+ for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;
+  const close=Math.hypot(d.px-pos.x,d.pz-pos.z)<6;
+  d.cube.rotation.y+=close?0.035:0.008;                            // spins faster as you approach
+let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
  if(_stepT>0)_stepT--;
  updateBombs();
  // it gets genuinely dark out here. If you have no lantern, say so - once a night.
@@ -3384,8 +3408,14 @@ function updateExtras(t){
  if(!paused){
   for(let i=coins.length-1;i>=0;i--){const c=coins[i];
    c.mesh.rotation.y+=(c.kind==='coin'?0.075:0.03);
-   c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16;
-   if(Math.hypot(c.x-pos.x,c.z-pos.z)<2.0){          // roomier grab radius - it should feel greedy
+   const dx=pos.x-c.x,dz=pos.z-c.z,dist=Math.hypot(dx,dz);
+   // money comes to you. it should feel greedy and good.
+   if(dist<7.5&&dist>0.1){const pull=Math.min(0.42,(7.5-dist)*0.055);
+    c.x+=dx/dist*pull;c.z+=dz/dist*pull;
+    c.mesh.position.x=c.x;c.mesh.position.z=c.z;
+    c.mesh.scale.setScalar(1+ (7.5-dist)*0.05);}
+   c.mesh.position.y=Math.sin(t*0.004+c.x)*0.16+(dist<7.5?(7.5-dist)*0.09:0);
+   if(dist<2.0){          // roomier grab radius - it should feel greedy
     worldGroup.remove(c.mesh);coins.splice(i,1);G.coins[c.id]=1;
     G.coinCount=(G.coinCount||0)+1;
     const v=c.val||50;addWealth(v);sfx('hit');
@@ -3419,7 +3449,17 @@ function updateExtras(t){
    $('hint').textContent=(nearNPC.deal?'💬 Press ↵ ENTER to hear out '+nearNPC.name:'💬 Press ↵ ENTER to talk to '+nearNPC.name);
    $('bE').classList.add('on')}
  }
- for(const n of npcs){if(n.mesh)n.mesh.rotation.y=Math.sin(t*0.001+(n.x||0)*0.1)*0.3}
+ for(const n of npcs){if(!n.mesh)continue;
+  const near=Math.hypot(n.x-pos.x,n.z-pos.z)<9;
+  if(near){                                        // turn to face you when you come close
+   const want=Math.atan2(pos.x-n.x,pos.z-n.z);
+   let d=want-n.mesh.rotation.y;while(d>Math.PI)d-=6.283;while(d<-Math.PI)d+=6.283;
+   n.mesh.rotation.y+=d*0.08;
+   n.mesh.position.y=Math.abs(Math.sin(t*0.005+(n.x||0)))*0.16;   // excited bob
+  } else {
+   n.mesh.rotation.y=Math.sin(t*0.001+(n.x||0)*0.1)*0.3;
+   n.mesh.position.y=Math.sin(t*0.0016+(n.x||0))*0.05;            // idle sway
+  }}
  drawMini()}
 function drawMini(){const mc=$('mini');if(!mc)return;const g=mc.getContext('2d'),S=mc.width;g.clearRect(0,0,S,S);g.fillStyle='rgba(10,16,30,.55)';g.beginPath();g.arc(S/2,S/2,S/2,0,7);g.fill();
  const _w=Math.max(70,Math.max(BND.x1-BND.x0,BND.z1-BND.z0)+10),sc=S/_w,_ox=(BND.x0+BND.x1)/2,_oz=(BND.z0+BND.z1)/2;
