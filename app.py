@@ -1151,12 +1151,13 @@ body.bigtext .helpbox{font-size:17px}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/9</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/10</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
  <span class="mrow clk" id=hteam>👥 Team</span>
  <span class="mrow clk" id=hchar>🧍 Your character</span>
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
+ <span class="mrow clk" id=hbench>🤖 Prompt Bench <i>paid jobs</i></span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
  <span class="mrow clk" id=hact>⏳ Spend your day</span>
  <span class="mrow clk" id=hshop>🛒 Shop</span>
@@ -1231,6 +1232,7 @@ const WORLDS=[
  {name:'Credit Canyon',ground:'#5a2f3a',tint:'#7a4050',prop:'💳'},
  {name:'Tax Town',ground:'#3f4a3a',tint:'#55654e',prop:'🧾'},
  {name:'Founders Bay',ground:'#1f5a6a',tint:'#2f7d8a',prop:'🚀'},
+ {name:'The Prompt Foundry',ground:'#2a2f52',tint:'#3d4370',prop:'🤖'},
 ];
 const LEVELS=[
  {world:0,diff:1,rooms:[
@@ -1413,7 +1415,50 @@ const LEVELS=[
    {q:'The best businesses usually start by...',choices:['Solving a problem people already pay to fix','Building something clever first','Raising money first','Renting an office'],a:0},
    {q:'Before spending savings on stock you should...',choices:['Prove somebody will actually buy it','Design a logo','Hire staff','Buy a van'],a:0},
    {q:'Working capital is...',choices:['The cash a business needs to keep trading','Profit','A loan','A tax'],a:0},
-   {q:'Owning rather than only earning matters because...',choices:['Income stops being limited by your hours','There is no risk','It avoids all tax','It is always easier'],a:0}]}}
+   {q:'Owning rather than only earning matters because...',choices:['Income stops being limited by your hours','There is no risk','It avoids all tax','It is always easier'],a:0}]}},
+ {world:9,diff:5,rooms:[
+   {type:'vocab',ic:'💬',title:'Word: Prompt',term:'PROMPT',
+    choices:['The instructions you give an AI','The answer an AI gives back','A kind of computer','A password'],a:0,
+    word:{t:'Prompt',d:'What you ask an AI, and how you ask it. The same model gives a far better answer to a clear, specific prompt than a vague one. Prompting is a skill you can practise.'}},
+   {type:'mc',ic:'🧠',title:'What Is It Actually Doing?',
+    teach:'A language model is not looking things up and it is not thinking like you. It has read an enormous amount of text and learned which words tend to follow which. It predicts a likely continuation.',
+    q:'When an AI answers you, it is mostly...',
+    choices:['Predicting likely next words from patterns it learned','Searching the internet live','Remembering you personally','Doing maths from first principles'],a:0,
+    word:{t:'Language Model',d:'Software trained on huge amounts of text that predicts likely continuations. Powerful, but it is pattern-matching, not understanding.'}},
+   {type:'mc',ic:'🎯',title:'Vague In, Vague Out',
+    teach:'The biggest difference between a useless answer and a great one is usually the prompt, not the model.',
+    q:'Which prompt will get the most useful answer?',
+    choices:['"Write a 100-word thank-you note to my gran for the bike, mention the blue colour, friendly and simple"','"Write something nice"','"thanks note"','"Help"'],a:0},
+   {type:'mc',ic:'🏭',title:'Who Makes These Things',
+    teach:'There is no single AI. Different companies build different models, and open-weight models can be run by anyone. They have different strengths, prices and rules.',
+    q:'Which of these is true about AI models?',
+    choices:['Several companies build them, and some models are open for anyone to run','There is only one AI and everyone uses it','They are all identical','They are all free forever'],a:0,
+    word:{t:'AI Provider',d:'A company that builds and serves AI models — Anthropic (Claude), OpenAI (GPT), Google (Gemini) and others. Open-weight models like Llama and Mistral can be downloaded and run yourself.'}},
+   {type:'tf',ic:'⚠️',title:'Confidently Wrong',
+    teach:'A model can produce something completely false in the same confident tone it uses for the truth. It has no idea which is which. That is called hallucination.',
+    q:'If an AI states a fact confidently, it must be correct.',a:false,
+    word:{t:'Hallucination',d:'When an AI states something false as though it were true. It is not lying — it has no idea. Always check anything that matters.'}},
+   {type:'mc',ic:'🪙',title:'It Is Not Free',
+    teach:'AI usage is measured in tokens — chunks of text going in and coming out. Providers charge per token, so a wasteful prompt literally costs more.',
+    q:'Why does a shorter, clearer prompt often cost less?',
+    choices:['You are billed per token, and fewer tokens means a lower bill','Short prompts are on a discount','Length does not matter','Only images cost money'],a:0,
+    word:{t:'Token',d:'A chunk of text, roughly a few characters. AI is billed per token in and out, so being clear is cheaper as well as better.'}},
+   {type:'scenario',ic:'⚖️',title:'Whose Work Is It?',
+    setup:'You use an AI to write your whole school essay and hand it in as your own.',
+    options:[{label:'📄 Hand it in as mine',ok:false,outcome:'That is not your work, and you learned nothing. Worse, if the AI hallucinated a fact you would not have spotted it.'},
+             {label:'🧑‍🎓 Use it to explain and check, then write it myself',ok:true}],
+    word:{t:'AI as a Tool',d:'AI is leverage on skill you already have. Used to learn faster it makes you stronger. Used to skip the learning it leaves you with nothing.'}},
+   {type:'mc',ic:'🚀',title:'Leverage, Again',
+    teach:'This is why the money room mattered. One person with these tools can now ship what used to need a team — which is exactly what leverage means.',
+    q:'Financially, why is being good with AI worth money?',
+    choices:['It multiplies what one person can produce, and output is what gets paid','It replaces the need to learn anything','It guarantees a job','It makes work free'],a:0}],
+  boss:{name:'The Black Box',enemy:'🗄️',intro:'It wants you to treat it as magic. Show that you know what it is and what it is not.',questions:[
+   {q:'A language model mainly works by...',choices:['Predicting likely next words from learned patterns','Looking up answers in a database','Reasoning like a human','Asking other people'],a:0},
+   {q:'The best way to get a better answer is usually to...',choices:['Give a clearer, more specific prompt','Ask the same thing repeatedly','Use ALL CAPS','Ask at a different time of day'],a:0},
+   {q:'When an AI states a confident fact you should...',choices:['Check it if it matters','Believe it always','Assume it is a lie','Ask it if it is sure and stop there'],a:0},
+   {q:'AI usage is billed by...',choices:['Tokens - the text going in and out','The hour','The question','It is always free'],a:0},
+   {q:'Open-weight models are ones you can...',choices:['Download and run yourself','Only rent by the minute','Never use commercially','Only use in one country'],a:0},
+   {q:'Used well, AI is best thought of as...',choices:['Leverage on skill you already have','A replacement for learning','Always right','A search engine'],a:0}]}}
 ];
 const STAGES=[];
 LEVELS.forEach((L,li)=>{L.rooms.forEach((r,ri)=>STAGES.push(Object.assign({},r,{wi:L.world,level:li,room:ri,diff:L.diff,isBoss:false})));
@@ -1494,7 +1539,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -1569,9 +1614,9 @@ let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],r
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
-const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6];
-const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a];
-const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a];
+const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6,0x4a4f80];
+const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a,0x3d4370];
+const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a,0x2a2f52];
 const BSTATE={done:0xf0b429,open:0x3d8bff,boss:0xf05a4a,lock:0x59647c};
 const CAMNAMES=['Overhead','3rd Person','1st Person','Cinematic'];
 const TOOLS=[{id:'fist',e:'👊',n:'Bare Hands',dmg:1},{id:'pick',e:'⛏️',n:'Pickaxe',dmg:2},{id:'hammer',e:'🔨',n:'Sledgehammer',dmg:3},{id:'drill',e:'🛠️',n:'Power Drill',dmg:5},{id:'tnt',e:'🧨',n:'Dynamite',dmg:9}];
@@ -1770,6 +1815,7 @@ $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEvent
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
+$('hbench').addEventListener('click',()=>openPromptBench(0));
 $('hprof').addEventListener('click',openProfile);
 $('hchar').addEventListener('click',openCharacter);
 $('hteam').addEventListener('click',openTeam);
@@ -2227,7 +2273,7 @@ function bigWall(x,z,w,d,opts){opts=opts||{};const H=opts.h||6,gate=(opts.gateFo
  if(wall.gateFor!=null&&G.done[wall.gateFor]){wall.broken=true;worldGroup.remove(m);worldGroup.remove(cap)}
  walls.push(wall);return wall}
 // rooms you actually walk through — a home, a school, a store, an office, a bank
-const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4];
+const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4,0x7a80b8];
 const VENUE=[
  {v:'Home',   rooms:['Bedroom','Kitchen','Living Room','Garage','Back Yard','Attic','Basement']},
  {v:'School', rooms:['Classroom','Library','Cafeteria','Gym','Science Lab','Hallway','Auditorium']},
@@ -2238,6 +2284,7 @@ const VENUE=[
  {v:'Lender',  rooms:['Front Desk','Application Room','Rates Room','Collections','Credit Bureau','Fine Print','Debt Pit']},
  {v:'Tax Office',rooms:['Reception','Filing Room','Brackets Hall','Deductions Desk','Audit Room','Refund Window','Archive']},
  {v:'Startup', rooms:['Garage','Pitch Room','Ledger Room','Customer Desk','Ops Room','Board Room','Launch Pad']},
+ {v:'AI Lab',  rooms:['Prompt Bench','Model Room','Context Window','Eval Lab','Guardrails','Token Meter','Build Bay']},
 ];
 // ============ WHAT EACH PLACE LOOKS LIKE ============
 // The rooms were named Classroom and Trading Floor and then all looked
@@ -2637,6 +2684,95 @@ function predStats(){const ps=G.predictions||[],res=ps.filter(p=>p.status!=='pen
  const right=res.filter(p=>p.status==='correct').length;
  return{total:ps.length,open:ps.filter(p=>p.status==='pending').length,resolved:res.length,right,
   acc:res.length?Math.round(right/res.length*100):null}}
+// ============ THE PROMPT BENCH ============
+// You cannot learn prompting by reading about prompting. So: assemble one from
+// parts and get scored on the things that actually matter - a clear task,
+// enough context, a stated format, and a constraint. No AI call needed; the
+// grading is the lesson.
+const PROMPT_JOBS=[
+ {job:'A neighbour will pay you $40 to write a poster advertising their lost cat.',
+  pay:400,
+  parts:[
+   {t:'"Write a lost cat poster."',k:'task',good:1,why:'A task. Necessary, but on its own the AI has to guess everything.'},
+   {t:'"Make something good."',k:'task',good:0,why:'Not a task. Good by whose measure, for what?'},
+   {t:'Her name is Mango, ginger, missing since Tuesday near Oak Street.',k:'context',good:1,why:'Context. Without the facts the AI will invent them — and inventing facts on a lost pet poster is worse than useless.'},
+   {t:'I like cats.',k:'context',good:0,why:'Not useful context. It does not change what the poster must say.'},
+   {t:'Keep it under 60 words, big headline, phone number at the bottom.',k:'format',good:1,why:'Format. You get something you can actually print instead of an essay.'},
+   {t:'Make it long and detailed.',k:'format',good:0,why:'Wrong for a poster. Nobody reads a long poster from across the road.'},
+   {t:'Do not invent any details I have not given you.',k:'guard',good:1,why:'A guardrail. This is the line that stops it hallucinating a reward or a fake description.'},
+   {t:'Be creative and add whatever you like.',k:'guard',good:0,why:'An invitation to make things up. On a factual job that is a bug, not a feature.'},
+ ]},
+ {job:'A shop will pay you $60 to write a polite reply to an angry customer email.',
+  pay:600,
+  parts:[
+   {t:'"Write a reply to this customer complaint."',k:'task',good:1,why:'A clear task.'},
+   {t:'"Fix this."',k:'task',good:0,why:'Fix what, how? The AI will guess, and guess wrong.'},
+   {t:'They got the wrong size, ordered Tuesday, we do offer free returns.',k:'context',good:1,why:'The facts it needs. Otherwise it will promise things you cannot honour.'},
+   {t:'Customers are annoying.',k:'context',good:0,why:'Adds nothing, and colours the tone in exactly the wrong direction.'},
+   {t:'Under 120 words, apologise once, give the two next steps.',k:'format',good:1,why:'Format and length. Now it is usable without rewriting.'},
+   {t:'Any length is fine.',k:'format',good:0,why:'You will get something you have to cut down yourself.'},
+   {t:'Do not promise a refund — we only offer exchanges.',k:'guard',good:1,why:'A guardrail that protects real money. This is the most valuable line in the prompt.'},
+   {t:'Promise whatever keeps them happy.',k:'guard',good:0,why:'That is how an AI commits your business to something it cannot deliver.'},
+ ]},
+];
+let _pj=0,_picked=[];
+function openPromptBench(job){
+ paused=true;_pj=job||0;_picked=[];
+ renderBench();
+ $('shop').classList.add('show');}
+function togglePart(k){
+ const i=_picked.indexOf(k);
+ if(i>=0)_picked.splice(i,1); else _picked.push(k);
+ renderBench();}
+function renderBench(){
+ const J=PROMPT_JOBS[_pj];
+ const rows=J.parts.map((p,k)=>{
+  const on=_picked.indexOf(k)>=0;
+  return '<div class=gloss style="'+(on?'border-color:#3d8bff':'')+';cursor:pointer" onclick="togglePart('+k+')">'
+   +'<b>'+(on?'☑':'☐')+' '+p.t+'</b></div>'}).join('');
+ const built=_picked.map(k=>J.parts[k].t).join(' ');
+ $('shopbody').innerHTML='<div class=p-title>🤖 Prompt Bench</div>'
+  +'<div class=p-world style=margin-bottom:8px>Job pays '+money(J.pay)+'</div>'
+  +'<p class=p-teach>'+J.job+'</p>'
+  +'<p class=p-teach style="border-color:#7fb4ff">A strong prompt has four things: a clear <b>task</b>, the <b>context</b> it cannot guess, '
+  +'the <b>format</b> you want back, and a <b>guardrail</b> telling it what not to do. Pick the lines that belong.</p>'
+  +rows
+  +'<div class=p-title style="font-size:15px;margin-top:10px">Your prompt</div>'
+  +'<div class=gloss style="min-height:44px">'+(built||'<span class=p-note>Nothing picked yet.</span>')+'</div>'
+  +'<button class=pbtn style="margin-top:8px" onclick="gradePrompt()">Send it 🚀</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;shop&#39;)">← Back</button>';}
+function gradePrompt(){
+ const J=PROMPT_JOBS[_pj];
+ const chosen=_picked.map(k=>J.parts[k]);
+ const kinds=['task','context','format','guard'];
+ const have={},bad=[];
+ chosen.forEach(p=>{if(p.good)have[p.k]=1;else bad.push(p)});
+ const missing=kinds.filter(k=>!have[k]);
+ const score=kinds.filter(k=>have[k]).length-bad.length;
+ let html='<div class=p-badge>'+(score>=4?'🏆':score>=2?'🙂':'🤔')+'</div>'
+  +'<div class=p-world>'+(score>=4?'That is a professional prompt':'Let us look at what came back')+'</div>'
+  +'<div class=p-title>Score '+Math.max(0,score)+' / 4</div>';
+ if(score>=4){
+  html+='<p class=p-teach style="border-color:#3fb950">Task, context, format and a guardrail. This is exactly how someone who does this for a living writes it. '
+   +'The answer comes back usable first time, which is the whole point.</p>';
+ } else {
+  if(missing.length)html+='<p class=p-teach style="border-color:#f0b429"><b>Missing:</b> '+missing.map(m=>
+    m==='task'?'a clear task':m==='context'?'the context it cannot guess':m==='format'?'the format you want back':'a guardrail')
+    .join(', ')+'.</p>';
+  bad.forEach(p=>{html+='<p class=p-teach style="border-color:#f85149"><b>'+p.t+'</b><br>'+p.why+'</p>'});
+ }
+ if(score>=4&&!(G.promptJobs||{})[_pj]){
+  G.promptJobs=G.promptJobs||{};G.promptJobs[_pj]=1;
+  const before=wageTier().n;G.skill=Math.min(SKILL_CAP,(G.skill||0)+2);
+  addWealth(J.pay);save();renderHUD();confetti();sfx('secret');
+  html+='<p class=p-teach style="border-color:#3fb950">Paid '+money(J.pay)+' · +2 skill'
+   +(wageTier().n!==before?(' · you are now '+wageTier().n):'')+'</p>';
+ }
+ html+='<button class=pbtn onclick="renderBench()">Try again</button>'
+  +(PROMPT_JOBS[_pj+1]?'<button class=pbtn onclick="openPromptBench('+(_pj+1)+')">Next job →</button>':'')
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;shop&#39;)">← Back</button>';
+ $('shopbody').innerHTML=html;
+ speak(score>=4?'Great prompt. Task, context, format and a guardrail.':'Not quite. Look at what is missing.');}
 function openMarket(){
  paused=true;
  if(!CAT){$('marketbody').innerHTML='<div class=p-title>📈 Market Desk</div><p class=p-teach>Live prices have not loaded yet. Close this and try again in a moment.</p><button class=pbtn onclick="hide(&#39;market&#39;)">← Back</button>';$('market').classList.add('show');return}
