@@ -1075,6 +1075,32 @@ body.bigtext .helpbox{font-size:17px}
 #web.show{display:flex}
 #webbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(180deg,#16223a,#0e1626);border-bottom:2px solid #3d8bff;box-shadow:0 3px 14px rgba(0,0,0,.5)}
 /* the one-click way home, floating over whatever is underneath */
+@keyframes cardIn{0%{opacity:0;transform:translateY(26px) scale(.94)}60%{transform:translateY(-4px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes optIn{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+@keyframes shakeNo{0%,100%{transform:translateX(0)}15%{transform:translateX(-9px)}30%{transform:translateX(8px)}45%{transform:translateX(-6px)}60%{transform:translateX(5px)}80%{transform:translateX(-3px)}}
+@keyframes rightGlow{0%{box-shadow:0 0 0 0 rgba(63,185,80,.75);transform:scale(1)}
+ 50%{box-shadow:0 0 0 16px rgba(63,185,80,0);transform:scale(1.05)}100%{box-shadow:none;transform:scale(1)}}
+@keyframes badgePop{0%{transform:scale(.3) rotate(-14deg);opacity:0}70%{transform:scale(1.15) rotate(4deg)}100%{transform:scale(1);opacity:1}}
+@keyframes spinIn{from{transform:rotate(-180deg) scale(.5);opacity:0}to{transform:none;opacity:1}}
+.ov.show .panel{animation:cardIn .34s cubic-bezier(.16,1,.3,1)}
+.ov.show .panel .p-badge{animation:badgePop .5s cubic-bezier(.16,1,.3,1) .06s both}
+.ov.show .opt{animation:optIn .3s ease both}
+.ov.show .opt:nth-of-type(1){animation-delay:.10s}
+.ov.show .opt:nth-of-type(2){animation-delay:.17s}
+.ov.show .opt:nth-of-type(3){animation-delay:.24s}
+.ov.show .opt:nth-of-type(4){animation-delay:.31s}
+/* these must out-rank ".ov.show .opt", which sets the entrance animation,
+   or the feedback animation silently never plays */
+.ov.show .opt.wrong,.opt.wrong{animation:shakeNo .45s ease!important;border-color:#f85149!important;background:#3a1f1f!important}
+.ov.show .opt.right,.opt.right{animation:rightGlow .6s ease!important;border-color:#3fb950!important;background:#16351f!important}
+#loadwrap{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 50% 35%,#2b4a7e,#0b1220 70%);color:#eaf1ff;transition:opacity .5s}
+#loadwrap.gone{opacity:0;pointer-events:none}
+#loadpig{font-size:74px;animation:spinIn .6s cubic-bezier(.16,1,.3,1), bob 1.5s ease-in-out .6s infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+#loadbar{width:230px;height:9px;border-radius:6px;background:#0d1420;overflow:hidden;margin-top:20px;border:1px solid #2b3654}
+#loadbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3d8bff,#3fb950);transition:width .35s ease}
+#loadtxt{margin-top:12px;font-size:14px;color:#8fa6c6;min-height:20px}
 #backfloat{position:fixed;right:16px;bottom:20px;z-index:120;display:none;
  align-items:center;gap:9px;padding:15px 22px;border-radius:999px;cursor:pointer;
  background:rgba(61,139,255,.92);backdrop-filter:blur(6px);color:#fff;
@@ -1199,6 +1225,9 @@ body.bigtext .helpbox{font-size:17px}
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
 <div id=quest><div class=qh>Your next step</div><div class=qt id=qtext></div><div class=qw id=qwhy></div><div class=qp><i id=qbar style=width:0%></i></div><div class=qs onclick="skipTutorial()">Skip the walkthrough</div></div>
+<div id=loadwrap><div id=loadpig>🐷</div>
+ <div style="font-size:26px;font-weight:800;margin-top:10px">Money World</div>
+ <div id=loadbar><i></i></div><div id=loadtxt>waking up…</div></div>
 <div id=backfloat onclick="closeWeb()">🎮 <span>Back to Money World</span></div>
 <div id=web><div id=webbar><button onclick="closeWeb()">← Back to Money World</button><span id=webtitle></span><a id=weblink href="#" target=_blank rel=noopener>Open in new tab ↗</a></div><iframe id=webframe title="Resource"></iframe><div id=webnote style="display:none"></div></div>
 <div class=ov id=shop><div class=panel><button class=tclose onclick="hide('shop')">✕</button><div id=shopbody></div></div></div>
@@ -1988,7 +2017,7 @@ document.querySelectorAll('#menu .clk').forEach(el=>el.addEventListener('click',
 document.addEventListener('click',e=>{const m=$('menu');
  if(m.classList.contains('show')&&!m.contains(e.target)&&e.target!==$('hmenu'))m.classList.remove('show')});
 addEventListener('keydown',e=>{if(e.key==='Escape')$('menu').classList.remove('show')});$('htool').addEventListener('click',()=>toast('Your tool: '+bestTool().e+' '+bestTool().n+' — beat bosses to unlock stronger ones!'));
-function setView(m){camMode=((m%4)+4)%4;$('hview').textContent='👁 '+CAMNAMES[camMode]}
+function setView(m){camMode=((m%4)+4)%4;_camBlend=0;$('hview').textContent='👁 '+CAMNAMES[camMode];toast('👁 '+CAMNAMES[camMode])}
 
 let hitCool=0;
 function hitBlock(d){if(!d)return;if(d.hp<=0){if(!G.done[d.i])openChallenge(d.i);return}const dmg=toolDmg();d.hp-=dmg;
@@ -2295,6 +2324,7 @@ function initWorld(){scene=new THREE.Scene();scene.background=new THREE.Color(0x
  setView(0);updateTool();updateVaultCount();updateWP();
  loadWorld(LEVELS[STAGES[firstOpen()].level]?STAGES[firstOpen()].level:0)}
 
+let _camBlend=1,_camPos=null,_camLook=null;
 function updateCamera(t){if(!hero)return;const P=hero.position,fx=Math.sin(heading),fz=Math.cos(heading);
  // portrait screens: sit further back and aim higher, so the frame fills with
  // world instead of the patch of grass by your feet
@@ -2302,7 +2332,14 @@ function updateCamera(t){if(!hero)return;const P=hero.position,fx=Math.sin(headi
  if(camMode===0){camera.position.set(P.x-fx*5*Z,30*(nar?1.15:1),P.z-fz*5*Z);camera.lookAt(P.x+fx*0.5,0.6,P.z+fz*0.5)}
  else if(camMode===1){camera.position.set(P.x-fx*9*Z,6+LIFT,P.z-fz*9*Z);camera.lookAt(P.x+fx*2,2.4+LIFT*1.5,P.z+fz*2)}
  else if(camMode===2){camera.position.set(P.x+fx*0.2,2.9,P.z+fz*0.2);camera.lookAt(P.x+fx*8,2.7,P.z+fz*8)}
- else{const a=t*0.0003;camera.position.set(P.x+Math.cos(a)*15*Z,11+LIFT,P.z+Math.sin(a)*15*Z);camera.lookAt(P.x,2+LIFT,P.z)}}
+ else{const a=t*0.0003;camera.position.set(P.x+Math.cos(a)*15*Z,11+LIFT,P.z+Math.sin(a)*15*Z);camera.lookAt(P.x,2+LIFT,P.z)}
+ // ease between camera modes instead of snapping
+ if(_camBlend<1){
+  _camBlend=Math.min(1,_camBlend+0.055);
+  if(_camPos){const e=1-Math.pow(1-_camBlend,3);
+   camera.position.lerpVectors(_camPos,camera.position,e);}
+ }
+ _camPos=camera.position.clone();}
 
 function update(t){if(!renderer)return;
  if(!paused){if(keys.TL)heading+=0.052;if(keys.TR)heading-=0.052;
@@ -4071,7 +4108,7 @@ function openChallenge(i){paused=true;G.cur=i;bossQ=0;const s=STAGES[i];$('cpane
  $('challenge').classList.add('show');
  if(s.type==='fill')setTimeout(()=>{const el=$('fillin');if(el)el.focus()},60);
  if(s.type==='boss')renderBossQ()}
-function closeChallenge(){stopSpeak();$('challenge').classList.remove('show');paused=false}
+function closeChallenge(){stopSpeak();if(typeof stopBossTimer==='function')stopBossTimer();$('challenge').classList.remove('show');paused=false}
 // A 7-year-old hit "Self-Employment Tax", got it wrong six times, saw the same
 // six words each time, and quit. Wrong answers now escalate into help:
 // nudge -> hint -> show me the answer. Being stuck is never the end of the road.
@@ -4119,15 +4156,37 @@ function giveAnswer(i){
  // they learned it the slow way, which still counts
  toast('👍 Now you know it. That is what matters.');
  complete(i);}
-function pick(i,k){if(k!==STAGES[i].a){wrongTry(i);return}complete(i)}
+function flashOpt(k,cls){const os=document.querySelectorAll('#cbody .opt');
+ const el=os[k];if(!el)return;el.classList.remove('wrong','right');void el.offsetWidth;el.classList.add(cls);
+ if(cls==='right'){os.forEach((o,n)=>{if(n!==k)o.style.opacity='.35'})}}
+function pick(i,k){if(k!==STAGES[i].a){flashOpt(k,'wrong');wrongTry(i);return}
+ flashOpt(k,'right');setTimeout(()=>complete(i),420)}
 function tfAns(i,v){if((!!v)!==(!!STAGES[i].a)){wrongTry(i);return}complete(i)}
 function norm(s){return (s||'').toLowerCase().trim().replace(/[^a-z0-9 ]/g,'')}
 function fillAns(i){const s=STAGES[i];const v=norm(($('fillin')||{}).value);const ok=[s.answer].concat(s.accept||[]).some(a=>norm(a)===v);if(!ok){wrongTry(i);return}complete(i)}
 function scenAns(i,k){const o=STAGES[i].options[k];if(!o.ok){if(o.outcome)toast(o.outcome);wrongTry(i);return}complete(i)}
+let _bossT=null,_bossLeft=0;
+function stopBossTimer(){if(_bossT){clearInterval(_bossT);_bossT=null}}
+function startBossTimer(){
+ stopBossTimer();
+ const lvl=(STAGES[G.cur]&&STAGES[G.cur].level)||0;
+ _bossLeft=Math.max(9,20-lvl);            // later bosses give you less time
+ _bossT=setInterval(()=>{
+  _bossLeft--;
+  const el=document.getElementById('bosstime');
+  if(el){el.textContent='⏱ '+_bossLeft+'s';
+   el.style.color=_bossLeft<=4?'#f85149':_bossLeft<=8?'#f0b429':'#7fb4ff';}
+  if(_bossLeft<=0){stopBossTimer();
+   const s=STAGES[G.cur];sfx('hit');
+   toast('⏱ Out of time! The boss hits back — start the round again.');
+   bossQ=0;renderBossQ();}
+ },1000);}
 function renderBossQ(){const s=STAGES[G.cur],B=s.boss,total=B.questions.length,remain=total-bossQ,q=B.questions[bossQ];
+ startBossTimer();  // sets _bossLeft before the template below reads it
  const hp=Array.from({length:total},(_,k)=>`<div class="hpseg ${k>=remain?'gone':''}"></div>`).join('');
- $('bosswrap').innerHTML=`<div class=arena><div class=enemy id=enemy>${B.enemy}</div><div class=ename>${B.name}</div><div class=hpwrap>${hp}</div><div class=hplbl>HP ${remain}/${total}</div></div><div class=bossp>Attack ${bossQ+1} of ${total} — answer to strike!</div><div class=p-q>${q.q}</div>`+q.choices.map((c,k)=>`<button class=opt onclick="bossPick(${k})">${String.fromCharCode(65+k)}.  ${c}</button>`).join('')}
+ $('bosswrap').innerHTML=`<div class=arena><div class=enemy id=enemy>${B.enemy}</div><div class=ename>${B.name}</div><div class=hpwrap>${hp}</div><div class=hplbl>HP ${remain}/${total}</div></div><div class=bossp>Attack ${bossQ+1} of ${total} — answer to strike!  <span id=bosstime style="font-weight:800;color:#7fb4ff">⏱ ${_bossLeft}s</span></div><div class=p-q>${q.q}</div>`+q.choices.map((c,k)=>`<button class=opt onclick="bossPick(${k})">${String.fromCharCode(65+k)}.  ${c}</button>`).join('')}
 function bossPick(k){const s=STAGES[G.cur],B=s.boss,q=B.questions[bossQ];const en=$('enemy');
+ if(k===q.a)flashOpt(k,'right'); else flashOpt(k,'wrong');
  if(k!==q.a){if(en){en.classList.remove('atk');void en.offsetWidth;en.classList.add('atk')}$('cpanel').classList.remove('shake');void $('cpanel').offsetWidth;$('cpanel').classList.add('shake');toast('💥 '+B.name+' strikes back! Try again.');return}
  if(q.word&&!G.glossary[q.word.t])G.glossary[q.word.t]=q.word.d;
  if(en){en.classList.remove('hit');void en.offsetWidth;en.classList.add('hit')}confetti();
@@ -4195,7 +4254,7 @@ async function boot(){
  if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
  document.body.classList.toggle('bigtext',!!G.narrate);
  try{CAT=await j('/api/game/catalog')}catch(e){document.body.innerHTML='<div style=color:#fff;padding:30px>Could not load market data: '+e.message+'</div>';return}
- await resolve();renderHUD();requestAnimationFrame(loop);setInterval(async()=>{try{CAT=await j('/api/game/catalog')}catch(e){}await resolve()},60000)}
+ await resolve();renderHUD();if(window.hideLoader)hideLoader();requestAnimationFrame(loop);setInterval(async()=>{try{CAT=await j('/api/game/catalog')}catch(e){}await resolve()},60000)}
 function fit(){if(!renderer)return;
  renderer.setSize(innerWidth,innerHeight);
  const asp=innerWidth/innerHeight;camera.aspect=asp;
@@ -4204,5 +4263,21 @@ function fit(){if(!renderer)return;
  const HFOV=76*Math.PI/180;
  camera.fov=asp<1.35?Math.min(88,2*Math.atan(Math.tan(HFOV/2)/asp)*180/Math.PI):70;
  camera.updateProjectionMatrix()}
+// a loading screen with something to look at while the world builds
+(function(){
+ const steps=['building your room…','planting the world…','hiding the money…',
+              'waking the animals…','checking the markets…','ready'];
+ let n=0;
+ const tick=setInterval(()=>{
+  n++;const p=Math.min(100,Math.round(n/steps.length*100));
+  const bar=document.querySelector('#loadbar i'),t=document.getElementById('loadtxt');
+  if(bar)bar.style.width=p+'%';
+  if(t)t.textContent=steps[Math.min(n-1,steps.length-1)];
+  if(n>=steps.length)clearInterval(tick);
+ },260);
+ window.hideLoader=()=>{const w=document.getElementById('loadwrap');
+  if(!w)return;const bar=document.querySelector('#loadbar i');if(bar)bar.style.width='100%';
+  setTimeout(()=>{w.classList.add('gone');setTimeout(()=>w.remove(),600)},280);};
+})();
 addEventListener('resize',fit);fit();boot();
 </script></body></html>"""
