@@ -1040,8 +1040,16 @@ body.bigtext .helpbox{font-size:17px}
 .readbtn{display:inline-block;margin:6px 0 4px;padding:9px 14px;border-radius:10px;background:#2a3f68;
  border:1px solid #3d8bff;color:#dce7f7;font-weight:800;font-size:14px;cursor:pointer}
 @media(max-width:820px){
- #pad button,#bJ2,#bE{min-width:62px;min-height:62px;font-size:24px}
- #mini{width:96px!important;height:96px!important}
+ /* thumbs, not cursors - big targets, clear of the edges and the home bar */
+ #pad{left:10px;right:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:auto}
+ #pad button{width:64px;height:64px;font-size:25px}
+ #gctl{right:10px;bottom:calc(16px + env(safe-area-inset-bottom,0px));gap:8px}
+ .gbtn{width:64px;height:64px;font-size:25px}
+ .gbtn.enter{width:84px;height:84px;font-size:12px}
+ .gbtn.enter b{font-size:30px}
+ #mini{width:74px!important;height:74px!important;bottom:auto;top:96px;right:10px}
+ #hud .hpill{min-height:34px;display:inline-flex;align-items:center}
+ #hmenu{min-width:54px;justify-content:center}
 }
 #quest{position:fixed;left:10px;top:64px;z-index:30;max-width:290px;background:linear-gradient(180deg,rgba(22,34,58,.97),rgba(14,22,38,.97));
  border:2px solid #3d8bff;border-radius:14px;padding:11px 13px;color:#eaf1ff;box-shadow:0 6px 22px rgba(0,0,0,.5);display:none}
@@ -1065,11 +1073,11 @@ body.bigtext .helpbox{font-size:17px}
  #wbt{font-size:13px!important}
  #wbn{font-size:26px!important}
  #hsense{font-size:12px;top:76px}
- #toast{top:auto;bottom:150px;font-size:13px;max-width:92vw}
+ #toast{top:auto;bottom:calc(210px + env(safe-area-inset-bottom,0px));font-size:13px;max-width:92vw}
 }
 @media(max-width:820px) and (orientation:landscape){
  #quest{max-width:280px;right:auto}
- #toast{bottom:96px}
+ #toast{bottom:calc(150px + env(safe-area-inset-bottom,0px))}
 }
 #web{position:fixed;inset:0;z-index:80;background:#0a0f18;display:none;flex-direction:column}
 #web.show{display:flex}
@@ -1133,8 +1141,13 @@ body.bigtext .helpbox{font-size:17px}
 .dU{grid-column:2;grid-row:1}.dL{grid-column:1;grid-row:2}.dR{grid-column:3;grid-row:2}.dD{grid-column:2;grid-row:3}
 .gbtn{border-radius:14px;background:rgba(20,28,50,.82);border:1px solid #33456a;color:#fff;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;touch-action:none}
 .gbtn:active{background:rgba(61,139,255,.5)}
-.gbtn.enter{width:auto;height:56px;padding:0 22px;border-radius:30px;border-color:#3d8bff;color:#7fb4ff;font-size:16px;display:none}
-.gbtn.enter.on{display:flex;animation:pE 1s infinite}@keyframes pE{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.gbtn.enter{width:76px;height:76px;border-radius:50%;border:3px solid #3d8bff;color:#fff;
+ font-size:12px;font-weight:800;background:rgba(61,139,255,.35);display:flex;flex-direction:column;
+ line-height:1.05;gap:1px}
+.gbtn.enter.on{background:rgba(61,139,255,.92);animation:pE 1s infinite;border-color:#fff}
+.gbtn.enter b{font-size:26px;font-weight:900}
+#gctl{position:fixed;right:14px;bottom:20px;z-index:20;display:grid;
+ grid-template-columns:auto auto;gap:8px;align-items:end}@keyframes pE{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 .ov{position:absolute;inset:0;background:rgba(6,9,16,.86);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
 .ov.show{display:flex}
 .panel{background:linear-gradient(160deg,#1a2340,#12172a);border:1px solid #3d8bff;border-radius:22px;padding:20px;max-width:460px;width:100%;text-align:center;max-height:94vh;overflow:auto;animation:pin .4s cubic-bezier(.2,1.4,.4,1);position:relative}
@@ -1218,7 +1231,13 @@ body.bigtext .helpbox{font-size:17px}
 <div id=wbanner><div class=wt id=wbt>LEVEL 1</div><div class=wn id=wbn>Piggy Bank Park</div></div>
 <div id=pad>
  <div class=dpad><button class="gbtn dU" id=bU>▲</button><button class="gbtn dL" id=bL>◀</button><button class="gbtn dR" id=bR>▶</button><button class="gbtn dD" id=bD>▼</button></div>
- <button class=gbtn id=bTNT style=margin-right:8px title="Throw dynamite (B)">🧨</button><button class=gbtn id=bJ2 style=margin-right:8px>⤴</button><button class="gbtn enter" id=bE>↵ ENTER</button></div>
+</div>
+<div id=gctl>
+ <button class=gbtn id=bView title="Change view">👁</button>
+ <button class=gbtn id=bTNT title="Throw dynamite">🧨</button>
+ <button class=gbtn id=bJ2 title="Jump">⤴</button>
+ <button class="gbtn enter" id=bE title="Do it"><b>✊</b><span id=bElbl>HIT</span></button>
+</div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
 <div class=ov id=team><div class=panel><button class=tclose onclick="hide('team')">✕</button><div id=teambody></div></div></div>
@@ -1994,6 +2013,8 @@ addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='
 function bindHold(el,key){el.addEventListener('touchstart',e=>{e.preventDefault();sk(key,1)},{passive:false});el.addEventListener('touchend',e=>{e.preventDefault();sk(key,0)},{passive:false});el.addEventListener('mousedown',()=>sk(key,1));el.addEventListener('mouseup',()=>sk(key,0));el.addEventListener('mouseleave',()=>sk(key,0))}
 bindHold($('bU'),'F');bindHold($('bD'),'B');bindHold($('bL'),'TL');bindHold($('bR'),'TR');bindHold($('bJ2'),'JUMP');
 $('bTNT').addEventListener('click',throwBomb);
+$('bView').addEventListener('click',()=>setView(camMode+1));
+$('bView').addEventListener('touchstart',e=>{e.preventDefault();setView(camMode+1)},{passive:false});
 $('bE').addEventListener('click',interact);$('bE').addEventListener('touchstart',e=>{e.preventDefault();interact()},{passive:false});
 $('htrophy').addEventListener('click',openTrophies);$('hgloss').addEventListener('click',openGlossary);$('hwealth').addEventListener('click',openWealth);
 $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEventListener('click',openVault);$('hshop').addEventListener('click',openShop);
@@ -2398,7 +2419,12 @@ function update(t){if(!renderer)return;
    for(const w of walls){if(w.broken)continue;if(w.kind!=='step'&&w.kind!=='ledge')continue;
     const dd=Math.hypot(w.x-pos.x,w.z-pos.z);if(dd<6&&dd<cd){cd=dd;cl=w}}
    if(cl&&heroY<cl.top-0.3){$('hint').textContent='⤴ Press SPACE to jump up — climb the ledges to get over the wall';$('hint').classList.add('show')}}
-  const near=nearGate>=0;$('hint').classList.toggle('show',near);$('bE').classList.toggle('on',near);
+  const near=nearGate>=0;$('hint').classList.toggle('show',near);
+  {const sleepy=atHome&&homeBed&&Math.hypot(homeBed.x-pos.x,homeBed.z-pos.z)<2.6;
+   const piggy=atHome&&homeSmash&&!G.smashed;
+   $('bE').classList.toggle('on',!!(near||nearNPC||sleepy||piggy));
+   const lbl=$('bElbl');
+   if(lbl)lbl.textContent = nearNPC?'TALK' : (near||piggy)?'SMASH' : sleepy?'SLEEP' : 'HIT';}
   if(near)$('hint').textContent=(DOORS[nearGate].s.isBoss?'⚔️ BOSS block':'Run into it or press ↵ to SMASH')+' — '+DOORS[nearGate].hp+' HP left';
   // auto-smash whenever you're near — walk into a block and it keeps cracking on its own
   if(near){const d=DOORS[nearGate];if(Math.hypot(d.px-pos.x,d.pz-pos.z)<(2.6+(d.sz||2)*0.6)){if(hitCool>0)hitCool--;else{hitCool=9;hitBlock(d)}}else hitCool=0}
