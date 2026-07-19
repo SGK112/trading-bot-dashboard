@@ -1074,6 +1074,16 @@ body.bigtext .helpbox{font-size:17px}
 #web{position:fixed;inset:0;z-index:80;background:#0a0f18;display:none;flex-direction:column}
 #web.show{display:flex}
 #webbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(180deg,#16223a,#0e1626);border-bottom:2px solid #3d8bff;box-shadow:0 3px 14px rgba(0,0,0,.5)}
+/* the one-click way home, floating over whatever is underneath */
+#backfloat{position:fixed;right:16px;bottom:20px;z-index:120;display:none;
+ align-items:center;gap:9px;padding:15px 22px;border-radius:999px;cursor:pointer;
+ background:rgba(61,139,255,.92);backdrop-filter:blur(6px);color:#fff;
+ font-size:17px;font-weight:800;border:2px solid rgba(255,255,255,.55);
+ box-shadow:0 8px 28px rgba(0,0,0,.45);user-select:none}
+#backfloat.show{display:flex}
+#backfloat:hover{background:rgba(90,157,255,.97)}
+#backfloat:active{transform:scale(.96)}
+@media(max-width:820px){#backfloat{right:10px;bottom:14px;padding:13px 18px;font-size:15px}}
 #webbar button{background:#3d8bff;color:#fff;border:none;border-radius:9px;padding:11px 18px;font-weight:800;font-size:15px;cursor:pointer;white-space:nowrap}
 #webbar button:hover{background:#5a9dff}
 #webtitle{color:#cfe0ff;font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
@@ -1189,6 +1199,7 @@ body.bigtext .helpbox{font-size:17px}
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
 <div id=quest><div class=qh>Your next step</div><div class=qt id=qtext></div><div class=qw id=qwhy></div><div class=qp><i id=qbar style=width:0%></i></div><div class=qs onclick="skipTutorial()">Skip the walkthrough</div></div>
+<div id=backfloat onclick="closeWeb()">🎮 <span>Back to Money World</span></div>
 <div id=web><div id=webbar><button onclick="closeWeb()">← Back to Money World</button><span id=webtitle></span><a id=weblink href="#" target=_blank rel=noopener>Open in new tab ↗</a></div><iframe id=webframe title="Resource"></iframe><div id=webnote style="display:none"></div></div>
 <div class=ov id=shop><div class=panel><button class=tclose onclick="hide('shop')">✕</button><div id=shopbody></div></div></div>
 <div class=ov id=mine><div class=panel><div id=minebody></div></div></div>
@@ -2668,7 +2679,9 @@ const SHOP=[
 // Sites we can legally embed. The rest send X-Frame-Options: SAMEORIGIN and
 // simply refuse to load in a frame - for those we open a tab and keep a big
 // obvious way back on screen. (We cannot put our button on someone else's site.)
-const EMBEDDABLE=[/(^|[.])investor[.]gov$/i,/(^|[.])wikipedia[.]org$/i,/(^|[.])khanacademy[.]org$/i];
+// Tested, not guessed. investor.gov and irs.gov send SAMEORIGIN and were
+// silently rendering a blank frame before this was checked properly.
+const EMBEDDABLE=[/(^|[.])wikipedia[.]org$/i,/(^|[.])khanacademy[.]org$/i,/(^|[.])treasurydirect[.]gov$/i];
 function canEmbed(u){try{return EMBEDDABLE.some(r=>r.test(new URL(u).hostname))}catch(e){return false}}
 // Every resource has a question waiting on the other side. You cannot claim
 // the reward by opening a tab and closing it - you have to have actually read
@@ -2753,16 +2766,29 @@ function openResource(url,title){
  $('webtitle').textContent=title||url;
  $('weblink').href=url;
  const fr=$('webframe'),note=$('webnote');
- if(canEmbed(url)){note.style.display='none';fr.style.display='';fr.src=url}
+ $('backfloat').classList.add('show');
+ if(canEmbed(url)){note.style.display='none';fr.style.display='';fr.src=url;watchFrame(url)}
  else{fr.style.display='none';fr.removeAttribute('src');note.style.display='';
   note.innerHTML='<h2 style="margin:0 0 10px">'+(title||'Resource')+'</h2>'
-   +'<p>This site does not allow itself to be opened inside another page, so it opened in a <b>new tab</b>.</p>'
-   +'<p>Your game is still running right here. Come back to this tab and hit the big blue button above.</p>'
-   +'<p style="color:#f0b429;font-weight:700">When you are done reading, there is a question waiting worth real money.</p>'
+   +'<p><b>'+(new URL(url).hostname)+'</b> refuses to be shown inside another site. That is a security setting on their end '
+   +'— banks and government sites use it so nobody can wrap a fake frame around them. It is a good thing, even though it is '
+   +'inconvenient here.</p>'
+   +'<p>So it opened in a <b>new tab</b>. When you are done, close that tab or come back to this one — '
+   +'the blue button is always bottom-right.</p>'
+   +'<p style="color:#f0b429;font-weight:700">There is a question waiting worth real money when you get back.</p>'
    +'<p><a href="'+url+'" target=_blank rel=noopener style="color:#7fb4ff;font-weight:800">Open it again ↗</a></p>';
   window.open(url,'_blank','noopener')}
  $('web').classList.add('show')}
-function closeWeb(){const fr=$('webframe');const u=_lastResourceUrl,t=_lastResourceTitle;
+function watchFrame(url){
+ // some sites say they allow framing and then do not. If nothing paints, bail out.
+ const fr=$('webframe');let loaded=false;
+ fr.onload=()=>{loaded=true};
+ setTimeout(()=>{if(!loaded&&$('web').classList.contains('show')){
+   fr.style.display='none';const note=$('webnote');note.style.display='';
+   note.innerHTML='<h2>That site would not load inside the game</h2>'
+    +'<p>Opening it in a new tab instead. The blue button bottom-right brings you back.</p>';
+   window.open(url,'_blank','noopener');}},4000);}
+function closeWeb(){$('backfloat').classList.remove('show');const fr=$('webframe');const u=_lastResourceUrl,t=_lastResourceTitle;
  fr.removeAttribute('src');$('web').classList.remove('show');paused=false;
  if(u)setTimeout(()=>offerReadCheck(u,t),350);}
 let _lastResourceUrl=null,_lastResourceTitle=null;
