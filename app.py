@@ -1243,6 +1243,7 @@ body.bigtext .helpbox{font-size:17px}
  <span class="mrow clk" id=hview>👁 Overhead</span>
  <span class="mrow clk" id=htool>👊 Bare Hands</span>
  <span class="mrow clk" id=hnarr>🔇 Read aloud: OFF</span>
+ <span class="mrow clk" id=hout>🚪 Sign out</span>
  <span class="mrow clk" id=hhelp>❔ How to play</span>
  <span class="mrow" id=hsave style="opacity:.4">☁ Saved</span>
  <a class="mrow clk" id=hdash href="/" style=color:inherit>📊 Trading dashboard</a>
@@ -1302,7 +1303,12 @@ body.bigtext .helpbox{font-size:17px}
 <div class=ov id=glossary><div class=panel><button class=tclose onclick="hide('glossary')">✕</button>
  <div class=p-title>📖 Word Bank</div><div class=p-world style=margin-bottom:8px>The language of investing — your superpower</div><div id=glist></div></div></div>
 </div><script>
-const KEY='money_world_3';
+// Scoped per player. One shared bucket meant a new account on a shared device
+// inherited the previous player's entire game - money, house, progress - and
+// then saved it under their own name.
+const KEY_BASE='money_world_3';
+let KEY=KEY_BASE;
+function keyFor(u){return u?(KEY_BASE+':'+u):KEY_BASE}
 const HORIZONS=[{h:24,l:'1 day'},{h:72,l:'3 days'},{h:168,l:'1 week'}];
 const WORLDS=[
  {name:'Piggy Bank Park',ground:'#2f7d46',tint:'#3fa35a',prop:'🌳'},
@@ -1751,8 +1757,15 @@ const $=id=>document.getElementById(id);
 const money=n=>n==null?'—':'$'+Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
 async function j(u,o){const r=await fetch(u,o);if(!r.ok)throw new Error(await r.text());return r.json()}
 function load(){try{return JSON.parse(localStorage.getItem(KEY))||null}catch(e){return null}}
-function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossary:{},hz:72,coins:{}}}
-let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
+function fresh(){return{xp:0,streak:0,bestStreak:0,hz:72,
+ done:{},predictions:[],glossary:{},coins:{},secrets:{},tempts:{},qclaim:{},found:{},
+ mines:{},opps:{},owned:{},met:{},furn:{},look:{},char:{},veh:{},vehVal:{},port:{},
+ readChecks:{},tries:{},acts:{},promptJobs:{},portHist:[],tools:['fist'],
+ wealth:0,equity:0,willpower:0,skill:0,buildPts:0,wasted:0,invested:0,
+ home:'parents',riding:'feet',biz:null,freedAt:null,rev:0}}
+// real state arrives in boot(), once we know who is signed in
+let G=fresh();
+if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
 if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
@@ -1771,6 +1784,17 @@ function pushProfile(){fetch('/api/game/profile',{method:'POST',headers:{'Conten
  .then(r=>r.json()).then(r=>{const el=$('hsave');if(!el)return;
   el.textContent=(r&&r.ok)?'☁ Saved':'☁ …';el.style.opacity='1';
   clearTimeout(el._t);el._t=setTimeout(()=>{el.style.opacity='.3'},1600)}).catch(()=>{})}
+// Never expose a partially-built G to the render loop: fill every default on a
+// detached object first, then swap it in as one assignment.
+function adopt(obj,owner){
+ const prev=G;
+ try{
+  G=obj||fresh();
+  if(owner)G._owner=owner;
+  normalizeG();
+  return G;
+ }catch(e){G=prev;return prev}
+}
 function normalizeG(){const f=fresh();for(const k in f)if(G[k]==null)G[k]=f[k];
  ['glossary','coins','secrets','tempts','qclaim','found','mines','opps','owned','met'].forEach(k=>{if(!G[k]||typeof G[k]!=='object')G[k]={}});
  if(!Array.isArray(G.tools))G.tools=['fist'];if(!Array.isArray(G.predictions))G.predictions=[];
@@ -2050,6 +2074,7 @@ $('hchar').addEventListener('click',openCharacter);
 $('hteam').addEventListener('click',openTeam);
 $('hboard').addEventListener('click',openBoard);$('hhelp').addEventListener('click',showHelp);
 $('hnarr').addEventListener('click',toggleNarrate);
+$('hout').addEventListener('click',logOut);
 // on a phone the "why" line is hidden until you tap the card
 $('quest').addEventListener('click',e=>{if(e.target.classList.contains('qs'))return;
  $('quest').classList.toggle('open')});
@@ -3396,6 +3421,10 @@ async function createTeam(){const n=($('tname')||{}).value||'';
 async function joinTeam(){const c=(($('tcode')||{}).value||'').toUpperCase();
  try{await j('/api/social/team/join',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:c})});
   confetti();sfx('secret');openTeam()}catch(e){toast(String(e.message||e).slice(0,80))}}
+async function logOut(){
+ try{await fetch('/api/auth/logout',{method:'POST'})}catch(e){}
+ try{localStorage.removeItem(KEY)}catch(e){}
+ location.href='/game';}
 async function leaveTeam(){try{await j('/api/social/team/leave',{method:'POST'})}catch(e){}openTeam()}
 async function sendCheer(i){try{await j('/api/social/team/cheer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({i})});
  sfx('hit');openTeam()}catch(e){toast(String(e.message||e).slice(0,80))}}
@@ -4286,11 +4315,18 @@ async function resolve(){const due=G.predictions.filter(p=>p.status==='pending'&
   toast('✅ Your '+p.name+' call came true! +$1,500 · +1 skill');
   if(wageTier().n!==before)setTimeout(()=>{confetti();toast('📈 Reading markets made you '+wageTier().n+' — '+money(wage())+'/shift.')},1400)}else{G.streak=0;G.xp+=5}}save();renderHUD()}
 async function boot(){
- // profile lives on the server now — pull it before anything reads progress
+ // Work out WHO is signed in before touching any saved state. Everything below
+ // hangs off this; getting it wrong leaks one player's game into another's.
+ let me=null;
+ try{me=(await j('/api/auth/me')).player}catch(e){}
+ if(me){
+  KEY=keyFor(me);
+  const mine=load();
+  G=adopt((mine&&mine._owner===me)?mine:fresh(),me);
+ }
  try{const srv=await j('/api/game/profile');
-  // never clobber something the player already did while the fetch was in flight
-  if(srv&&typeof srv==='object'&&Object.keys(srv).length&&!_actedBeforeLoad&&(srv.rev||0)>=(G.rev||0)){
-   G=srv;normalizeG();localStorage.setItem(KEY,JSON.stringify(G));
+  if(srv&&typeof srv==='object'&&Object.keys(srv).length&&(srv.rev||0)>=(G.rev||0)){
+   G=adopt(srv,me);localStorage.setItem(KEY,JSON.stringify(G));
    if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';
    document.body.classList.toggle('bigtext',!!G.narrate);
    if(typeof loadHome==='function'&&window.THREE){loadHome();updateTool();updateVaultCount();updateWP();if(typeof buildRide==='function')buildRide()}
