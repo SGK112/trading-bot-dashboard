@@ -1151,13 +1151,13 @@ body.bigtext .helpbox{font-size:17px}
 #mini{position:absolute;right:12px;bottom:92px;width:120px;height:120px;border-radius:50%;border:2px solid #2b3654;background:rgba(10,16,30,.4);z-index:5;pointer-events:none}
 #pad{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;z-index:6}
 /* ---- side panel ---- */
-#sidep{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);z-index:26;
+#sidep{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);z-index:31;
  background:linear-gradient(170deg,#151d36,#0d1220);border-left:1px solid #2b3654;
  box-shadow:-14px 0 40px rgba(0,0,0,.5);transform:translateX(104%);transition:transform .3s cubic-bezier(.2,.9,.3,1);
  display:flex;flex-direction:column}
 #sidep.show{transform:none}
 #sidep.peek{transform:translateX(104%)}
-#sideveil{position:fixed;inset:0;background:rgba(6,9,16,.5);z-index:25;display:none}
+#sideveil{position:fixed;inset:0;background:rgba(6,9,16,.5);z-index:30;display:none}
 #sideveil.show{display:block}
 #sidehd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #22304e;flex:0 0 auto}
 #sidehd .st{font-weight:800;font-size:15px;flex:1;text-align:left}
@@ -1179,13 +1179,57 @@ body.bigtext .helpbox{font-size:17px}
 .slotit .sc{font-size:10px;font-weight:800;margin-top:3px;color:#f0b429}
 .slotit .sc.free{color:#3fb950}
 .slotit .tick{position:absolute;top:4px;right:5px;font-size:11px;color:#3d8bff}
+/* ---- workbench: the hands-on sims ---- */
+.simhd{display:flex;align-items:center;gap:11px;text-align:left;margin-bottom:10px}
+.simhd .e{font-size:34px;flex:0 0 auto}
+.simhd .t{font-size:19px;font-weight:800;line-height:1.2}
+.simhd .s{font-size:12px;color:#7fb4ff;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.simrow{display:flex;align-items:center;gap:10px;background:#0d1420;border:1px solid #2b3654;
+ border-radius:13px;padding:10px 12px;margin:7px 0;text-align:left}
+.simrow .ic{font-size:22px;flex:0 0 auto}
+.simrow .nm{flex:1 1 auto;font-size:13.5px;font-weight:700;line-height:1.3}
+.simrow .nm small{display:block;font-weight:500;color:#93a1b5;font-size:11.5px;margin-top:2px}
+.simrow .vv{font-size:14px;font-weight:800;min-width:76px;text-align:right;font-variant-numeric:tabular-nums}
+.stepper{display:flex;gap:5px;flex:0 0 auto}
+.stepper button{width:36px;height:36px;border-radius:11px;background:#16223a;border:1px solid #2b3654;
+ color:#cfe0ff;font-size:19px;font-weight:800;line-height:1}
+.stepper button:active{background:#3d8bff}
+.simbar{height:9px;background:#0a0f18;border-radius:5px;overflow:hidden;margin:9px 0 3px}
+.simbar i{display:block;height:100%;transition:width .2s}
+.simtot{display:flex;justify-content:space-between;font-size:12.5px;font-weight:800;margin-bottom:4px}
+.buckets{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:9px 0}
+.bucket{background:#0d1420;border:2px dashed #2b3654;border-radius:14px;padding:9px;min-height:90px}
+.bucket h6{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;text-align:center}
+.bucket.a{border-color:#2f6b3d}.bucket.a h6{color:#3fb950}
+.bucket.l{border-color:#7a3340}.bucket.l h6{color:#f85149}
+.chip{display:block;width:100%;background:#16223a;border:1px solid #2b3654;border-radius:10px;
+ padding:8px 9px;margin:4px 0;font-size:12.5px;font-weight:700;color:#e9eef5;text-align:left;line-height:1.25}
+.chip:active{border-color:#3d8bff}
+.chip small{display:block;font-weight:500;color:#93a1b5;font-size:11px}
+.flagit{display:flex;gap:9px;align-items:flex-start;background:#0d1420;border:2px solid #2b3654;
+ border-radius:13px;padding:10px 12px;margin:7px 0;text-align:left;width:100%}
+.flagit.on{border-color:#f0b429;background:#221c0d}
+.flagit .fb{font-size:20px;flex:0 0 auto}
+.flagit .ft{flex:1 1 auto;font-size:13px;line-height:1.45}
+.flagit .ft b{display:block;font-size:13.5px;margin-bottom:2px}
+.simslide{width:100%;margin:12px 0 4px;accent-color:#3d8bff;height:30px}
+.simout{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:7px;margin:8px 0}
+.simout div{background:#0d1420;border:1px solid #2b3654;border-radius:11px;padding:8px 9px;text-align:center}
+.simout .k{font-size:10.5px;color:#7b8aa3;text-transform:uppercase;letter-spacing:.05em}
+.simout .v{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+.simgrade{border-radius:14px;padding:12px 13px;margin:10px 0;text-align:left;font-size:13.5px;line-height:1.5}
+.simgrade.good{background:#0f2318;border:1px solid #2f6b3d}
+.simgrade.ok{background:#241d0c;border:1px solid #7a5f1f}
+.simgrade.bad{background:#2a1113;border:1px solid #7a3340}
+.simgrade b{display:block;font-size:16px;margin-bottom:4px}
+@media(max-width:820px){.buckets{grid-template-columns:1fr}.simrow .vv{min-width:64px;font-size:13px}}
 .slotnote{font-size:12px;color:#93a1b5;line-height:1.5;background:#0e162699;border:1px solid #22304e;
  border-radius:11px;padding:9px 11px;margin:6px 0 12px}
 .sechd{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#7fb4ff;margin:16px 0 2px}
 .swrow{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .sw{width:36px;height:36px;border-radius:11px;cursor:pointer;border:3px solid #2b3654}
 .sw.on{border-color:#3d8bff;transform:scale(1.06)}
-#peekbtn{position:fixed;right:14px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:27;display:none;
+#peekbtn{position:fixed;right:14px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:32;display:none;
  padding:12px 18px;border-radius:14px;background:rgba(61,139,255,.92);color:#fff;font-weight:800;font-size:14px;border:none}
 #sidep.show ~ #peekbtn{display:block}
 @media(max-width:820px){
@@ -1208,6 +1252,7 @@ body.bigtext .helpbox{font-size:17px}
  grid-template-columns:auto 1fr auto;align-items:end;gap:12px;
  padding:0 14px calc(14px + env(safe-area-inset-bottom,0px));pointer-events:none}
 #ctlbar>*{pointer-events:auto}
+body.overlay #ctlbar,body.overlay #gesthint,body.overlay #stick{opacity:0;pointer-events:none}
 /* the ring that appears where your thumb lands */
 #stick{position:fixed;z-index:19;width:104px;height:104px;margin:-52px 0 0 -52px;border-radius:50%;
  border:2px solid rgba(127,180,255,.55);background:rgba(61,139,255,.10);display:none;pointer-events:none}
@@ -1263,7 +1308,7 @@ body.bigtext .helpbox{font-size:17px}
  #gctl{grid-template-columns:repeat(2,44px);grid-auto-rows:44px;gap:4px}
  #gctl .gbtn.enter{height:44px}
 }
-.ov{position:absolute;inset:0;background:rgba(6,9,16,.86);display:none;align-items:center;justify-content:center;z-index:20;padding:16px}
+.ov{position:fixed;inset:0;background:rgba(6,9,16,.86);display:none;align-items:center;justify-content:center;z-index:34;padding:16px}
 .ov.show{display:flex}
 .panel{background:linear-gradient(160deg,#1a2340,#12172a);border:1px solid #3d8bff;border-radius:22px;padding:20px;max-width:460px;width:100%;text-align:center;max-height:94vh;overflow:auto;animation:pin .4s cubic-bezier(.2,1.4,.4,1);position:relative}
 .panel.boss{border-color:#f0b429}
@@ -1349,6 +1394,7 @@ body.bigtext .helpbox{font-size:17px}
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
  <span class="mrow clk" id=hinv>📊 Your investments</span>
  <span class="mrow clk" id=hbuild>🏗️ Your business</span>
+ <span class="mrow clk" id=hwork>🛠️ Workbench <i>hands-on, pays</i></span>
  <span class="mrow clk" id=hbench>🤖 Prompt Bench <i>paid jobs</i></span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
  <span class="mrow clk" id=hact>⏳ Spend your day</span>
@@ -1439,6 +1485,7 @@ body.bigtext .helpbox{font-size:17px}
   Walls: beat them down, climb them, or go round. Push crates. Climb mountains.
  </div>
 </div></div>
+<div class=ov id=sim><div class='panel wide' style=max-width:620px><button class=tclose onclick="hide('sim')">✕</button><div id=simbody></div></div></div>
 <div class=ov id=secret><div class=panel style=border-color:#f0b429><button class=tclose onclick="hide('secret')">✕</button><div id=secbody></div></div></div>
 <div class=ov id=vault><div class=panel><button class=tclose onclick="hide('vault')">✕</button><div id=vbody></div></div></div>
 <div class=ov id=glossary><div class=panel><button class=tclose onclick="hide('glossary')">✕</button>
@@ -1909,7 +1956,7 @@ let G=fresh();
 if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;if(!G.hidden)G.hidden={};if(G.coach==null)G.coach=0;if(G.highCoins==null)G.highCoins=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;if(!G.hidden)G.hidden={};if(!G.sims)G.sims={};if(G.coach==null)G.coach=0;if(G.highCoins==null)G.highCoins=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -2379,6 +2426,287 @@ const HIDDEN=[
    +'Nearly everyone who got seriously wealthy owned a piece of something rather than being paid by the hour. '
    +'Ask of any work: at the end of this, do I own anything?'},
 ];
+/* =================================================================
+   THE WORKBENCH — every island has something you actually DO.
+   Reading about a budget is not the same as building one.
+   ================================================================= */
+const SIMS=[
+ {id:'budget',th:'basics',e:'🧾',n:'Build a Month',kind:'allocate',pay:400,skill:2,
+  brief:'You clear <b>$2,600</b> a month. Rent and food are fixed — everything else is a choice you get to make. '
+    +'Move the sliders and see what is left. There is no trick: the only thing that builds money is the gap between what comes in and what goes out.',
+  total:2600,unit:'$',
+  items:[{id:'rent',e:'🏠',n:'Rent',s:'Fixed. You signed for it.',min:900,max:900,start:900},
+         {id:'food',e:'🍜',n:'Food',s:'You have to eat. How you eat is up to you.',min:200,max:600,start:400},
+         {id:'car',e:'🚗',n:'Car payment',s:'Optional. A bus pass is $70.',min:0,max:600,start:400},
+         {id:'fun',e:'🎉',n:'Going out',s:'This is your life, not a leak. Just choose the number.',min:0,max:600,start:300},
+         {id:'stuff',e:'📦',n:'Stuff you order',s:'The one nobody tracks.',min:0,max:500,start:250},
+         {id:'save',e:'🏦',n:'Save & invest',s:'Move this FIRST, not last.',min:0,max:1500,start:0}],
+  grade(v){const rate=v.save/2600;
+   if(rate>=0.2)return{t:'good',h:'Saving '+Math.round(rate*100)+'% — you are ahead of most adults.',
+    d:'Anything over 20% is genuinely strong. At this rate, with average returns, you would have about a year of expenses banked in under four years. The people who do this are not richer than you — they just decided the number first.'};
+   if(rate>=0.1)return{t:'ok',h:'Saving '+Math.round(rate*100)+'% — a real start.',
+    d:'Ten percent works, it is just slow. Look at the car and the stuff line: those two together are usually where the next 10% is hiding, and neither one changes your day very much.'};
+   if(rate>0)return{t:'ok',h:'Saving '+Math.round(rate*100)+'%. Something is better than nothing.',
+    d:'This is where most people live, and it is why most people stay stuck. Try dropping the car to a bus pass and see what happens to the last line — it is usually a bigger jump than people expect.'};
+   return{t:'bad',h:'Nothing saved. Every dollar spoken for.',
+    d:'This is not a moral failing — it is just maths, and the maths never improves on its own. Drag the bottom slider up before you touch anything else, then make the rest fit. That order is the entire lesson.'}}},
+
+ {id:'balance',th:'invest',e:'⚖️',n:'Assets vs Liabilities',kind:'sort',pay:500,skill:3,
+  brief:'This is the single distinction most people never get taught. An <b>asset</b> puts money in your pocket. '
+    +'A <b>liability</b> takes money out. Not "expensive vs cheap" — direction of cash flow. Sort all eight.',
+  left:{k:'a',n:'Asset — pays me'},right:{k:'l',n:'Liability — costs me'},
+  items:[{id:'i1',n:'Index fund',s:'Pays dividends, grows over time',ans:'a'},
+         {id:'i2',n:'Your car',s:'Fuel, insurance, and it loses value yearly',ans:'l'},
+         {id:'i3',n:'A rented-out flat',s:'Rent comes in above the mortgage',ans:'a'},
+         {id:'i4',n:'The home you live in',s:'Rates, repairs, interest — nothing comes in',ans:'l'},
+         {id:'i5',n:'Credit card balance',s:'Charges you 22% a year to exist',ans:'l'},
+         {id:'i6',n:'A skill people pay for',s:'Raises what an hour of you is worth, forever',ans:'a'},
+         {id:'i7',n:'Designer watch',s:'Beautiful. Silent. Costs to insure',ans:'l'},
+         {id:'i8',n:'A small side business',s:'Sends money even on days you do not work',ans:'a'}],
+  grade(v,items){const right=items.filter(i=>v[i.id]===i.ans).length;
+   if(right===items.length)return{t:'good',h:'All eight. You have got it.',
+    d:'Notice that the house you live in landed on the liability side. That surprises almost everyone, and arguing about it misses the point: it is not a bad thing to own, it just does not pay you while you live in it. Rich people are not the ones with the most stuff. They are the ones whose stuff sends them money.'};
+   if(right>=6)return{t:'ok',h:right+' of 8.',
+    d:'Close. Re-read the ones you missed and ask only one question — after I own this, does money arrive or leave? Ignore price, ignore how impressive it is. Direction of cash flow is the whole test.'};
+   return{t:'bad',h:'Only '+right+' of 8.',
+    d:'Worth doing again, slowly. The trap is sorting by price — a $60,000 car feels like an asset because it cost a lot. It is not. A $500 course that gets you a better job is. Cost tells you nothing; direction tells you everything.'}}},
+
+ {id:'port',th:'invest',e:'🧺',n:'Build a Portfolio',kind:'allocate',pay:600,skill:3,
+  brief:'You have <b>$10,000</b> and thirty years. Split it however you like, then see what history says usually happens. '
+    +'There is no perfect answer — but there are answers that quietly cost you a house.',
+  total:10000,unit:'$',
+  items:[{id:'cash',e:'💵',n:'Cash under the bed',s:'0% — and inflation eats ~3% a year',min:0,max:10000,start:10000},
+         {id:'bond',e:'🏛️',n:'Bonds',s:'~3% · steady, boring, rarely scary',min:0,max:10000,start:0},
+         {id:'index',e:'🧺',n:'Whole-market index fund',s:'~7% after inflation · owns thousands of companies',min:0,max:10000,start:0},
+         {id:'single',e:'🎯',n:'One company you like',s:'Could be 20%. Could be zero.',min:0,max:10000,start:0},
+         {id:'crypto',e:'🎲',n:'Crypto',s:'Wild. Sometimes up. Sometimes -70%.',min:0,max:10000,start:0}],
+  grade(v){const t=10000;
+   const proj=Math.round((v.cash*Math.pow(1.00,30)+v.bond*Math.pow(1.03,30)+v.index*Math.pow(1.07,30)
+     +v.single*Math.pow(1.05,30)+v.crypto*Math.pow(1.02,30)));
+   const risky=(v.single+v.crypto)/t, idx=v.index/t, cash=v.cash/t;
+   const tail='<br><br>Rough 30-year projection at historical averages: <b>'+money(proj)+'</b>.';
+   if(cash>0.5)return{t:'bad',h:'Over half in cash.',d:'Cash feels safe because the number never drops. It is the only choice on this list that is guaranteed to lose — inflation takes about 3% a year, every year, quietly. Thirty years of that halves what your money buys.'+tail};
+   if(risky>0.5)return{t:'bad',h:'Over half in single bets.',d:'One company and crypto can absolutely make money. They can also go to zero while the rest of the market rises. You are not being brave here, you are being concentrated — and concentration is how people lose a decade.'+tail};
+   if(idx>=0.5)return{t:'good',h:'Index-heavy. This is the boring answer, and the boring answer wins.',d:'You own thousands of companies at once, so no single failure can wreck you, and you pay almost nothing in fees. A small side bet is fine — it keeps it interesting and it will not sink you.'+tail};
+   return{t:'ok',h:'Spread out, but light on the engine.',d:'Nothing here is reckless. But the index fund is the part that does the heavy lifting over thirty years, and it is currently doing less than half the work.'+tail}}},
+
+ {id:'scam',th:'protect',e:'🚩',n:'Spot the Scam',kind:'flag',pay:550,skill:3,
+  brief:'Five messages arrive this week. <b>Three are scams.</b> Tap the ones you would not touch. '
+    +'Every real scam leaves the same fingerprints — you are learning the fingerprints, not the story.',
+  items:[{id:'s1',n:'"Guaranteed 12% monthly. Zero risk. Spots close tonight."',
+    s:'From a slick account with 40k followers.',bad:1,
+    why:'Three tells at once: guaranteed, no risk, and a deadline. Any one of them is a warning. All three is a robbery in progress.'},
+   {id:'s2',n:'"Your employer will match 50% of what you put in your retirement account."',
+    s:'A boring email from HR with a form attached.',bad:0,
+    why:'This is real, it is free money, and it is the single most-skipped opportunity in personal finance — because it arrives looking like paperwork.'},
+   {id:'s3',n:'"Send $200 to unlock your $5,000 prize."',
+    s:'You do not remember entering anything.',bad:1,
+    why:'You never pay to receive money. Not a fee, not tax, not a release charge. That rule has no exceptions.'},
+   {id:'s4',n:'"Broad market index fund. 0.03% fee. Returns not guaranteed."',
+    s:'Dull page, no photos of anyone with a jet.',bad:0,
+    why:'Legitimate investments tell you they might lose. The honesty is the signal. Nobody is going to hype this at you.'},
+   {id:'s5',n:'"Hey it is your bank — confirm your password on this link to stop a charge."',
+    s:'Looks right. Logo and everything.',bad:1,
+    why:'Panic plus a link plus a password request. A real bank never asks for your password. Hang up, then dial the number on your actual card.'}],
+  grade(v,items){const bad=items.filter(i=>i.bad),good=items.filter(i=>!i.bad);
+   const caught=bad.filter(i=>v[i.id]).length, wrong=good.filter(i=>v[i.id]).length;
+   if(caught===bad.length&&wrong===0)return{t:'good',h:'All three caught, no false alarms.',
+    d:'You spotted the pattern instead of the story. Scams change costume constantly — the fingerprints never do: urgency, guarantees, secrecy, and a payment before a payout. And notice you did not flag the boring ones. Boring is usually the honest one.'};
+   if(caught===bad.length)return{t:'ok',h:'Caught all three — but flagged '+wrong+' safe one'+(wrong>1?'s':'')+'.',
+    d:'Being suspicious is the right instinct, and it does have a cost. The employer match is the clearest example: real, free, and turned down every day because it looked like a trick. Check the tells rather than the vibe.'};
+   return{t:'bad',h:'Missed '+(bad.length-caught)+'.',
+    d:'Go back through the ones you let past and look for four words: guaranteed, urgent, secret, and pay-first. At least one of those is in every single scam on this list.'}}},
+
+ {id:'bug',th:'dev',e:'🐛',n:'Read the Error',kind:'flag',pay:500,skill:3,
+  brief:'A red wall of text is not a punishment, it is a map. Below are five lines from a crash. '
+    +'<b>Tap the ones that actually tell you where the problem is.</b>',
+  items:[{id:'b1',n:'TypeError: Cannot read property &#39;name&#39; of undefined',s:'Line 1 of the output',bad:1,
+    why:'This is the whole answer. Something you expected to be an object is undefined, and you tried to reach inside it. Nine times out of ten it is a thing that had not loaded yet.'},
+   {id:'b2',n:'at getUser (users.js:42:19)',s:'Second line',bad:1,
+    why:'File and line number. This is where you open your editor. Beginners scroll past this line constantly; it is the most valuable one on the screen.'},
+   {id:'b3',n:'at processTicksAndRejections (node:internal/process/task_queues)',s:'Further down',bad:0,
+    why:'This is the language&#39;s own plumbing, not your code. Anything with node:internal or node_modules can be skipped — your bug is almost always in a file you wrote.'},
+   {id:'b4',n:'Node.js v20.11.0',s:'Last line',bad:0,
+    why:'Version information. Occasionally useful when asking for help, never the cause.'},
+   {id:'b5',n:'const user = users.find(u => u.id === id)',s:'The code the trace points at',bad:1,
+    why:'Here is the actual bug: find() returns undefined when nothing matches, and the next line reads .name off it. Reading the trace led you straight here in under a minute.'}],
+  grade(v,items){const bad=items.filter(i=>i.bad),good=items.filter(i=>!i.bad);
+   const caught=bad.filter(i=>v[i.id]).length,wrong=good.filter(i=>v[i.id]).length;
+   if(caught===3&&wrong===0)return{t:'good',h:'You read it like a professional.',
+    d:'Error, location, code. That is the whole method, and it is most of the gap between someone who has been coding a month and someone who has been coding a year. The panic is the only thing that ever really slowed anybody down.'};
+   if(caught>=2)return{t:'ok',h:caught+' of 3 useful lines.',
+    d:'Good instincts. The rule that makes this automatic: ignore any line containing node_modules or node:internal, and read the first line plus the first file of your own that appears.'};
+   return{t:'bad',h:'Only '+caught+' of 3.',
+    d:'Try again with one question per line — does this name a file I wrote, or a line of my code? If not, skip it. The signal is always in the top few lines.'}}},
+
+ {id:'price',th:'biz',e:'💲',n:'Price It Right',kind:'slider',pay:650,skill:3,
+  brief:'You make candles. Each one costs <b>$4</b> in wax and wick, and you spend <b>$600</b> a month on rent, '
+    +'stall fees and ads whether you sell any or not. Pick a price and watch what actually happens. '
+    +'Careful — cheap does not mean more profit.',
+  min:5,max:40,start:8,step:1,unit:'$',label:'Price per candle',
+  compute(p){const demand=Math.max(0,Math.round(520-11*p));
+   const rev=p*demand, cogs=4*demand, fixed=600, profit=rev-cogs-fixed;
+   return{demand,rev,cogs,fixed,profit,
+    out:[{k:'Sold / month',v:demand},{k:'Revenue',v:money(rev)},
+         {k:'Costs',v:money(cogs+fixed)},{k:'Profit',v:money(profit),c:profit>0?'#3fb950':'#f85149'}]}},
+  peak(){let bp=-1e9,best=this.min;
+   for(let p=this.min;p<=this.max;p+=this.step){const q=this.compute(p).profit;if(q>bp){bp=q;best=p}}
+   return{p:best,profit:bp}},
+  grade(p,r){const pk=this.peak(), share=r.profit/pk.profit;
+   if(r.profit<=0)return{t:'bad',h:'You lose '+money(-r.profit)+' a month.',
+    d:'At $'+p+' each you are selling plenty and going backwards, because every candle only clears $'+(p-4)+' toward a $600 bill that arrives whether you sell one or none. This is exactly how busy businesses go under — full order book, empty bank account.'};
+   if(share>=0.92)return{t:'good',h:money(r.profit)+' a month. That is the sweet spot.',
+    d:'You found it. Notice the highest price did not win and neither did the lowest — profit peaks in the middle, and most new businesses never look there because low prices feel safer. Raising prices is the fastest profit lever there is, and it costs nothing to try.'};
+   if(p<=10)return{t:'ok',h:money(r.profit)+' profit. Working very hard for it.',
+    d:'You are making '+r.demand+' candles a month for '+money(r.profit)+'. Push the price up and watch what happens — you will sell fewer and earn more, because the customers you lose were the least profitable ones. The peak is '+money(pk.profit)+' at $'+pk.p+'.'};
+   if(p>=pk.p+6)return{t:'ok',h:money(r.profit)+' profit, but very few customers.',
+    d:'Only '+r.demand+' sold. Premium pricing can work, and this thin a market leaves you one quiet month from trouble. Profit actually peaks lower, at $'+pk.p+' — '+money(pk.profit)+' a month.'};
+   return{t:'ok',h:money(r.profit)+' a month. Solid, not optimal.',
+    d:'You are in profit and it is stable. You are leaving about '+money(pk.profit-r.profit)+' a month on the table though — the peak sits at $'+pk.p+'. Worth finding, for any business you ever run.'}}},
+];
+function simsFor(th){return SIMS.filter(s=>s.th===th)}
+function simDone(id){return !!(G.sims&&G.sims[id])}
+let curSim=null,simState={};
+function openSim(id){
+ const S=SIMS.find(x=>x.id===id); if(!S)return;
+ curSim=S; paused=true; simState={};
+ if(S.kind==='allocate')S.items.forEach(i=>simState[i.id]=i.start);
+ else if(S.kind==='sort')S.items.forEach(i=>simState[i.id]=null);
+ else if(S.kind==='flag')S.items.forEach(i=>simState[i.id]=false);
+ else if(S.kind==='slider')simState.v=S.start;
+ renderSim(); $('sim').classList.add('show');
+}
+function simHead(){
+ return '<div class=simhd><div class=e>'+curSim.e+'</div><div>'
+  +'<div class=s>Workbench'+(simDone(curSim.id)?' · done before':'')+'</div>'
+  +'<div class=t>'+curSim.n+'</div></div></div>'
+  +'<p class=p-teach>'+curSim.brief+'</p>';
+}
+function renderSim(){
+ const S=curSim; let h=simHead();
+ if(S.kind==='allocate'){
+  const used=S.items.reduce((a,i)=>a+simState[i.id],0), left=S.total-used;
+  h+=S.items.map(i=>{
+   const v=simState[i.id], locked=i.min===i.max;
+   return '<div class=simrow><span class=ic>'+i.e+'</span>'
+    +'<span class=nm>'+i.n+'<small>'+i.s+'</small></span>'
+    +'<span class=vv>'+money(v)+'</span>'
+    +(locked?'<span class=stepper><button disabled style=opacity:.25>🔒</button></span>'
+      :'<span class=stepper><button onclick="simStep(&#39;'+i.id+'&#39;,-1)">−</button>'
+       +'<button onclick="simStep(&#39;'+i.id+'&#39;,1)">+</button></span>')
+    +'</div>'}).join('');
+  const pctUsed=Math.min(100,used/S.total*100);
+  h+='<div class=simtot><span>Spent '+money(used)+'</span>'
+   +'<span style="color:'+(left<0?'#f85149':left===0?'#3fb950':'#f0b429')+'">'
+   +(left<0?money(-left)+' over':money(left)+' left')+'</span></div>'
+   +'<div class=simbar><i style="width:'+pctUsed+'%;background:'+(left<0?'#f85149':'#3d8bff')+'"></i></div>'
+   +(left!==0?'<div class=p-note>Every dollar has to have a job. Get the remaining amount to zero.</div>':'')
+   +'<button class=pbtn '+(left!==0?'disabled style="opacity:.4"':'')+' onclick=simSubmit()>See what this does →</button>';
+ }
+ else if(S.kind==='sort'){
+  const un=S.items.filter(i=>!simState[i.id]);
+  h+='<div class=buckets>'
+   +'<div class="bucket a"><h6>'+S.left.n+'</h6>'
+   +S.items.filter(i=>simState[i.id]==='a').map(i=>'<button class=chip onclick="simUnsort(&#39;'+i.id+'&#39;)">'+i.n+'</button>').join('')+'</div>'
+   +'<div class="bucket l"><h6>'+S.right.n+'</h6>'
+   +S.items.filter(i=>simState[i.id]==='l').map(i=>'<button class=chip onclick="simUnsort(&#39;'+i.id+'&#39;)">'+i.n+'</button>').join('')+'</div></div>';
+  if(un.length){h+='<div class=p-world style="text-align:left;margin:10px 0 4px">'+un.length+' left to sort</div>'
+   +un.map(i=>'<div class=simrow><span class=nm>'+i.n+'<small>'+i.s+'</small></span>'
+     +'<span class=stepper><button title="Asset" style="color:#3fb950;font-size:15px" onclick="simSort(&#39;'+i.id+'&#39;,&#39;a&#39;)">↑$</button>'
+     +'<button title="Liability" style="color:#f85149;font-size:15px" onclick="simSort(&#39;'+i.id+'&#39;,&#39;l&#39;)">↓$</button></span></div>').join('');}
+  h+='<button class=pbtn '+(un.length?'disabled style="opacity:.4"':'')+' onclick=simSubmit()>Check my sorting →</button>';
+ }
+ else if(S.kind==='flag'){
+  h+=S.items.map(i=>'<button class="flagit'+(simState[i.id]?' on':'')+'" onclick="simFlag(&#39;'+i.id+'&#39;)">'
+   +'<span class=fb>'+(simState[i.id]?'🚩':'⬜')+'</span>'
+   +'<span class=ft><b>'+i.n+'</b>'+i.s+'</span></button>').join('');
+  h+='<button class=pbtn onclick=simSubmit()>Lock in my answer →</button>';
+ }
+ else if(S.kind==='slider'){
+  const r=S.compute(simState.v);
+  h+='<div class=simtot><span>'+S.label+'</span><span style=color:#7fb4ff>'+S.unit+simState.v+'</span></div>'
+   +'<input class=simslide type=range min='+S.min+' max='+S.max+' step='+S.step+' value='+simState.v
+   +' oninput="simSlide(this.value)">'
+   +'<div class=simout>'+r.out.map(o=>'<div><div class=k>'+o.k+'</div>'
+     +'<div class=v'+(o.c?' style=color:'+o.c:'')+'>'+o.v+'</div></div>').join('')+'</div>'
+   +'<button class=pbtn onclick=simSubmit()>Lock in this price →</button>';
+ }
+ h+='<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;sim&#39;)">← Back to the game</button>';
+ $('simbody').innerHTML=h;
+}
+function simStep(id,dir){
+ const S=curSim,i=S.items.find(x=>x.id===id);
+ const stepSize=S.total>5000?500:50;
+ let v=simState[id]+dir*stepSize;
+ v=Math.max(i.min,Math.min(i.max,v));
+ const used=S.items.reduce((a,x)=>a+(x.id===id?v:simState[x.id]),0);
+ if(used>S.total)v-=(used-S.total);
+ simState[id]=Math.max(i.min,v); renderSim();
+}
+function simSort(id,side){simState[id]=side;renderSim()}
+function simUnsort(id){simState[id]=null;renderSim()}
+function simFlag(id){simState[id]=!simState[id];renderSim();sfx('hit')}
+function simSlide(v){simState.v=+v;renderSim()}
+function simSubmit(){
+ const S=curSim; let g,detail='';
+ if(S.kind==='allocate')      g=S.grade(simState);
+ else if(S.kind==='sort'){    g=S.grade(simState,S.items);
+   detail='<div class=sechd>Where each one goes</div>'
+    +S.items.map(i=>'<div class=simrow><span class=ic>'+(simState[i.id]===i.ans?'✅':'❌')+'</span>'
+      +'<span class=nm>'+i.n+'<small>'+(i.ans==='a'?'Asset — money comes in':'Liability — money goes out')+'</small></span></div>').join('');}
+ else if(S.kind==='flag'){    g=S.grade(simState,S.items);
+   detail='<div class=sechd>Why</div>'
+    +S.items.map(i=>{const you=!!simState[i.id],ok=you===!!i.bad;
+      return '<div class=gloss style="border-color:'+(ok?'#2f6b3d':'#7a3340')+'"><b>'+(ok?'✅':'❌')+' '+i.n+'</b>'
+        +'<div class=gd>'+i.why+'</div></div>'}).join('');}
+ else {                       g=S.grade(simState.v,S.compute(simState.v));
+   // show them the peak they may have missed
+   const pk=S.peak();
+   detail='<div class=gloss><b>The best price was '+S.unit+pk.p+'</b><div class=gd>At '+S.unit+pk.p
+     +' the profit peaks at '+money(pk.profit)+' a month. Worth remembering that the peak is almost never at either end.</div></div>';}
+ const first=!simDone(S.id);
+ const pay=first?S.pay:Math.round(S.pay*0.25);
+ const sk=first?S.skill:0;
+ if(g.t==='good'||g.t==='ok'){ addWealth(pay); G.skill=Math.min(SKILL_CAP,(G.skill||0)+sk); }
+ G.sims=G.sims||{}; G.sims[S.id]=Math.max(G.sims[S.id]||0,g.t==='good'?2:1); save();
+ if(g.t==='good'){sfx('win');confetti()} else if(g.t==='ok')sfx('secret'); else sfx('bad');
+ $('simbody').innerHTML=simHead()
+  +'<div class="simgrade '+g.t+'"><b>'+g.h+'</b>'+g.d+'</div>'
+  +((g.t==='good'||g.t==='ok')?'<div class=p-teach style="border-color:#3fb950;text-align:center"><b>+'+money(pay)
+     +(sk?' · +'+sk+' skill':'')+'</b>'+(first?'':'<div class=gd>Repeat run — the full reward is first time only.</div>')+'</div>'
+   :'<div class=p-teach style="border-color:#f85149;text-align:center">No payout this time. Have another go — it costs nothing but a minute.</div>')
+  +detail
+  +'<button class=pbtn onclick="openSim(&#39;'+S.id+'&#39;)">↻ Try it again</button>'
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;sim&#39;)">← Back to the game</button>';
+ renderHUD();
+}
+function openWorkbench(){
+ paused=true;
+ const byTheme=THEMES.map(t=>{
+  const list=simsFor(t.id);
+  // the AI island already has a full hands-on bench of its own - link it rather than duplicate it
+  const extra = t.id==='ai'
+   ? '<div class=simrow><span class=ic>🤖</span><span class=nm>Prompt Bench<small>'
+     +(Object.keys(G.promptJobs||{}).length?Object.keys(G.promptJobs||{}).length+' jobs delivered':'Write a real prompt, get paid for it')
+     +'</small></span><button class=pbtn style="width:auto;margin:0;padding:8px 13px;font-size:13px" '
+     +'onclick="hide(&#39;sim&#39;);openPromptBench(0)">Open</button></div>' : '';
+  if(!list.length&&!extra)return '';
+  return '<div class=sechd style=color:'+t.col+'>'+t.e+' '+t.n+'</div>'
+   +list.map(S=>'<div class=simrow><span class=ic>'+S.e+'</span>'
+     +'<span class=nm>'+S.n+'<small>'+(simDone(S.id)===2?'Nailed it':simDone(S.id)?'Done — try for a clean run':'Not tried yet')+'</small></span>'
+     +'<button class=pbtn style="width:auto;margin:0;padding:8px 13px;font-size:13px" onclick="hide(&#39;sim&#39;);openSim(&#39;'+S.id+'&#39;)">'
+     +(simDone(S.id)?'Again':'Start')+'</button></div>').join('')
+   +extra}).join('');
+ const done=SIMS.filter(S=>simDone(S.id)).length;
+ const total=SIMS.length+1;
+ $('simbody').innerHTML='<div class=simhd><div class=e>🛠️</div><div>'
+  +'<div class=s>'+done+' of '+total+' completed</div><div class=t>The Workbench</div></div></div>'
+  +'<p class=p-teach>Reading about money and doing it are different skills, and only one of them pays. '
+  +'Every island has something here you actually build, sort, price or catch. They are short, they are repeatable, and they pay.</p>'
+  +byTheme
+  +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;sim&#39;)">← Back to the game</button>';
+ $('sim').classList.add('show');
+}
 function themeForLevel(li){for(const t of THEMES)if(t.worlds.indexOf(li)>=0)return t.id;return 'basics'}
 function hiddenFound(){return Object.keys(G.hidden||{}).length}
 function hiddenFor(li){
@@ -2502,6 +2830,7 @@ $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEvent
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
+$('hwork').addEventListener('click',openWorkbench);
 $('hbench').addEventListener('click',()=>openPromptBench(0));
 $('hbuild').addEventListener('click',openBuild);
 $('hinv').addEventListener('click',openInvest);
@@ -5008,7 +5337,11 @@ function openWealth(){paused=true;const tp=topPoss(),np=nextPoss();
   <div style="height:12px;background:#0d1420;border:1px solid #2b3654;border-radius:8px;overflow:hidden;margin:10px 0"><div style="height:100%;width:${prog}%;background:linear-gradient(90deg,#3d8bff,#3fb950)"></div></div>
   ${items}<div class=p-teach style=margin-top:12px>${IDEAS[Object.keys(G.done).length%IDEAS.length]}</div>`;
  $('wealth').classList.add('show')}
-function hide(id){$(id).classList.remove('show');paused=false}
+function hide(id){$(id).classList.remove('show');paused=false;syncOverlay()}
+function syncOverlay(){const any=!!document.querySelector('.ov.show')||$('sidep').classList.contains('show')||$('web').classList.contains('show');
+ document.body.classList.toggle('overlay',any)}
+// anything that opens a panel goes through classList.add('show'); watch for it rather than patch 40 call sites
+new MutationObserver(syncOverlay).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
 function renderHUD(){$('hnw').textContent=(typeof netWorth==='function'?netWorth():(G.wealth||0)).toLocaleString();$('hwords').textContent=Object.keys(G.glossary).length;let i=0;while(i<STAGES.length&&G.done[i])i++;$('hlvl').textContent=(i>=STAGES.length?LEVELS.length:STAGES[i].level+1)}
 async function resolve(){const due=G.predictions.filter(p=>p.status==='pending'&&Date.now()>=p.due);if(!due.length)return;let q={};try{q=await j('/api/game/quotes')}catch(e){return}
  for(const p of due){const now=q[p.symbol];if(now==null)continue;p.resolved=now;const win=(p.dir==='up'&&now>p.price)||(p.dir==='down'&&now<p.price);p.status=win?'correct':'wrong';if(win){G.streak++;G.bestStreak=Math.max(G.bestStreak,G.streak);addWealth(1500);
