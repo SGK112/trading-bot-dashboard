@@ -1223,6 +1223,7 @@ body.bigtext .helpbox{font-size:17px}
 <canvas id=game width=800 height=450></canvas>
 <div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/14</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
+ <span class="mrow clk" id=hmap>🗺️ The Map <i>choose a world</i></span>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
  <span class="mrow clk" id=hteam>👥 Team</span>
  <span class="mrow clk" id=hchar>🧍 Your character</span>
@@ -1262,6 +1263,7 @@ body.bigtext .helpbox{font-size:17px}
 </div>
 <canvas id=mini width=120 height=120></canvas>
 <div class=toast id=toast></div>
+<div class=ov id=map><div class=panel><button class=tclose onclick="hide('map')">✕</button><div id=mapbody></div></div></div>
 <div class=ov id=team><div class=panel><button class=tclose onclick="hide('team')">✕</button><div id=teambody></div></div></div>
 <div class=ov id=profile><div class=panel><button class=tclose onclick="hide('profile')">✕</button><div id=profbody></div></div></div>
 <div class=ov id=market><div class=panel><button class=tclose onclick="hide('market')">✕</button><div id=marketbody></div></div></div>
@@ -2072,7 +2074,8 @@ $('hinv').addEventListener('click',openInvest);
 $('hprof').addEventListener('click',openProfile);
 $('hchar').addEventListener('click',openCharacter);
 $('hteam').addEventListener('click',openTeam);
-$('hboard').addEventListener('click',openBoard);$('hhelp').addEventListener('click',showHelp);
+$('hboard').addEventListener('click',openBoard);
+$('hmap').addEventListener('click',openMap);$('hhelp').addEventListener('click',showHelp);
 $('hnarr').addEventListener('click',toggleNarrate);
 $('hout').addEventListener('click',logOut);
 // on a phone the "why" line is hidden until you tap the card
@@ -3373,6 +3376,83 @@ function showFinale(){
 // Teams share a goal. They do not share a message box - the only thing you can
 // send is one of twelve fixed phrases, chosen from a menu.
 let CHEERLIST=[];
+// ============ THE MAP ============
+// Fourteen worlds used to sit in a fixed line with no reason for the order.
+// Grouped into themed islands you choose between, the order becomes the point:
+// every island is a different way people actually build a life, and they all
+// converge on the same freedom number.
+const THEMES=[
+ {id:'basics',e:'🐷',n:'Money Basics',col:'#3fb950',
+  blurb:'Where everybody starts. Saving, compounding, and a plan boring enough to actually work.',
+  worlds:[0,1,13]},
+ {id:'invest',e:'📈',n:'Investing',col:'#3d8bff',
+  blurb:'Owning things instead of only earning. Shares, property, and what time does to money.',
+  worlds:[2,3,11,12]},
+ {id:'protect',e:'🛡️',n:'Protect What You Build',col:'#f0b429',
+  blurb:'Debt, tax and con artists. Most people lose more here than they ever gain investing.',
+  worlds:[6,7,10]},
+ {id:'dev',e:'💻',n:'Developer',col:'#a371f7',
+  blurb:'Your skills are the biggest asset you own. Learn to build and your hour changes price.',
+  worlds:[5]},
+ {id:'ai',e:'🤖',n:'AI',col:'#66c7d6',
+  blurb:'What these tools are, what they are not, and how to prompt one properly.',
+  worlds:[9]},
+ {id:'biz',e:'🚀',n:'Business',col:'#f0803a',
+  blurb:'Profit is not revenue. Build something that earns while you are asleep.',
+  worlds:[8,4]},
+];
+const SOON=[
+ {e:'⚽',n:'Sports',blurb:'Contracts, sponsorship, and why so many pros end up broke.'},
+ {e:'🎬',n:'Creator',blurb:'Channels, sponsors, royalties — getting paid for something made once.'},
+ {e:'🎮',n:'Gamer',blurb:'In-game economies, skins, and the psychology built into a shop screen.'},
+];
+function themeProgress(t){
+ let done=0,total=0;
+ t.worlds.forEach(l=>levelStages(l).forEach(i=>{total++;if(G.done[i])done++}));
+ return{done,total,pct:total?Math.round(done/total*100):0};
+}
+function travelTo(lvl){
+ hide('map');
+ atHome=false;if(bigGround)bigGround.visible=true;
+ loadWorld(lvl);
+ paused=false;
+ showBanner(LEVELS[lvl].world);
+ toast('🗺️ Travelled to '+WORLDS[LEVELS[lvl].world].name);
+ speak('Travelled to '+WORLDS[LEVELS[lvl].world].name);
+}
+function openMap(){
+ paused=true;
+ const cards=THEMES.map(t=>{
+  const p=themeProgress(t);
+  const worlds=t.worlds.map(l=>{
+   const w=WORLDS[LEVELS[l].world];
+   const st=levelStages(l);
+   const d=st.filter(i=>G.done[i]).length;
+   const beaten=d>=st.length;
+   return '<button class=opt style="text-align:left;padding:10px 12px;margin:4px 0;'
+    +(beaten?'border-color:#3fb950':'')+'" onclick="travelTo('+l+')">'
+    +'<b>'+w.prop+' '+w.name+'</b> <span class=p-note>'+(beaten?'✓ beaten':d+'/'+st.length+' rooms')+'</span></button>'
+  }).join('');
+  return '<div class=gloss style="border-color:'+t.col+'">'
+   +'<b style="font-size:17px">'+t.e+' '+t.n+'</b>'
+   +'<div class=qp style="margin:6px 0"><i style="width:'+p.pct+'%;background:'+t.col+'"></i></div>'
+   +'<div class=gd>'+t.blurb+'</div>'
+   +'<div class=gd style="color:'+t.col+'">'+p.done+' of '+p.total+' rooms cleared</div>'
+   +worlds+'</div>'}).join('');
+ const soon=SOON.map(s=>'<div class=gloss style="opacity:.5">'
+   +'<b>'+s.e+' '+s.n+'</b> <span class=p-note>· not built yet</span>'
+   +'<div class=gd>'+s.blurb+'</div></div>').join('');
+ let cleared=0,all=0;THEMES.forEach(t=>{const p=themeProgress(t);cleared+=p.done;all+=p.total});
+ $('mapbody').innerHTML='<div class=p-badge>🗺️</div>'
+  +'<div class=p-world>Choose where to learn next</div><div class=p-title>The Map</div>'
+  +'<p class=p-teach>You are 18 with nothing. Every island here is a different way people actually build a life — '
+  +'and every one of them ends at the same place: the month your money covers your life. '
+  +'Go wherever you like, in any order.</p>'
+  +'<div class=p-teach style="border-color:#3fb950"><b>'+cleared+' of '+all+' rooms cleared</b></div>'
+  +cards
+  +'<div class=p-title style="font-size:16px;margin-top:14px">Coming next</div>'+soon
+  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;map&#39;)">← Back to Money World</button>';
+ $('map').classList.add('show');}
 async function openTeam(){
  paused=true;
  $('teambody').innerHTML='<div class=p-title>👥 Team</div><p class=p-teach>Loading…</p>';
