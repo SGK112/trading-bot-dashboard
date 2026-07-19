@@ -2243,8 +2243,14 @@ const VENUE=[
 // The rooms were named Classroom and Trading Floor and then all looked
 // identical. Now a school has desks and a blackboard, a store has aisles and
 // checkouts, an office has cubicles. You should know where you are.
+ function vPropCollide(x,z,w,d,h){
+  // solid, but never taller than a step: you can always walk up and out.
+  const H=Math.min(h,stepReach()-0.05);
+  walls.push({mesh:null,cap:null,x,z,hw:w/2,hd:d/2,top:H,hp:999,maxhp:999,
+   broken:false,solid:true,immovable:true,gateFor:null,kind:'prop',movable:false});}
 function vProp(wi,x,z,par,k){
  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=Math.random()*6.283;
+ vPropCollide(x,z,2.4,2.4,1.4);
  const add=(w,h,d,c,px,py,pz)=>{const m=box(w,h,d,c);m.position.set(px||0,py||0,pz||0);g.add(m);return m};
  if(wi===0){                                   // HOME
   if(k%4===0){add(2.6,0.7,1.1,0x8a5a3a,0,0.55,0);add(2.6,0.9,0.3,0x9a6a45,0,1.1,-0.45);      // sofa
