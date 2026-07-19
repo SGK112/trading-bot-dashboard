@@ -1157,6 +1157,7 @@ body.bigtext .helpbox{font-size:17px}
  <span class="mrow clk" id=hteam>👥 Team</span>
  <span class="mrow clk" id=hchar>🧍 Your character</span>
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
+ <span class="mrow clk" id=hinv>📊 Your investments</span>
  <span class="mrow clk" id=hbuild>🏗️ Your business</span>
  <span class="mrow clk" id=hbench>🤖 Prompt Bench <i>paid jobs</i></span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
@@ -1540,7 +1541,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -1818,6 +1819,7 @@ $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
 $('hbench').addEventListener('click',()=>openPromptBench(0));
 $('hbuild').addEventListener('click',openBuild);
+$('hinv').addEventListener('click',openInvest);
 $('hprof').addEventListener('click',openProfile);
 $('hchar').addEventListener('click',openCharacter);
 $('hteam').addEventListener('click',openTeam);
@@ -2613,6 +2615,10 @@ function buyItem(id){const it=SHOP.find(x=>x.id===id);if(!it||owns(id))return;
 // whole game in one function: what is left over is what compounds.
 function passMonth(){
  const H=curHome();G.month=(G.month||0)+1;const _p=tParts();
+ if(typeof growPortfolio==='function'){const g=growPortfolio();
+  if(g&&g.detail.length){const best=g.detail.slice().sort((a,b)=>b.pct-a.pct)[0];
+   setTimeout(()=>toast((g.moved>=0?'📈 Investments grew '+money(g.moved):'📉 Investments fell '+money(-g.moved))
+     +' this month · '+best.e+' '+(best.pct>=0?'+':'')+best.pct+'%'),1100)}}
  const bi=(typeof bizIncome==='function')?bizIncome():0;
  if(bi>0){G.wealth=(G.wealth||0)+bi;
   setTimeout(()=>toast('🏪 '+bizName()+' took '+money(bi)+' this month.'),1700)}
@@ -2656,7 +2662,7 @@ function birthday(p){paused=true;sfx('tool');confetti();
   +'<div class=p-note>Every year you wait, that number shrinks. Time is the ingredient you cannot buy back.</div>'
   +'<button class=pbtn onclick="hide(&#39;mine&#39;)">Another year →</button>';
  $('mine').classList.add('show')}
-function netWorth(){return (G.wealth||0)+(G.equity||0)+(typeof vehValue==='function'?vehValue():0)}
+function netWorth(){return (G.wealth||0)+(G.equity||0)+(typeof vehValue==='function'?vehValue():0)+(typeof portVal==='function'?portVal():0)}
 function buyFurn(id){const f=FURN.find(x=>x.id===id);if(!f||ownsF(id))return;
  if((G.wealth||0)<f.price){toast('Not enough money — clear rooms and collect coins first.');return}
  G.wealth-=f.price;G.furn[id]=1;save();renderHUD();sfx('secret');
@@ -2891,6 +2897,78 @@ function buildBiz(){
  const H=curHome();
  g.position.set(-H.w/2-7,0,H.d/2-4);
  worldGroup.add(g);bizMesh=g;}
+// ============ ACTUALLY INVESTING ============
+// The whole game is about money that grows without you, and until now there was
+// nowhere to put it - cash just sat in a pile. This is the engine: money in,
+// compounding every month, and the volatile ones genuinely fall some months.
+const FUNDS=[
+ {id:'savings',e:'🏦',n:'Savings Account',ret:0.02,vol:0.00,
+  d:'Safe, and slowly loses to inflation. Right for an emergency fund, useless for building wealth.'},
+ {id:'bonds',e:'📜',n:'Government Bonds',ret:0.04,vol:0.02,
+  d:'Lending to the government. Steadier than shares, and slower. Boring on purpose.'},
+ {id:'index',e:'📈',n:'Index Fund',ret:0.09,vol:0.16,
+  d:'A slice of hundreds of companies at once. Bumpy year to year, and the most reliable way ordinary people have got rich.'},
+ {id:'stock',e:'🎯',n:'One Company',ret:0.11,vol:0.38,
+  d:'Higher ceiling, and a real chance it goes to nothing. Never put in what you cannot lose.'},
+ {id:'crypto',e:'🪙',n:'Crypto',ret:0.13,vol:0.75,
+  d:'Wild swings both ways. Some people got rich, more got wrecked. Size it like a bet, not a plan.'},
+];
+function portVal(){let t=0;FUNDS.forEach(f=>t+=(G.port&&G.port[f.id])||0);return Math.round(t)}
+function portIn(){return Math.round(G.invested||0)}
+function investIn(id,amt){
+ const f=FUNDS.find(x=>x.id===id);if(!f)return;
+ amt=Math.min(Math.floor(amt),Math.floor(G.wealth||0));
+ if(amt<1){toast('You have no spare cash to invest.');return}
+ G.wealth-=amt;G.port=G.port||{};G.port[id]=(G.port[id]||0)+amt;
+ G.invested=(G.invested||0)+amt;save();renderHUD();sfx('secret');
+ toast('📈 '+money(amt)+' into '+f.n+'. It works for you now.');openInvest();}
+function sellFrom(id){
+ const have=Math.round((G.port&&G.port[id])||0);if(have<1)return;
+ G.wealth=(G.wealth||0)+have;G.port[id]=0;save();renderHUD();sfx('hit');
+ toast('💵 Sold '+money(have)+' back to cash.');openInvest();}
+function growPortfolio(){
+ if(!G.port)return null;
+ let moved=0;const detail=[];
+ FUNDS.forEach(f=>{
+  const v=G.port[f.id]||0;if(v<=0)return;
+  const m=f.ret/12, sd=f.vol/Math.sqrt(12);
+  const u=Math.max(1e-9,Math.random()),w=Math.random();
+  const z=Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w);
+  const r=m+z*sd;
+  const nv=Math.max(0,v*(1+r));
+  detail.push({n:f.n,e:f.e,pct:Math.round(r*1000)/10});
+  moved+=nv-v;G.port[f.id]=nv;});
+ if(!detail.length)return null;
+ G.portHist=(G.portHist||[]).concat([Math.round(portVal())]).slice(-24);
+ return{moved:Math.round(moved),detail};}
+function openInvest(){
+ paused=true;
+ const pv=portVal(),inv=portIn(),gain=pv-inv;
+ const rows=FUNDS.map(f=>{const have=Math.round((G.port&&G.port[f.id])||0);
+  return '<div class=gloss style="'+(have>0?'border-color:#3fb950':'')+'">'
+   +'<b>'+f.e+' '+f.n+'</b> <span class=p-note>· about '+Math.round(f.ret*100)+'% a year'
+   +(f.vol>0.3?' · very bumpy':f.vol>0.1?' · bumpy':' · steady')+'</span>'
+   +'<div class=gd>'+f.d+'</div>'
+   +(have>0?'<div class=gd style=color:#3fb950>You hold '+money(have)+'</div>':'')
+   +'<div class=calls>'
+   +'<button onclick="investIn(&#39;'+f.id+'&#39;,100)">+$100</button>'
+   +'<button onclick="investIn(&#39;'+f.id+'&#39;,1000)">+$1,000</button>'
+   +'<button onclick="investIn(&#39;'+f.id+'&#39;,(G.wealth||0))">+all</button>'
+   +(have>0?'<button class=down onclick="sellFrom(&#39;'+f.id+'&#39;)">Sell</button>':'')
+   +'</div></div>'}).join('');
+ const hist=(G.portHist||[]).slice(-10);
+ const spark=hist.length>1?('<div class=gd>Last '+hist.length+' months: '+hist.map(h=>money(h).replace('.00','')).join(' → ')+'</div>'):'';
+ $('shopbody').innerHTML='<div class=p-title>📊 Your investments</div>'
+  +'<div class=p-teach style="border-color:'+(gain>=0?'#3fb950':'#f85149')+'">'
+  +'<b>Portfolio '+money(pv)+'</b>'
+  +'<div class=gd>You put in '+money(inv)+' · '+(gain>=0?'up ':'down ')+money(Math.abs(gain))
+  +(inv>0?(' ('+(gain>=0?'+':'')+Math.round(gain/inv*1000)/10+'%)'):'')+'</div>'+spark+'</div>'
+  +'<p class=p-teach>Cash in your pocket does nothing at all. Money in here compounds every month whether you are playing or not '
+  +'— and the bumpy ones really do fall some months. That is the price of the higher return, not a bug.</p>'
+  +'<div class=p-world style="margin:8px 0">Spare cash: '+money(G.wealth||0)+'</div>'
+  +rows
+  +'<button class=pbtn style="margin-top:10px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
+ $('shop').classList.add('show');}
 function openMarket(){
  paused=true;
  if(!CAT){$('marketbody').innerHTML='<div class=p-title>📈 Market Desk</div><p class=p-teach>Live prices have not loaded yet. Close this and try again in a moment.</p><button class=pbtn onclick="hide(&#39;market&#39;)">← Back</button>';$('market').classList.add('show');return}
@@ -3054,6 +3132,7 @@ function openProfile(){
   +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
   +stat('Net worth',money(nw),'#3fb950')+stat('Cash',money(G.wealth||0))
   +stat('Home equity',money(G.equity||0))+stat('Monthly burn',money(monthlyBurn()),'#f0b429')
+  +stat('Investments',money(typeof portVal==='function'?portVal():0),(typeof portVal==='function'&&portVal()>0)?'#3fb950':'#7b8aa3')
   +stat('Passive income',money(passiveIncome()),passiveIncome()>0?'#3fb950':'#7b8aa3')
   +stat('A shift pays',money(wage()))+'</div>'
 
