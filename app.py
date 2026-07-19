@@ -1151,7 +1151,7 @@ body.bigtext .helpbox{font-size:17px}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/9</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
  <span class="mrow clk" id=hteam>👥 Team</span>
@@ -1228,6 +1228,9 @@ const WORLDS=[
  {name:'Asset Islands',ground:'#1f6a70',tint:'#2a8a86',prop:'🌊'},
  {name:'Millionaire Mountain',ground:'#6a6a72',tint:'#8a8a92',prop:'⛰️'},
  {name:'Dev Valley',ground:'#1b2740',tint:'#2b3a5c',prop:'💻'},
+ {name:'Credit Canyon',ground:'#5a2f3a',tint:'#7a4050',prop:'💳'},
+ {name:'Tax Town',ground:'#3f4a3a',tint:'#55654e',prop:'🧾'},
+ {name:'Founders Bay',ground:'#1f5a6a',tint:'#2f7d8a',prop:'🚀'},
 ];
 const LEVELS=[
  {world:0,diff:1,rooms:[
@@ -1315,7 +1318,102 @@ const LEVELS=[
    {q:'The fastest way to LOWER your freedom number is to...',choices:['Spend less each year, so you need a smaller pot','Earn more and spend it all','Take bigger risks','Retire later'],a:0},
    {q:'An employer 401(k) match is best described as...',choices:['An instant, guaranteed return on your own money','A loan you repay later','A tax penalty','A type of stock'],a:0},
    {q:'Money you have not spent is really...',choices:['Future freedom, measured in time','Money wasted','Always better in cash','Only useful in retirement'],a:0}]}}
-
+,
+ {world:6,diff:5,rooms:[
+   {type:'vocab',ic:'💳',title:'Word: Interest',term:'INTEREST',
+    choices:['The price you pay for using somebody elses money','A fee for opening an account','A reward for spending','A government charge'],a:0,
+    word:{t:'Interest',d:'The price of using someone elses money. You earn it when you save and pay it when you borrow. Which side you are on decides a lot.'}},
+   {type:'mc',ic:'🔻',title:'Compounding, Backwards',
+    teach:'Compound interest builds your savings. On a debt it runs the other way - the interest earns interest against you.',
+    q:'A $1,000 card balance at 24% APR, paying nothing, roughly doubles in...',
+    choices:['About 3 years','About 30 years','About 6 months','It never grows'],a:0,
+    word:{t:'APR',d:'The yearly cost of borrowing including fees. 24% APR means the debt grows about a quarter every year you leave it.'}},
+   {type:'mc',ic:'📉',title:'Minimum Payments',
+    teach:'The minimum payment is set by the lender, not by your interest. It is designed to keep you paying for years.',
+    q:'Why do lenders love minimum payments?',
+    choices:['You stay in debt longer, so they earn more interest','It clears the debt fastest','It improves your credit most','The law requires it'],a:0},
+   {type:'tf',ic:'📊',title:'Credit Scores',
+    teach:'A credit score is a number lenders use to guess how likely you are to repay. It changes what a house or a car costs you.',
+    q:'A better credit score can make the SAME car cost you thousands less.',a:true,
+    word:{t:'Credit Score',d:'A number predicting how reliably you repay. A good one lowers the interest offered, so the same purchase costs less.'}},
+   {type:'scenario',ic:'🪤',title:'Buy Now, Pay Later',
+    setup:'A $600 console offers four easy payments of $150, 0% interest. You have $200 saved.',
+    options:[{label:'💳 Take the plan',ok:false,outcome:'Miss one payment and fees plus back-interest land at once. Splitting a price you cannot afford does not make it affordable.'},
+             {label:'⏳ Save until you can pay once',ok:true}],
+    word:{t:'Buy Now Pay Later',d:'Splitting a purchase into instalments. It does not make things cheaper, it makes unaffordable things feel affordable.'}},
+   {type:'mc',ic:'🏗️',title:'Good Debt vs Bad Debt',
+    teach:'Debt that buys something which earns or appreciates can build wealth. Debt that buys something that loses value just costs you.',
+    q:'Which is closest to good debt?',
+    choices:['A mortgage on a home you can comfortably afford','A payday loan for a holiday','Card debt on clothes','Financing a jet ski'],a:0}],
+  boss:{name:'The Debt Collector',enemy:'🧛',intro:'It has fed on interest for years. Know how debt works and it starves.',questions:[
+   {q:'Interest on a debt is...',choices:['The price you pay to use borrowed money','A tax','A refund','A discount'],a:0},
+   {q:'The fastest way out of high-interest debt is usually...',choices:['Attack the highest interest rate first','Pay everything equally','Only pay minimums','Borrow more'],a:0},
+   {q:'A credit score mainly affects...',choices:['The interest rate you are offered','Your salary','Your tax rate','Your rent forever'],a:0},
+   {q:'0% for 12 months usually means...',choices:['Interest starts, sometimes backdated, when the offer ends','It is free forever','You never repay it','The item is discounted'],a:0},
+   {q:'Debt used to buy something that loses value is...',choices:['The expensive kind','Always fine','Free money','An investment'],a:0}]}},
+ {world:7,diff:5,rooms:[
+   {type:'vocab',ic:'🧾',title:'Word: Net Pay',term:'NET PAY',
+    choices:['What actually lands in your account after tax and deductions','Your salary before anything is taken','A bonus','Your tax refund'],a:0,
+    word:{t:'Net Pay',d:'What actually reaches your account. Gross is the headline number, net is the one you can spend.'}},
+   {type:'mc',ic:'🪜',title:'How Brackets Really Work',
+    teach:'Almost everyone gets this wrong. A higher bracket only taxes the money ABOVE that line at the higher rate, not all of it.',
+    q:'A raise pushes you into a higher bracket. What happens?',
+    choices:['Only money above the line is taxed higher - you still take home more','Your whole income is taxed at the higher rate','You lose money overall','Nothing changes'],a:0,
+    word:{t:'Tax Bracket',d:'A band of income taxed at a given rate. Only money inside that band pays that rate, so a raise never leaves you worse off.'}},
+   {type:'mc',ic:'🛡️',title:'Shielded Accounts',
+    teach:'Some accounts are legally shielded from tax. Using them is not a loophole, it is the system working as designed.',
+    q:'Which account has a triple tax advantage in the US?',
+    choices:['An HSA','A regular savings account','A checking account','A prepaid card'],a:0,
+    word:{t:'HSA',d:'Health Savings Account - deductible going in, grows tax-free, comes out tax-free for medical costs. The only triple break in the tax code.'}},
+   {type:'tf',ic:'⚖️',title:'Earned vs Owned',
+    teach:'Wages can be taxed up to 37%. Long-term capital gains are taxed at 0-20%. That gap is why wealthy people own things instead of only working.',
+    q:'Money earned from wages is usually taxed MORE than money from long-held investments.',a:true},
+   {type:'scenario',ic:'💸',title:'The Refund Myth',
+    setup:'Your friend is thrilled about a $3,000 tax refund and calls it free money.',
+    options:[{label:'🎉 Agree, free money',ok:false,outcome:'It was never free. It was your own wages, held by the government all year, returned without interest.'},
+             {label:'🧐 Point out it was his money all along',ok:true}],
+    word:{t:'Tax Refund',d:'Money you overpaid being given back. A big refund means you lent the government your wages interest-free for a year.'}},
+   {type:'mc',ic:'📚',title:'Credits Beat Deductions',
+    teach:'A deduction lowers the income you are taxed on. A credit lowers the tax itself, so credits are usually worth more.',
+    q:'Which cuts your tax bill more, dollar for dollar?',
+    choices:['A tax credit','A tax deduction','They are identical','Neither does anything'],a:0}],
+  boss:{name:'The Auditor',enemy:'🕵️',intro:'It assumes you do not understand the rules. Prove otherwise.',questions:[
+   {q:'Net pay is...',choices:['What lands in your account after deductions','Your salary before tax','Your bonus','Your refund'],a:0},
+   {q:'Moving into a higher bracket means...',choices:['Only income above that line is taxed higher','All income is taxed higher','You take home less','You pay no tax'],a:0},
+   {q:'Long-term capital gains are generally taxed...',choices:['Lower than wages','Higher than wages','The same as wages','Not at all'],a:0},
+   {q:'A big tax refund really means...',choices:['You overpaid all year and lent it interest-free','You won money','You earned a bonus','You underpaid'],a:0},
+   {q:'A tax credit versus a deduction is...',choices:['Usually worth more per dollar','Always worth less','Exactly the same','Only for companies'],a:0}]}},
+ {world:8,diff:5,rooms:[
+   {type:'vocab',ic:'🚀',title:'Word: Profit',term:'PROFIT',
+    choices:['What is left after every cost is paid','Everything a business takes in','The price on the label','The money in the till'],a:0,
+    word:{t:'Profit',d:'Revenue minus every cost. A business can take a fortune and still lose money - profit is the number that matters.'}},
+   {type:'mc',ic:'💰',title:'Revenue Is Not Profit',
+    teach:'A stall selling $1,000 of lemonade sounds great until you subtract $400 for lemons, $200 for the pitch and $300 for help.',
+    q:'That stall took $1,000 and spent $900. What did it earn?',
+    choices:['$100','$1,000','$900','Nothing - revenue is profit'],a:0},
+   {type:'mc',ic:'🧲',title:'Find the Problem First',
+    teach:'Businesses that last solve a problem people already have. Ones that fail invent something clever nobody asked for.',
+    q:'What is the safest first question for a new business?',
+    choices:['What problem do people already pay to fix?','What is fun to build?','What sounds impressive?','What is cheapest to make?'],a:0},
+   {type:'tf',ic:'🧪',title:'Test It Small',
+    teach:'Spending your savings before a single customer says yes is how people lose it. Sell one before you make a hundred.',
+    q:'The safest way to start is to spend everything up front to look professional.',a:false,
+    word:{t:'Minimum Viable Product',d:'The smallest version worth selling. It answers will anyone pay for this before you bet real money on the answer.'}},
+   {type:'scenario',ic:'🤝',title:'Pay Yourself Last?',
+    setup:'Your side business made $2,000 this month. You want to take it all out and buy something.',
+    options:[{label:'💸 Spend all of it',ok:false,outcome:'The business needs stock, tools and a cushion. Draining it means borrowing to trade next month.'},
+             {label:'🏦 Keep some in, take a wage',ok:true}],
+    word:{t:'Working Capital',d:'The cash a business needs on hand to keep trading. Take it all out and you borrow it straight back.'}},
+   {type:'mc',ic:'♻️',title:'Ownership Beats Wages',
+    teach:'An employee is paid for hours. An owner is paid for what the business earns, including while asleep.',
+    q:'Why does owning tend to build more wealth than a wage?',
+    choices:['Your income stops being capped by hours','Owners never work','Wages are illegal','Owning removes all risk'],a:0}],
+  boss:{name:'The Market',enemy:'🌐',intro:'It does not care about your idea. It only cares whether anyone will pay.',questions:[
+   {q:'Profit is...',choices:['Revenue minus every cost','Everything you take in','Your best month','The price tag'],a:0},
+   {q:'The best businesses usually start by...',choices:['Solving a problem people already pay to fix','Building something clever first','Raising money first','Renting an office'],a:0},
+   {q:'Before spending savings on stock you should...',choices:['Prove somebody will actually buy it','Design a logo','Hire staff','Buy a van'],a:0},
+   {q:'Working capital is...',choices:['The cash a business needs to keep trading','Profit','A loan','A tax'],a:0},
+   {q:'Owning rather than only earning matters because...',choices:['Income stops being limited by your hours','There is no risk','It avoids all tax','It is always easier'],a:0}]}}
 ];
 const STAGES=[];
 LEVELS.forEach((L,li)=>{L.rooms.forEach((r,ri)=>STAGES.push(Object.assign({},r,{wi:L.world,level:li,room:ri,diff:L.diff,isBoss:false})));
@@ -1471,9 +1569,9 @@ let heroHand=null,heroMouth=null,bombs=[],_blink=0,heroRide=null,rideWheels=[],r
 let heroY=0,heroVY=0,onGround=true;
 const DOORS=STAGES.map((s,i)=>({i,s}));
 if(!G.tools)G.tools=['fist'];if(!G.secrets)G.secrets={};if(!G.found)G.found={};if(!G.tempts)G.tempts={};if(G.willpower==null)G.willpower=0;if(G.coinCount==null)G.coinCount=0;if(!G.qclaim)G.qclaim={};
-const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e];
-const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c];
-const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740];
+const SKY=[0x8ecbff,0xe8b06a,0xaec8e8,0x66c7d6,0xdfeaf6,0x2a3a5e,0x8a5a66,0xb8c49a,0x6ec3d6];
+const WCOL=[0x3f9a54,0x8a7a3a,0x5a6272,0x2a9a92,0x8a8a92,0x2b3a5c,0x7a4050,0x55654e,0x2f7d8a];
+const WACC=[0x2f7d3a,0x6a5a2e,0x455170,0x1f6a70,0x6a6a72,0x1b2740,0x5a2f3a,0x3f4a3a,0x1f5a6a];
 const BSTATE={done:0xf0b429,open:0x3d8bff,boss:0xf05a4a,lock:0x59647c};
 const CAMNAMES=['Overhead','3rd Person','1st Person','Cinematic'];
 const TOOLS=[{id:'fist',e:'👊',n:'Bare Hands',dmg:1},{id:'pick',e:'⛏️',n:'Pickaxe',dmg:2},{id:'hammer',e:'🔨',n:'Sledgehammer',dmg:3},{id:'drill',e:'🛠️',n:'Power Drill',dmg:5},{id:'tnt',e:'🧨',n:'Dynamite',dmg:9}];
@@ -1527,7 +1625,10 @@ function firstOpen(){let i=0;while(i<STAGES.length&&G.done[i])i++;return Math.mi
 function doorState(d){return G.done[d.i]?'done':unlocked(d.i)?'open':'lock'}
 function bestTool(){let b=TOOLS[0];for(const t of TOOLS)if(G.tools.includes(t.id)&&t.dmg>b.dmg)b=t;return b}
 function toolDmg(){return bestTool().dmg}
-function updateTool(){const t=bestTool();$('htool').textContent=t.e+' '+t.n;if(typeof refreshHandTool==='function')refreshHandTool()}
+function updateTool(){const t=bestTool();$('htool').textContent=t.e+' '+t.n;
+ if(typeof refreshHandTool==='function')refreshHandTool();
+ // only offer the throw button to someone who actually has dynamite
+ const tb=$('bTNT');if(tb)tb.style.display=(t.id==='tnt')?'':'none';}
 function grantToolFor(s){if(!s.isBoss)return;const nt=TOOLS[s.level+1];if(nt&&!G.tools.includes(nt.id)){G.tools.push(nt.id);save();updateTool();setTimeout(()=>{sfx('tool');toast('🎁 TOOL UNLOCKED: '+nt.e+' '+nt.n+' — blocks break faster now!')},950)}}
 function updateVaultCount(){$('hvn').textContent=Object.keys(G.secrets).length+SHOP.filter(i=>i.url&&owns(i.id)).length}
 let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);const now=actx.currentTime;
@@ -1544,13 +1645,7 @@ function makeLabel(txt,emoji){const c=document.createElement('canvas');c.width=2
  const tex=new THREE.CanvasTexture(c);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));s.scale.set(3.4,1.9,1);return s}
 function addTree(x,z,leaf,par){const t=new THREE.Group();const tr=box(0.5,1.5,0.5,0x6b4a2a);tr.position.y=0.75;t.add(tr);const lf=box(2,2,2,leaf);lf.position.y=2.4;t.add(lf);t.position.set(x,0,z);par.add(t)}
 function cone(r,h,col){return new THREE.Mesh(new THREE.ConeGeometry(r,h,6),new THREE.MeshLambertMaterial({color:col}))}
-function spawnBiome(wi,par){function put(fn,n){let c=0,g=0;while(c<n&&g<n*5){g++;const x=(Math.random()-0.5)*78,z=(Math.random()-0.5)*78;if(Math.hypot(x,z)<12)continue;fn(x,z);c++}}
- if(wi===0){put((x,z)=>addTree(x,z,0x2f7d3a,par),18);put((x,z)=>{const f=box(0.4,0.5,0.4,[0xff7ab0,0xffd54a,0xff5a5a][Math.floor(Math.random()*3)]);f.position.set(x,0.3,z);par.add(f)},16)}
- else if(wi===1){put((x,z)=>{const r=box(1.4,0.7+Math.random()*1.2,1.4,0x8a6a3a);r.position.y=r.geometry.parameters.height/2;r.position.x=x;r.position.z=z;par.add(r)},16);put((x,z)=>{const c=box(0.6,2.4,0.6,0x3f8a4a);c.position.set(x,1.3,z);par.add(c)},10)}
- else if(wi===2){put((x,z)=>{const h=5+Math.random()*10;const b=box(3,h,3,[0x5a6272,0x475066,0x6a7284][Math.floor(Math.random()*3)]);b.position.set(x,h/2,z);par.add(b);const w=box(3.05,h,0.1,0xffe066);w.position.set(x,h/2,z+1.5);w.material.opacity=0.25;w.material.transparent=true;par.add(w)},18)}
- else if(wi===3){put((x,z)=>{const w=new THREE.Mesh(new THREE.PlaneGeometry(7,7),new THREE.MeshLambertMaterial({color:0x2a8ad0}));w.rotation.x=-Math.PI/2;w.position.set(x,0.04,z);par.add(w)},9);put((x,z)=>{const t=box(0.4,2,0.4,0x6b4a2a);t.position.set(x,1,z);par.add(t);const l=box(1.8,0.5,1.8,0x2f8a4a);l.position.set(x,2.2,z);par.add(l)},12)}
- else{put((x,z)=>{const m=box(2+Math.random()*3,1.6,2+Math.random()*3,0xf0f4ff);m.position.set(x,0.8,z);par.add(m)},16);put((x,z)=>{const c=cone(1,2.6,0x2a5a3a);c.position.set(x,1.3,z);par.add(c);const snow=cone(0.6,0.8,0xffffff);snow.position.set(x,2.4,z);par.add(snow)},10)}
-}
+
 function disposeGroup(g){g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}})}
 
 function buildBlock(d){const g=new THREE.Group();const boss=d.s.isBoss;const st=doorState(d);
@@ -1696,13 +1791,7 @@ function hitBlock(d){if(!d)return;if(d.hp<=0){if(!G.done[d.i])openChallenge(d.i)
  burst(d.px,d.base,d.pz,d.s.isBoss?0xf05a4a:0x3d8bff);if(d.cube)d.cube.userData.shake=8;
  if(d.hp<=0){sfx('break');toast('💥 Block smashed open!');const i=d.i;setTimeout(()=>openChallenge(i),170)}
  else{sfx('hit');toast('⛏️ '+d.hp+' more hit'+(d.hp>1?'s':'')+' to crack it open! (a better tool helps)')}}
-function addWall(par,x,z,w,d,top){const m=box(w,top,d,0x8a6a4a);m.position.set(x,top/2,z);par.add(m);
- const cap=box(w+0.1,0.25,d+0.1,0x6b4f36);cap.position.set(x,top,z);par.add(cap);
- walls.push({mesh:m,cap,x,z,hw:w/2,hd:d/2,top,hp:Math.round(top*3),maxhp:Math.round(top*3),broken:false})}
-function spawnWalls(wi,par){walls=[];const gap=(Math.random()-0.5)*22;
- addWall(par,gap-20,-9,26,1.6,1.4);addWall(par,gap+20,-9,26,1.6,1.4);        // low barrier row (jump it, break it, or use the gap)
- let made=0,g=0;while(made<3&&g<24){g++;const x=(Math.random()-0.5)*50,z=(Math.random()*24)-3;if(Math.hypot(x,z+18)<10)continue;addWall(par,x,z,6,2.5,3.8);made++}}
-// how high you can step up unaided; a rope ladder makes you a proper climber
+
 function stepReach(){return owns('ladder')?3.2:1.45}
 let _stepT=0;
 function stepFX(w){if(_stepT>0)return;_stepT=10;sfx('hit');burst(pos.x,heroY,pos.z,0xd8c8a8)}
@@ -1767,8 +1856,7 @@ function interact(){if(paused)return;
  if(bw){ram(bw);return}
  armSwing();sfx('hit');toast('🤜 You swing at the air — get closer to a wall, a block, or someone to talk to.')}
 
-function scatterPos(used){for(let tries=0;tries<40;tries++){const x=(Math.random()-0.5)*38,z=(Math.random()-0.5)*30;if(Math.hypot(x,z+18)<8)continue;let ok=true;for(const u of used)if(Math.hypot(u.x-x,u.z-z)<7){ok=false;break}if(ok){used.push({x,z});return{x,z}}}const x=(Math.random()-0.5)*38,z=(Math.random()-0.5)*30;used.push({x,z});return{x,z}}
-function cornerPos(used){const cs=[{x:-26,z:-22},{x:26,z:-22},{x:-26,z:22},{x:26,z:22},{x:0,z:26},{x:0,z:-26}];const c=cs[used.length%cs.length];used.push(c);return c}
+
 
 function loadWorld(li){if(worldGroup){scene.remove(worldGroup);disposeGroup(worldGroup)}
  worldGroup=new THREE.Group();scene.add(worldGroup);curLevel=li;const wi=LEVELS[li].world;curWi=wi;
@@ -2061,6 +2149,12 @@ function update(t){if(!renderer)return;
  for(const b of blocks){const d=b.userData.d;if(!b.visible||!d.cube)continue;d.cube.rotation.y+=0.008;let yy=d.base+Math.sin(t*0.002+d.i)*0.18;if(d.cube.userData.shake>0){d.cube.userData.shake--;yy+=Math.sin(d.cube.userData.shake*3)*0.12}d.cube.position.y=yy;const f=d.hp/d.maxhp;d.cube.scale.setScalar(0.6+0.4*f)}
  if(_stepT>0)_stepT--;
  updateBombs();
+ // it gets genuinely dark out here. If you have no lantern, say so - once a night.
+ if(!atHome&&!paused&&typeof isNight==='function'){
+  const n=isNight(),d=tParts().totalDays;
+  if(n&&!owns('lantern')&&G._darkDay!==d){G._darkDay=d;
+   toast('🌑 It is pitch dark out here. A 🔦 Lantern from the shop would fix that.');}
+  if(!n)G._darkDay=null;}
  if(heroRide){const spin=(keys.F||keys.B)?0.34:0;
   rideWheels.forEach(w=>{w.rotation.x+=spin});
   if(rideProp)rideProp.rotation.z+=0.5;}
@@ -2071,8 +2165,15 @@ function update(t){if(!renderer)return;
   const happy=(G.wealth||0)>2000;
   heroMouth.position.y=happy?2.58:2.62;heroMouth.scale.x=happy?1.5:1;}
  if(!paused&&(t|0)%17===0)checkQuest();
- {const fp=$('hfree');if(fp){const fn=freedomNumber();
-   fp.textContent='🗽 '+Math.min(999,Math.round(Math.max(0,netWorth())/fn*1000)/10)+'%'}}
+ {const fp=$('hfree');if(fp){const fn=freedomNumber(),nw=Math.max(0,netWorth());
+   const pct=Math.round(nw/fn*1000)/10;
+   if(pct>=5){fp.textContent='🗽 '+Math.min(999,pct)+'%';fp.title='How close you are to financial freedom'}
+   else{ // early on that number barely moves - give a target you can actually reach today
+    const np=(typeof nextPoss==='function')?nextPoss():null;
+    if(np){const need=Math.max(0,np.min-nw);
+     fp.textContent=np.e+' '+money(need).replace('.00','')+' to go';
+     fp.title='Next reward: '+np.n+' — then the freedom % takes over'}
+    else{fp.textContent='🗽 '+pct+'%'}}}}
  if(_swing>0){_swing--;const sw=-2.1*Math.sin((12-_swing)/12*Math.PI);
   if(heroArms[1])heroArms[1].rotation.x=sw;        // the arm actually holding the tool
   if(heroArms[0])heroArms[0].rotation.x=sw*0.35;   // the other one comes along for the ride
@@ -2102,7 +2203,7 @@ function bigWall(x,z,w,d,opts){opts=opts||{};const H=opts.h||6,gate=(opts.gateFo
  if(wall.gateFor!=null&&G.done[wall.gateFor]){wall.broken=true;worldGroup.remove(m);worldGroup.remove(cap)}
  walls.push(wall);return wall}
 // rooms you actually walk through — a home, a school, a store, an office, a bank
-const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80];
+const ROOMWALL=[0xc9a878,0xcbb98a,0x9aa6ba,0x86b3ad,0xb2adc4,0x4a5a80,0xa8707e,0x9aa88a,0x6aa8b4];
 const VENUE=[
  {v:'Home',   rooms:['Bedroom','Kitchen','Living Room','Garage','Back Yard','Attic','Basement']},
  {v:'School', rooms:['Classroom','Library','Cafeteria','Gym','Science Lab','Hallway','Auditorium']},
@@ -2110,6 +2211,9 @@ const VENUE=[
  {v:'Office', rooms:['Lobby','Cubicles','Meeting Room','Server Room','Corner Office','Break Room','Rooftop']},
  {v:'Bank',   rooms:['Teller Line','Vault','Trading Floor','Board Room','Archive','Atrium','Executive Suite']},
  {v:'Studio', rooms:['Bootcamp','Code Lab','Design Studio','Security Lab','AI Lab','Launch Pad','Server Room']},
+ {v:'Lender',  rooms:['Front Desk','Application Room','Rates Room','Collections','Credit Bureau','Fine Print','Debt Pit']},
+ {v:'Tax Office',rooms:['Reception','Filing Room','Brackets Hall','Deductions Desk','Audit Room','Refund Window','Archive']},
+ {v:'Startup', rooms:['Garage','Pitch Room','Ledger Room','Customer Desk','Ops Room','Board Room','Launch Pad']},
 ];
 // ============ WHAT EACH PLACE LOOKS LIKE ============
 // The rooms were named Classroom and Trading Floor and then all looked
@@ -2543,8 +2647,7 @@ function openMarket(){
  $('market').classList.add('show')}
 // Everything you are, in one place. Who you became, what you learned,
 // what you own, and how close you actually are to being free.
-function hoursSpent(){const a=G.acts||{};let h=0;
- ACTIONS.forEach(x=>{h+=(a[x.id]||0)*x.hours});return h}
+
 // Finishing all six worlds used to do nothing at all. Now it lands.
 function showFinale(){
  paused=true;stopSpeak();
@@ -2828,7 +2931,7 @@ const TUTORIAL=[
  {t:'📈 Call a REAL market',        w:'☰ Menu → Market Desk. Live prices.',          chk:()=>(G.predictions||[]).length>=1},
  {t:'🗽 Now go get rich',           w:'Freedom = 25x what you spend in a year.',      chk:()=>false},
 ];
-function tutStep(){return TUTORIAL[Math.min(G.tut||0,TUTORIAL.length-1)]}
+
 function renderQuest(){
  const q=$('quest');if(!q)return;
  if(G.tutSkipped){q.classList.remove('show');return}
@@ -3333,11 +3436,11 @@ function drawMini(){const mc=$('mini');if(!mc)return;const g=mc.getContext('2d')
    g.fillStyle=n.quest?'#b18aff':(n.deal?((n.obvious||streetSmarts()>=4)?'#f85149':'#6fd3a0'):'#6fd3a0');g.beginPath();g.arc(p[0],p[1],n.quest?2.8:2,0,7);g.fill()}
  const pp=P(pos.x,pos.z);g.fillStyle='#43d17a';g.beginPath();g.arc(pp[0],pp[1],3,0,7);g.fill();g.strokeStyle='#43d17a';g.lineWidth=1.5;g.beginPath();g.moveTo(pp[0],pp[1]);g.lineTo(pp[0]+Math.sin(heading)*8,pp[1]+Math.cos(heading)*8);g.stroke()}
 function loop(){const t=performance.now();update(t);if(renderer)renderer.render(scene,camera);requestAnimationFrame(loop)}
-if(window.THREE){initWorld();if(typeof loadHome==='function')loadHome();paused=true;$('help').classList.add('show')}else{setTimeout(()=>toast('3D engine did not load — check internet and refresh'),400)}
+if(window.THREE){initWorld();if(typeof loadHome==='function')loadHome();paused=true;$('help').classList.add('show');if(typeof renderQuest==='function')renderQuest()}else{setTimeout(()=>toast('3D engine did not load — check internet and refresh'),400)}
 
 /* ===== challenges (shared engine) ===== */
 let bossQ=0;
-function tryEnter(){if(paused||nearGate<0)return;openChallenge(nearGate)}
+
 function opts(arr,fn,i){return arr.map((c,k)=>`<button class=opt onclick="${fn}(${i},${k})">${String.fromCharCode(65+k)}.  ${c}</button>`).join('')}
 function hdr(s){return `<div class=p-badge>${s.isBoss?s.boss.enemy:s.ic}</div><div class=p-world>Level ${s.level+1} · ${WORLDS[s.wi].name}${s.isBoss?' · BOSS':''}</div><div class=p-title>${s.isBoss?s.boss.name:s.title}</div><div class="p-tag diff${s.diff}">Difficulty ${s.diff}/5</div>`}
 function openChallenge(i){paused=true;G.cur=i;bossQ=0;const s=STAGES[i];$('cpanel').classList.toggle('boss',!!s.isBoss);
