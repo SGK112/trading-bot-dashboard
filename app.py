@@ -1385,7 +1385,7 @@ body.overlay #ctlbar,body.overlay #gesthint,body.overlay #stick{opacity:0;pointe
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style></head><body><div id=stage>
 <canvas id=game width=800 height=450></canvas>
-<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/14</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
+<div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/<b id=hlvlmax>17</b></span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
  <span class="mrow clk" id=hmap>🗺️ The Map <i>choose a world</i></span>
  <span class="mrow clk" id=hboard>🏆 Leaderboard</span>
@@ -1513,6 +1513,9 @@ const WORLDS=[
  {name:'Property Peak',ground:'#4a4030',tint:'#6a5a44',prop:'🏘️'},
  {name:'The Long View',ground:'#2a4a4a',tint:'#3d6a6a',prop:'⏳'},
  {name:'The Plan Room',ground:'#3a4a2a',tint:'#55683d',prop:'📋'},
+ {name:'Contract Stadium',ground:'#1f5a30',tint:'#2f7d46',prop:'⚽'},
+ {name:'Creator Studio',  ground:'#3a2340',tint:'#55305e',prop:'🎬'},
+ {name:'The Arcade',      ground:'#1c2440',tint:'#2b3a63',prop:'🕹️'},
 ];
 const LEVELS=[
  {world:0,diff:1,rooms:[
@@ -1867,7 +1870,75 @@ const LEVELS=[
    {q:'Paying yourself first means...',choices:['Saving leaves your account before you can spend it','Treating yourself first','Paying debts first','Taking a bonus'],a:0},
    {q:'When the market falls, an automatic payment...',choices:['Buys the same fund cheaper','Should be stopped','Loses the most','Is refunded'],a:0},
    {q:'A long-term plan should be reviewed...',choices:['Once or twice a year','Every day','Every week','Never again'],a:0},
-   {q:'The boring plan usually beats the exciting one because...',choices:['It keeps running when you are scared or busy','It is faster','It has no risk','Experts recommend it'],a:0}]}}
+   {q:'The boring plan usually beats the exciting one because...',choices:['It keeps running when you are scared or busy','It is faster','It has no risk','Experts recommend it'],a:0}]}},
+
+ // ---------------- 14 · Contract Stadium (sports) ----------------
+ {world:14,diff:3,rooms:[
+   {type:'vocab',ic:'✍️',title:'Word: Gross vs Net',term:'NET PAY',choices:['The number on the headline','What actually lands in your account after tax and fees','Your signing bonus','What your agent earns'],a:1,
+    word:{t:'Net Pay',d:'What you actually keep after tax, agent fees and expenses. The headline number is never the real one.'}},
+   {type:'scenario',ic:'\U0001f4b0',title:'The Signing Bonus',setup:'You sign for $400,000 a year. Your agent takes 4%, tax takes about 40%, and the average career in your sport lasts 3 years. A dealership offers you a $90,000 car today.',
+    options:[{label:'\U0001f697 Buy the car — you earned it',ok:false,outcome:'You cleared roughly $224,000 this year. The car is 40% of it, plus insurance and depreciation. Careers this short have to fund the 50 years that come after them.'},
+             {label:'\U0001f3e6 Bank it and drive what you own',ok:true}],
+    word:{t:'Career Length',d:'How many years an income will actually last. Short-career incomes have to be spread across a long life.'}},
+   {type:'mc',ic:'\U0001f4c9',title:'Why Pros Go Broke',teach:'Studies have put the figure at over half of pro athletes in some sports being in financial trouble within a few years of retiring. The money was real. The plan was not.',
+    q:'What is the biggest single reason it happens?',
+    choices:['They were underpaid','Spending grew to match the peak year and never came back down','Taxes were too high','They invested in index funds'],a:1},
+   {type:'tf',ic:'\U0001f9b5',title:'One Bad Landing',teach:'An injury can end a sports income overnight. It cannot end a rental property, a business, or a share portfolio. That is the whole argument for building something outside the thing you are good at.',
+    q:'If all your income depends on your body, you have no diversification.',a:true,
+    word:{t:'Income Diversification',d:'Having money arrive from more than one source, so one bad event cannot stop all of it.'}},
+   {type:'fill',ic:'\U0001f9ee',title:'The Peak Year Trap',teach:'The rule pros are taught late: budget on your WORST likely year, not your best one.',
+    prompt:'Plan your spending around your ____ year, not your best.',answer:'worst',accept:['worst','lowest','smallest']},
+  ],boss:{name:'The Agent Who Loves You',enemy:'\U0001f9db',intro:'Charming, always available, and paid a percentage of a number you never see the bottom of. Beat him with arithmetic.',questions:[
+   {q:'Your contract says $400k. What matters?',choices:['The headline','What clears after tax and fees','What your team-mate got','The signing photo'],a:1},
+   {q:'Average career is 3 years. Your spending should be built for...',choices:['Three years','The rest of your life','This season','Your best month'],a:1},
+   {q:'The safest thing to do with a signing bonus is...',choices:['Buy something that shows you made it','Invest it before you get used to seeing it','Lend it to friends','Leave it in a current account'],a:1},
+   {q:'Which income survives a torn knee?',choices:['Match fees','Sponsorship for playing','A rented-out flat','Win bonuses'],a:2}]}},
+
+ // ---------------- 15 · Creator Studio (creator) ----------------
+ {world:15,diff:3,rooms:[
+   {type:'vocab',ic:'♾️',title:'Word: Leverage',term:'LEVERAGE',choices:['Borrowing money','Making something once that can be sold or watched a million times','Working longer hours','A type of camera'],a:1,
+    word:{t:'Leverage',d:'Doing the work once and having it pay repeatedly. A video, a song, a book and a piece of software all have it. An hour of your labour does not.'}},
+   {type:'mc',ic:'\U0001f4bd',title:'The Back Catalogue',teach:'A creator’s old work is an asset. Videos from three years ago still earn while you sleep, which is why quitting at month five is so expensive — you delete your own compounding.',
+    q:'What makes a back catalogue valuable?',
+    choices:['It looks impressive','It keeps earning without new work','It is hard to make','Sponsors demand it'],a:1},
+   {type:'scenario',ic:'\U0001f91d',title:'The Sponsor Deal',setup:'A brand offers $8,000 to promote a product you have not tried and do not believe in. Your audience is 40,000 people who trust you.',
+    options:[{label:'\U0001f4b5 Take the $8,000',ok:false,outcome:'You got paid once. Trust is the entire asset — it took three years to build and one video to dent. The next honest recommendation you make is worth less now.'},
+             {label:'\U0001f6ab Turn it down',ok:true}],
+    word:{t:'Reputation Capital',d:'Trust you have built up. It is slow to earn, fast to spend, and it is what everything else you sell rests on.'}},
+   {type:'tf',ic:'\U0001f3d7️',title:'Renting Your Audience',teach:'Followers on a platform are rented, not owned. Algorithms change, accounts get banned, apps die. An email list is the only version you take with you.',
+    q:'A million followers on one app is safer than 20,000 email subscribers.',a:false,
+    word:{t:'Platform Risk',d:'The danger of building your whole income on something somebody else controls and can change without telling you.'}},
+   {type:'mc',ic:'\U0001f4c8',title:'Paid Once, Paid Forever',teach:'There are two kinds of creator money. Trading hours (client work, appearances) stops when you stop. Royalties and ad revenue on old work do not.',
+    q:'Which of these keeps paying after you stop working?',
+    choices:['An hourly editing gig','A sponsored appearance','Ad revenue on a video you made last year','A one-off commission'],a:2},
+  ],boss:{name:'The Algorithm',enemy:'\U0001f47e',intro:'It gave you everything and can take it back on a Tuesday for no stated reason. Beat it by not depending on it.',questions:[
+   {q:'What do you actually own?',choices:['Your follower count','Your email list and your back catalogue','Your engagement rate','Your verified badge'],a:1},
+   {q:'A sponsor offers big money for something you do not believe in. The real cost is...',choices:['The tax','Your audience’s trust','Editing time','Nothing'],a:1},
+   {q:'Which is leverage?',choices:['An hour of freelance work','A tutorial that gets watched for years','A shift at a shop','A day of filming for someone else'],a:1},
+   {q:'Your channel gets banned tomorrow. What survives?',choices:['Your subscriber count','Your email list','Your watch time','Your comments'],a:1}]}},
+
+ // ---------------- 16 · The Arcade (gamer) ----------------
+ {world:16,diff:3,rooms:[
+   {type:'vocab',ic:'\U0001fa99',title:'Word: Real Money',term:'V-BUCKS, GEMS, COINS',choices:['A fun made-up currency','Real money wearing a costume so it stops feeling like money','Free rewards','A kind of savings account'],a:1,
+    word:{t:'Virtual Currency',d:'Game money you bought with real money. The rename is deliberate — spending 800 gems hurts less than spending $8, which is exactly why it exists.'}},
+   {type:'mc',ic:'\U0001f381',title:'The Odds Behind the Box',teach:'A loot box with a 1% chance at the good item means the average player pays for 100 of them. The animation is designed by the same people who design slot machines, using the same research.',
+    q:'A 1% drop rate means...',
+    choices:['You get it within 100 tries','On average you pay for about 100 boxes, and could open 300 and get nothing','It is guaranteed eventually','The odds improve as you go'],a:1},
+   {type:'scenario',ic:'\U0001f6d2',title:'The Shop Screen',setup:'The skin is $20 and the timer says 6 hours left. You want it. The timer is the part that was engineered.',
+    options:[{label:'⏳ Buy before it goes',ok:false,outcome:'It came back four months later, as they almost always do. You paid $20 for the countdown, not the skin. That is the same urgency tell that runs every scam on every island here.'},
+             {label:'\U0001f6cf️ Sleep on it',ok:true}],
+    word:{t:'Artificial Scarcity',d:'A limit invented to make you decide fast. The item is not actually running out. The clock is the product.'}},
+   {type:'tf',ic:'\U0001f4b8',title:'Free to Play',teach:'Free games make money from a tiny number of very heavy spenders — the industry calls them whales. The game is free because you are not the one it is built to charge.',
+    q:'A free game with a shop makes most of its money from a small minority of players.',a:true,
+    word:{t:'Whale',d:'A player who spends heavily. Most free games earn the bulk of their revenue from a small fraction of users.'}},
+   {type:'mc',ic:'\U0001f9e0',title:'Turn It Around',teach:'Gaming skills convert: reaction time, teamwork, reading systems, grinding for a long-term goal. Streamers, coaches, testers, esports staff and game developers all get paid using them.',
+    q:'What is the difference between a player and someone who earns from games?',
+    choices:['Talent','One of them makes something other people want — a stream, a guide, a mod, a team','Money to start','Better hardware'],a:1},
+  ],boss:{name:'The Shop Timer',enemy:'⏰',intro:'It has never once let you think about it overnight. Beat it by knowing exactly what it is doing.',questions:[
+   {q:'800 gems for $8 exists because...',choices:['Gems are cheaper','It makes spending stop feeling like spending','Servers cost gems','It is fairer'],a:1},
+   {q:'A 1% loot box means on average you pay for about...',choices:['10 boxes','100 boxes','2 boxes','It is guaranteed'],a:1},
+   {q:'The countdown on a shop item is there to...',choices:['Manage stock','Stop you thinking it over','Be fair to everyone','Save server space'],a:1},
+   {q:'The way to actually earn from games is to...',choices:['Play more hours','Make something other players want','Buy better gear','Spend on skins'],a:1}]}},
 ];
 const STAGES=[];
 LEVELS.forEach((L,li)=>{L.rooms.forEach((r,ri)=>STAGES.push(Object.assign({},r,{wi:L.world,level:li,room:ri,diff:L.diff,isBoss:false})));
@@ -2118,7 +2189,7 @@ let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.we
  o.type=ty;o.frequency.setValueAtTime(f,now);if(type==='secret'||type==='win'||type==='break'||type==='coin')o.frequency.exponentialRampToValueAtTime(f*(type==='coin'?1.5:2),now+d);
  if(type==='bad')o.frequency.exponentialRampToValueAtTime(f*0.5,now+d);
  g.gain.setValueAtTime(0.16,now);g.gain.exponentialRampToValueAtTime(0.001,now+d);o.start(now);o.stop(now+d)}catch(e){}}
-function startGame(){$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
+function startGame(){if($('hlvlmax'))$('hlvlmax').textContent=LEVELS.length;$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
  setTimeout(()=>{try{showCoach()}catch(e){}},700)}
 function showHelp(){paused=true;$('help').classList.add('show')}
 
@@ -2421,6 +2492,45 @@ const HIDDEN=[
   teach:'New businesses almost always price too low, because low prices feel safe. Then there is nothing left for mistakes, marketing or growth, '
    +'and the cheapest customers complain the most. '
    +'Raising prices is usually the fastest profit lever there is, and it costs nothing to try.'},
+ // ---------- sports ----------
+ {id:'h_short',th:'sport',e:'⏱️',n:'The Career Is Shorter Than the Life',cash:600,skill:3,
+  teach:'The average pro career in most sports is measured in single-digit years. The life after it is measured in decades. '
+   +'The ones who stay wealthy treat their playing income like a lottery win with a deadline: bank most of it early, live on a fraction, '
+   +'and build something that still pays when the body stops. The ones who do not are not stupid — they just assumed next year looked like this one.'},
+ {id:'h_headline',th:'sport',e:'📰',n:'Nobody Ever Got Paid the Headline',cash:500,skill:2,
+  teach:'A $400,000 contract is not $400,000. Take off tax, the agent’s percentage, training costs, and the fact that half of it may be bonuses you never hit. '
+   +'The number in the newspaper exists to sell newspapers. The number that matters is the one that lands in the account, '
+   +'and getting used to living on the headline is what breaks people.'},
+ {id:'h_second',th:'sport',e:'🏆',n:'Build the Second Career While the First One Pays',cash:700,skill:3,
+  teach:'The best time to start the thing that comes next is while you are still winning — you have money, attention and doors that open. '
+   +'Coaching, a business, property, a media career, a qualification. All of it is easier to start at your peak than two years after nobody calls. '
+   +'This is true of any high-earning job with an expiry date, not just sport.'},
+ // ---------- creator ----------
+ {id:'h_own_list',th:'creator',e:'📫',n:'Own the List, Rent the Platform',cash:650,skill:3,
+  teach:'Followers belong to the app. Email addresses belong to you. Channels get banned, algorithms change overnight, and whole platforms have died '
+   +'taking millions of "followings" with them. Every creator who survived a platform collapse had one thing in common: '
+   +'a way to reach their audience that did not need permission.'},
+ {id:'h_catalogue',th:'creator',e:'📚',n:'The Back Catalogue Is the Asset',cash:600,skill:3,
+  teach:'Your newest post pays you this week. Your library pays you every week, forever, while you sleep — and it only exists because somebody kept going '
+   +'through the months where nothing worked. Most people quit at the exact point the compounding was about to start. '
+   +'The work is not the video. The work is the hundred videos.'},
+ {id:'h_trust',th:'creator',e:'🤝',n:'Trust Is the Whole Business',cash:550,skill:3,
+  teach:'Everything a creator sells — sponsorships, products, courses, recommendations — is priced off how much people believe them. '
+   +'That means a bad sponsorship does not just cost you that video, it lowers the price of every honest thing you say afterwards. '
+   +'Turning down money is a business decision, not a moral one.'},
+ // ---------- gamer ----------
+ {id:'h_costume',th:'gamer',e:'🪙',n:'The Currency Is Wearing a Costume',cash:450,skill:2,
+  teach:'Games rename money because renamed money does not hurt. 800 gems, 1,200 V-Bucks, 5,000 coins — none of those feel like the $8, $12 and $50 they are. '
+   +'Bundle sizes are also chosen so you always have some left over and never quite enough. That is not sloppiness, it is design. '
+   +'Convert it back to real money before you spend and half the purchases stop making sense.'},
+ {id:'h_odds',th:'gamer',e:'🎰',n:'Loot Boxes Are Slot Machines',cash:500,skill:3,
+  teach:'The flashing, the near-miss, the delayed reveal, the escalating sound — all of it comes from slot machine research, and it works on adults too. '
+   +'A 1% drop rate does not mean you get it in 100 tries. It means the average is 100, and plenty of people open 400. '
+   +'Several countries now regulate this as gambling. Knowing the maths is the only defence that actually works.'},
+ {id:'h_skills',th:'gamer',e:'🎮',n:'Your Gaming Skills Have a Market Price',cash:700,skill:3,
+  teach:'Reading a complex system fast, coordinating a team, grinding toward a long goal, staying calm under pressure — those are paid skills outside the game. '
+   +'Games hire testers, community managers, designers, analysts and coaches. So do companies with nothing to do with games. '
+   +'The gap between playing and earning is one thing: making something other people want, rather than only consuming what someone else made.'},
  {id:'h_ownership',th:'biz',e:'🔑',n:'Own, Do Not Just Earn',cash:800,skill:3,
   teach:'Wages stop the day you do. Ownership does not — a share of a company, a rental, a book, a piece of software keeps paying. '
    +'Nearly everyone who got seriously wealthy owned a piece of something rather than being paid by the hour. '
@@ -2538,6 +2648,99 @@ const SIMS=[
     d:'Good instincts. The rule that makes this automatic: ignore any line containing node_modules or node:internal, and read the first line plus the first file of your own that appears.'};
    return{t:'bad',h:'Only '+caught+' of 3.',
     d:'Try again with one question per line — does this name a file I wrote, or a line of my code? If not, skip it. The signal is always in the top few lines.'}}},
+
+ {id:'contract',th:'sport',e:'✍️',n:'What You Actually Keep',kind:'slider',pay:600,skill:3,
+  brief:'You just signed for <b>$400,000 a year</b> and the papers are thrilled. Your agent takes 4%, tax takes 40%, and training, physio '
+    +'and travel cost you $30,000. Now pick how much of what is left you spend on your lifestyle — and watch how many years '
+    +'a 3-year career actually has to cover.',
+  min:0,max:100,start:80,step:5,unit:'%',label:'Share of take-home you spend',
+  compute(p){const gross=400000, agent=gross*0.04, tax=gross*0.40, costs=30000;
+   const net=gross-agent-tax-costs;
+   const spend=Math.round(net*p/100), saved=net-spend;
+   const pot=saved*3;                       // three seasons, banked
+   // the pot is invested at ~5% a year above inflation and you draw your
+   // lifestyle out of it. if the growth covers the draw, it never runs out.
+   const r=0.05, growth=pot*r;
+   let years, forever=false;
+   if(spend<=0){years=Infinity;forever=true}
+   else if(growth>=spend){years=Infinity;forever=true}
+   else {years=Math.round(Math.log(1/(1-growth/spend))/Math.log(1+r)*10)/10;
+         if(!isFinite(years)||years<0)years=0}
+   return{net,spend,saved,pot,years,forever,growth,
+    out:[{k:'Take-home / yr',v:money(net)},{k:'You spend',v:money(spend)},
+         {k:'Banked over 3 yrs',v:money(pot),c:pot>0?'#3fb950':'#f85149'},
+         {k:'Lasts after you retire',v:(forever?'forever':years+' yrs'),
+          c:forever?'#3fb950':years>=15?'#f0b429':'#f85149'}]}},
+  peak(){return{p:0,profit:0}},
+  grade(p,r){
+   if(r.forever)return{t:'good',h:'It never runs out.',
+    d:'You banked '+money(r.pot)+' across three seasons and live on '+money(r.spend)+' a year. Invested sensibly it throws off '
+     +money(Math.round(r.growth))+' a year — more than you spend — so the pot grows instead of shrinking. You are financially free at 27. '
+     +'Nothing here required earning more. It required not letting your spending rise to meet the headline, which is the entire difference between the pros who stay rich and the ones in those documentaries.'};
+   if(r.years>=20)return{t:'ok',h:'About '+r.years+' years of cover.',
+    d:'Strong, and still not a life. You retire around 27; this takes you to roughly '+(27+Math.round(r.years))+'. '
+     +'The threshold is closer than it looks — at about 13% of take-home the pot earns more than you spend and lasts forever. '
+     +'That last few percent is worth more than any raise.'};
+   if(r.years>=8)return{t:'ok',h:'Around '+r.years+' years.',
+    d:'You are living like the money continues, and it stops at 27. This is the exact pattern behind the broke-ex-professional headlines — '
+     +'not one disaster, just a lifestyle sized to a peak year that lasted three. Try 20% and watch the last line move a long way.'};
+   return{t:'bad',h:r.spend>0?'Gone in about '+r.years+' years.':'Nothing banked at all.',
+    d:'Spending most of it means the career funds the career and nothing else. Pull the slider down to 15-20%. '
+     +'You would still be living on '+money(Math.round(r.net*0.18))+' a year — better than almost everyone you know — and the pot would last the rest of your life.'}}},
+
+ {id:'creator',th:'creator',e:'🎬',n:'Make Once, Paid Twice',kind:'allocate',pay:600,skill:3,
+  brief:'You have <b>40 hours</b> this month. Some work pays now and stops. Some pays a little now and keeps paying for years. '
+    +'Split your hours and see where you stand in three years.',
+  total:40,unit:'h',
+  items:[{id:'client',e:'💼',n:'Client work',s:'$60/hr, paid immediately, gone the second you stop',min:0,max:40,start:40},
+         {id:'video',e:'🎥',n:'Videos for your channel',s:'Slow to start, earns for years afterwards',min:0,max:40,start:0},
+         {id:'list',e:'📫',n:'Building an email list',s:'Pays nothing now. The only audience you own.',min:0,max:40,start:0},
+         {id:'course',e:'📘',n:'A course or template you sell',s:'Made once, sold repeatedly',min:0,max:40,start:0}],
+  grade(v){const now=v.client*60;
+   const later=Math.round(v.video*38*36 + v.course*55*36 + v.list*22*36)/36|0;
+   const monthly3=Math.round(v.video*11 + v.course*17 + v.list*7);
+   const tail='<br><br>This month you earn <b>'+money(now)+'</b>. In three years, this month is still paying you roughly <b>'
+     +money(monthly3)+' a month</b>.';
+   if(v.client===40)return{t:'bad',h:'All 40 hours traded for cash.',
+    d:'Nothing wrong with the money — it is real and it arrived. But in three years this month pays you exactly nothing, '
+     +'because you sold hours and hours do not compound. Everybody has to do some of this. Doing only this is how you stay on the treadmill forever.'+tail};
+   if(v.client===0)return{t:'ok',h:'All in on the long game.',
+    d:'Brave, and it may be right. It also means no money this month, and creators who run out of runway quit before the catalogue starts paying. '
+     +'Most people who make this work keep some paid work going while the library builds.'+tail};
+   if(monthly3>=380)return{t:'good',h:'Paid now and paid later.',
+    d:'You kept the lights on and still built something that outlives the month. That mix — some hours sold, most hours invested into things that keep earning — '
+     +'is what separates a creator with a business from a freelancer with a camera.'+tail};
+   return{t:'ok',h:'Mostly trading hours.',
+    d:'The balance is tilted toward money that stops. Move even five hours from client work into the catalogue and the three-year number moves a long way, '
+     +'because those hours keep paying every month instead of once.'+tail}}},
+
+ {id:'loot',th:'gamer',e:'🎰',n:'Open the Box',kind:'slider',pay:550,skill:3,
+  brief:'The legendary skin has a <b>1% drop rate</b>. Boxes are <b>$2.50</b>. Pick how many you would open, '
+    +'then see what actually happens — the real odds, not the ones the animation implies.',
+  min:10,max:400,start:50,step:10,unit:'',label:'Boxes you would open',
+  compute(n){const cost=n*2.5;
+   const chance=Math.round((1-Math.pow(0.99,n))*1000)/10;
+   const expected=Math.round(n*0.01*100)/100;
+   const breakeven=250;
+   return{n,cost,chance,expected,
+    out:[{k:'You spend',v:money(cost),c:'#f85149'},
+         {k:'Chance of getting it',v:chance+'%',c:chance>=63?'#f0b429':'#93a1b5'},
+         {k:'Expected legendaries',v:expected},
+         {k:'Chance of nothing',v:(Math.round((100-chance)*10)/10)+'%',c:'#f85149'}]}},
+  peak(){return{p:0,profit:0}},
+  grade(n,r){
+   if(r.chance<40)return{t:'good',h:money(r.cost)+' for a '+r.chance+'% chance. You stopped early.',
+    d:'Good instinct, and look at what it bought: at '+r.n+' boxes you are more likely than not to get nothing at all. '
+     +'That is what a 1% rate means — not "it happens within 100", but "the average is 100 and the spread is enormous". '
+     +'The honest version of this shop screen would print your '+(Math.round((100-r.chance)*10)/10)+'% chance of walking away empty.'};
+   if(r.chance<80)return{t:'ok',h:money(r.cost)+' for a '+r.chance+'% chance.',
+    d:'You have spent real money — '+money(r.cost)+' — and there is still a '+(Math.round((100-r.chance)*10)/10)+'% chance you get nothing. '
+     +'Compare that to just buying the skin directly if the game sells it, and to what '+money(r.cost)+' does in an index fund over ten years. '
+     +'Neither comparison is one the shop screen wants you to make.'};
+   return{t:'bad',h:money(r.cost)+'. That is the whole point of the machine.',
+    d:'Even here, after '+money(r.cost)+', you have a '+(Math.round((100-r.chance)*10)/10)+'% chance of nothing. '
+     +'This is exactly how slot machines are built, using the same research — near-misses, escalating sound, a reveal that takes just long enough. '
+     +'Several countries now regulate loot boxes as gambling. You are not weak for wanting it; it was engineered by people who do this professionally.'}}},
 
  {id:'price',th:'biz',e:'💲',n:'Price It Right',kind:'slider',pay:650,skill:3,
   brief:'You make candles. Each one costs <b>$4</b> in wax and wick, and you spend <b>$600</b> a month on rent, '
@@ -3358,6 +3561,9 @@ const VENUE=[
  {v:'Estate',  rooms:['Viewing Room','Survey Office','Mortgage Desk','The Roof','Rental Flat','Repairs Yard','Closing Table']},
  {v:'Observatory',rooms:['Time Room','Vault of Years','Currency Hall','Orchard','Long Gallery','Quiet Room','Horizon']},
  {v:'Planner',  rooms:['Goal Desk','Whiteboard','Standing Order','Autopilot','Storm Room','Review Bench','Checklist']},
+ {v:'Stadium',  rooms:['Locker Room','Agent Office','Training Ground','Press Room','Physio Table','Trophy Hall','The Tunnel']},
+ {v:'Studio',   rooms:['Filming Room','Edit Bay','Sponsor Desk','Comment Wall','Merch Store','Back Catalogue','Green Room']},
+ {v:'Arcade',   rooms:['Token Booth','Claw Machine','Skin Shop','Loot Counter','Leaderboard','Back Room','Cash Out']},
 ];
 // ============ WHAT EACH PLACE LOOKS LIKE ============
 // The rooms were named Classroom and Trading Floor and then all looked
@@ -4198,11 +4404,17 @@ const THEMES=[
  {id:'biz',e:'🚀',n:'Business',col:'#f0803a',
   blurb:'Profit is not revenue. Build something that earns while you are asleep.',
   worlds:[8,4]},
+ {id:'sport',e:'⚽',n:'Sports',col:'#3fa35a',
+  blurb:'Huge money, short careers. Why so many pros end up broke, and what the ones who did not do differently.',
+  worlds:[14]},
+ {id:'creator',e:'🎬',n:'Creator',col:'#d65cc0',
+  blurb:'Make it once, get paid for years. Audiences, sponsors, royalties - and who actually owns your followers.',
+  worlds:[15]},
+ {id:'gamer',e:'🎮',n:'Gamer',col:'#66c7d6',
+  blurb:'The shop screen was designed by professionals. Learn what it is doing to you, then get paid for the skills instead.',
+  worlds:[16]},
 ];
 const SOON=[
- {e:'⚽',n:'Sports',blurb:'Contracts, sponsorship, and why so many pros end up broke.'},
- {e:'🎬',n:'Creator',blurb:'Channels, sponsors, royalties — getting paid for something made once.'},
- {e:'🎮',n:'Gamer',blurb:'In-game economies, skins, and the psychology built into a shop screen.'},
 ];
 function themeProgress(t){
  let done=0,total=0;
