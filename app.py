@@ -1007,6 +1007,7 @@ body.bigtext .helpbox{font-size:17px}
 <canvas id=game width=800 height=450></canvas>
 <div id=hud><span class=hpill>Lvl <b id=hlvl>1</b>/6</span><span class="hpill clk" id=hwealth>💰 $<b id=hnw>0</b></span><span class=hpill id=hfree title="How close you are to financial freedom">🗽 0%</span><span class=hpill style="font-variant-numeric:tabular-nums"><b id=hclock>08:00</b><span id=hdate> · Mon 1 Jan · Yr 1</span></span><span class="hpill clk" id=hmenu>☰<span class=lbl> Menu</span></span></div>
 <div id=menu>
+ <span class="mrow clk" id=hchar>🧍 Your character</span>
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
  <span class="mrow clk" id=hact>⏳ Spend your day</span>
@@ -1246,7 +1247,7 @@ function fresh(){return{xp:0,streak:0,bestStreak:0,done:{},predictions:[],glossa
 let G=load()||fresh();if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;
 let _pushT=null,_actedBeforeLoad=false;
 function save(){G.rev=(G.rev||0)+1;_actedBeforeLoad=true;localStorage.setItem(KEY,JSON.stringify(G));
  clearTimeout(_pushT);_pushT=setTimeout(pushProfile,1200)}
@@ -1411,25 +1412,44 @@ function refreshBlocks(){for(const b of blocks){const d=b.userData.d,st=doorStat
  const face=st==='done'?'⭐':st==='lock'?'🔒':boss?'👑':'❓';const nq=makeLabel('',face);nq.scale.copy(d.qface.scale);nq.position.copy(d.qface.position);nq.material.depthTest=true;b.remove(d.qface);d.qface.material.map.dispose();d.qface.material.dispose();b.add(nq);d.qface=nq}}
 
 function buildHero(){const g=new THREE.Group();
- const torso=box(1.1,1.3,0.6,0x3d8bff);torso.position.y=1.75;g.add(torso);
- const head=box(0.82,0.82,0.82,0xf1c9a5);head.position.y=2.85;g.add(head);
- const eL=box(0.13,0.13,0.06,0x22303a);eL.position.set(-0.18,2.9,0.42);g.add(eL);const eR=eL.clone();eR.position.x=0.18;g.add(eR);
- const cap=box(0.94,0.32,0.94,0x2f7d3a);cap.position.y=3.28;g.add(cap);
- const legL=box(0.42,1.15,0.5,0x2a3a5a);legL.position.set(-0.28,0.58,0);g.add(legL);heroLegs.push(legL);
- const legR=legL.clone();legR.position.x=0.28;g.add(legR);heroLegs.push(legR);
- const armL=box(0.32,1.15,0.45,0x2f6fd0);armL.position.set(-0.73,1.75,0);g.add(armL);heroArms.push(armL);
- const armR=armL.clone();armR.position.x=0.73;g.add(armR);heroArms.push(armR);
- // the tool lives in the right fist and swings with the arm
- heroHand=new THREE.Group();heroHand.position.set(0,-0.62,0.1);armR.add(heroHand);
- // a few details that make him read as a person and not a stack of boxes
- const brow=box(0.5,0.07,0.06,0x2a1d12);brow.position.set(0,3.05,0.42);g.add(brow);
- const nose=box(0.13,0.15,0.13,0xe8b894);nose.position.set(0,2.78,0.45);g.add(nose);
+ const c=ch(),of=outfitDef();
+ const skin=SKINS[c.skin]||SKINS[0], hairC=HAIRCOL[c.haircol]||HAIRCOL[0];
+ const fem=c.sex==='f';
+ const tw=fem?0.98:1.1, hipW=fem?1.02:1.1;
+ const torso=box(tw,1.3,0.58,of.col);torso.position.y=1.75;g.add(torso);
+ if(fem){const hips=box(hipW,0.4,0.6,of.legs);hips.position.y=1.16;g.add(hips)}
+ const head=box(0.82,0.82,0.82,skin);head.position.y=2.85;g.add(head);
+ const eL=box(0.13,0.13,0.06,0x22303a);eL.position.set(-0.18,2.9,0.42);g.add(eL);
+ const eR=eL.clone();eR.position.x=0.18;g.add(eR);
+ const brow=box(0.5,0.07,0.06,hairC);brow.position.set(0,3.05,0.42);g.add(brow);
+ const nose=box(0.13,0.15,0.13,skin);nose.position.set(0,2.78,0.45);g.add(nose);
  heroMouth=box(0.26,0.06,0.05,0x8a4a3a);heroMouth.position.set(0,2.6,0.44);g.add(heroMouth);
- const brim=box(0.94,0.09,0.44,0x2a6a32);brim.position.set(0,3.16,0.42);g.add(brim);
- const belt=box(1.14,0.2,0.63,0x1b2740);belt.position.y=1.16;g.add(belt);
+ // hair
+ const cap=box(0.9,0.26,0.9,hairC);cap.position.y=3.22;g.add(cap);
+ if(c.hair==='long'){const bk=box(0.86,1.0,0.3,hairC);bk.position.set(0,2.75,-0.42);g.add(bk)}
+ else if(c.hair==='pony'){const bk=box(0.5,0.3,0.3,hairC);bk.position.set(0,3.0,-0.5);g.add(bk);
+   const t=box(0.26,0.8,0.26,hairC);t.position.set(0,2.6,-0.66);g.add(t)}
+ else if(c.hair==='afro'){const a=new THREE.Mesh(new THREE.SphereGeometry(0.66,12,10),
+   new THREE.MeshLambertMaterial({color:hairC}));a.position.y=3.3;g.add(a)}
+ else if(c.hair==='braids'){[-0.34,0.34].forEach(x=>{const br=box(0.2,0.95,0.2,hairC);br.position.set(x,2.72,-0.3);g.add(br)})}
+ else if(c.hair==='buzz'){cap.scale.y=0.5}
+ // accessory
+ if(c.acc==='cap'){const h=box(0.95,0.3,0.95,0x2f7d3a);h.position.y=3.42;g.add(h);
+   const brim=box(0.95,0.09,0.45,0x2a6a32);brim.position.set(0,3.3,0.42);g.add(brim)}
+ else if(c.acc==='beanie'){const h=box(0.94,0.42,0.94,0xd6453f);h.position.y=3.42;g.add(h)}
+ else if(c.acc==='glasses'){const fr=box(0.72,0.1,0.05,0x22303a);fr.position.set(0,2.9,0.46);g.add(fr)}
+ else if(c.acc==='shades'){const fr=box(0.76,0.18,0.06,0x11151c);fr.position.set(0,2.9,0.46);g.add(fr)}
+ else if(c.acc==='crown'){const cr=box(0.86,0.3,0.86,0xf0c419);cr.position.y=3.46;g.add(cr);
+   [-0.3,0,0.3].forEach(x=>{const p=box(0.14,0.24,0.14,0xf0c419);p.position.set(x,3.68,0);g.add(p)})}
+ const legL=box(fem?0.38:0.42,1.15,0.5,of.legs);legL.position.set(-0.26,0.58,0);g.add(legL);heroLegs.push(legL);
+ const legR=legL.clone();legR.position.x=0.26;g.add(legR);heroLegs.push(legR);
+ const armL=box(0.3,1.15,0.44,of.col);armL.position.set(-(tw/2+0.18),1.75,0);g.add(armL);heroArms.push(armL);
+ const armR=armL.clone();armR.position.x=(tw/2+0.18);g.add(armR);heroArms.push(armR);
+ const belt=box(tw+0.04,0.2,0.63,0x1b2740);belt.position.y=1.16;g.add(belt);
  const buckle=box(0.24,0.2,0.05,0xf0b429);buckle.position.set(0,1.16,0.33);g.add(buckle);
- const shoeL=box(0.46,0.22,0.62,0x22303a);shoeL.position.set(-0.28,0.1,0.06);g.add(shoeL);
- const shoeR=shoeL.clone();shoeR.position.x=0.28;g.add(shoeR);
+ const shoeL=box(0.46,0.22,0.62,0x22303a);shoeL.position.set(-0.26,0.1,0.06);g.add(shoeL);
+ const shoeR=shoeL.clone();shoeR.position.x=0.26;g.add(shoeR);
+ heroHand=new THREE.Group();heroHand.position.set(0,-0.62,0.1);armR.add(heroHand);
  possSprite=makeLabel('','');possSprite.position.y=4.1;possSprite.scale.set(1.4,1.4,1);g.add(possSprite);
  refreshHandTool();return g}
 function refreshHandTool(){
@@ -1498,7 +1518,8 @@ $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEvent
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
-$('hprof').addEventListener('click',openProfile);$('hhelp').addEventListener('click',showHelp);
+$('hprof').addEventListener('click',openProfile);
+$('hchar').addEventListener('click',openCharacter);$('hhelp').addEventListener('click',showHelp);
 $('hnarr').addEventListener('click',toggleNarrate);
 // on a phone the "why" line is hidden until you tap the card
 $('quest').addEventListener('click',e=>{if(e.target.classList.contains('qs'))return;
@@ -2550,7 +2571,8 @@ const WAGE_TIERS=[
  {s:0, w:140,n:'Entry level'},{s:5, w:200,n:'Junior'},{s:12,w:300,n:'Skilled'},
  {s:22,w:450,n:'Senior'},   {s:35,w:650,n:'Expert'},{s:50,w:900,n:'In demand'}];
 const SKILL_CAP=50;
-function wageTier(){let t=WAGE_TIERS[0];for(const x of WAGE_TIERS)if((G.skill||0)>=x.s)t=x;return t}
+function effSkill(){return (G.skill||0)+((typeof outfitDef==='function'&&outfitDef().wage)?1:0)}
+function wageTier(){let t=WAGE_TIERS[0];for(const x of WAGE_TIERS)if(effSkill()>=x.s)t=x;return t}
 function wage(){return wageTier().w}
 function nextTier(){return WAGE_TIERS.find(x=>x.s>(G.skill||0))||null}
 // A side project takes real, repeated effort - 10 sessions - before it pays anything.
@@ -2668,6 +2690,90 @@ function openActions(){paused=true;
 // repairs, and the value bleeding out of it while it sits there. The cheap
 // ones cost nothing to keep and hold their worth. The fast ones have a meter
 // running every single month. That is the entire lesson, and you can drive it.
+// ============ WHO YOU ARE ============
+// Body and skin are free and always will be. You do not pay to look like
+// yourself. Clothes cost money - and mostly return nothing, which is its own
+// lesson. The one exception is the interview suit, because presentation
+// really does open doors, and the game should not pretend otherwise.
+const SKINS=[0xf1c9a5,0xe8b892,0xc98d63,0xa06a44,0x7a4f30,0x5a3a22];
+const HAIRCOL=[0x2a1d12,0x4a3020,0x8a5a2a,0xc9a227,0xd6453f,0x9a9a9a,0x3d8bff,0xa371f7];
+const HAIRSTYLES=[
+ {id:'short', n:'Short',    cost:0},
+ {id:'buzz',  n:'Buzz cut', cost:0},
+ {id:'long',  n:'Long',     cost:60},
+ {id:'pony',  n:'Ponytail', cost:60},
+ {id:'afro',  n:'Afro',     cost:80},
+ {id:'braids',n:'Braids',   cost:80},
+];
+const OUTFITS=[
+ {id:'tee',   e:'👕',n:'T-shirt',        cost:0,    col:0x3d8bff,legs:0x2a3a5a,
+  note:'What you already own. Costs nothing, does nothing. Perfect.'},
+ {id:'hoodie',e:'🧥',n:'Hoodie',         cost:120,  col:0x4a5a72,legs:0x22303a,
+  note:'Comfortable. Loses value the second you wear it, like almost all clothes.'},
+ {id:'hivis', e:'🦺',n:'Hi-vis Workwear',cost:180,  col:0xf0b429,legs:0x3a4a5a,
+  note:'Bought for a job, not for a photo. Clothes that earn are different from clothes that impress.'},
+ {id:'lab',   e:'🥼',n:'Lab Coat',       cost:260,  col:0xf4f7fb,legs:0x6a7280,
+  note:'Looks clever. Being clever is free; looking it costs $260.'},
+ {id:'suit',  e:'🤵',n:'Interview Suit', cost:900,  col:0x22303a,legs:0x1b2740,wage:1,
+  note:'The one piece of clothing here that pays you back — it counts as +1 skill at work. Presentation opens doors. It still is not an investment.'},
+ {id:'gold',  e:'✨',n:'Gold Jacket',    cost:6000, col:0xf0c419,legs:0x8a6a1a,
+  note:'Six thousand dollars to look rich. Ask yourself whether looking rich and being rich are the same thing.'},
+];
+const ACCESSORIES=[
+ {id:'none', e:'—', n:'Nothing',    cost:0},
+ {id:'cap',  e:'🧢',n:'Cap',        cost:40},
+ {id:'beanie',e:'🥾',n:'Beanie',    cost:40},
+ {id:'glasses',e:'👓',n:'Glasses',  cost:90},
+ {id:'shades',e:'🕶️',n:'Sunglasses',cost:150},
+ {id:'crown',e:'👑',n:'Crown',      cost:9000},
+];
+function ch(){G.char=G.char||{};const c=G.char;
+ if(!c.sex)c.sex='m';if(c.skin==null)c.skin=0;if(!c.hair)c.hair='short';
+ if(c.haircol==null)c.haircol=0;if(!c.outfit)c.outfit='tee';if(!c.acc)c.acc='none';return c}
+function outfitDef(){return OUTFITS.find(o=>o.id===ch().outfit)||OUTFITS[0]}
+function ownedLook(id){return !!(G.look&&G.look[id])}
+function buyLook(kind,id,cost){
+ if(cost>0&&!ownedLook(id)){
+  if((G.wealth||0)<cost){toast('Not enough money for that yet.');return}
+  G.wealth-=cost;G.look=G.look||{};G.look[id]=1;sfx('secret');
+ }
+ const c=ch();
+ if(kind==='hair')c.hair=id; else if(kind==='outfit')c.outfit=id;
+ else if(kind==='acc')c.acc=id; else if(kind==='skin')c.skin=id;
+ else if(kind==='haircol')c.haircol=id; else if(kind==='sex')c.sex=id;
+ save();renderHUD();rebuildHero();openCharacter();}
+function rebuildHero(){
+ if(!hero||!scene)return;
+ const p=hero.position.clone(),r=hero.rotation.y;
+ scene.remove(hero);heroLegs=[];heroArms=[];heroHand=null;heroMouth=null;heroRide=null;
+ hero=buildHero();hero.position.copy(p);hero.rotation.y=r;scene.add(hero);
+ if(typeof buildRide==='function')buildRide();}
+function openCharacter(){
+ paused=true;const c=ch(),of=outfitDef();
+ const swatch=(arr,kind,cur)=>arr.map((col,k)=>
+  '<span onclick="buyLook(&#39;'+kind+'&#39;,'+k+',0)" style="display:inline-block;width:34px;height:34px;margin:3px;border-radius:9px;cursor:pointer;'
+  +'background:#'+col.toString(16).padStart(6,'0')+';border:3px solid '+(cur===k?'#3d8bff':'#2b3654')+'"></span>').join('');
+ const row=(items,kind,cur)=>items.map(it=>{const owned=it.cost===0||ownedLook(it.id),on=cur===it.id;
+  return '<div class=gloss style="'+(on?'border-color:#3d8bff':owned?'border-color:#3fb950':'')+'">'
+   +'<b>'+(it.e?it.e+' ':'')+it.n+'</b>'+(on?' <span class=p-note style=color:#3d8bff>· wearing</span>':'')
+   +(it.note?'<div class=gd>'+it.note+'</div>':'')
+   +(it.wage?'<div class=gd style=color:#3fb950>Counts as +1 skill while you wear it.</div>':'')
+   +(on?'':'<button class=pbtn style="margin-top:6px" onclick="buyLook(&#39;'+kind+'&#39;,&#39;'+it.id+'&#39;,'+(owned?0:it.cost)+')">'
+      +(owned?'Wear this':'Buy · '+money(it.cost))+'</button>')
+   +'</div>'}).join('');
+ $('shopbody').innerHTML='<div class=p-title>🧍 Your character</div>'
+  +'<div class=p-world style=margin-bottom:8px>Cash '+money(G.wealth||0)+'</div>'
+  +'<p class=p-teach>Body and skin are free, and always will be. Clothes cost money and mostly give nothing back — that is true here and true outside.</p>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Body</div>'
+  +'<div class=calls><button class="'+(c.sex==='m'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;m&#39;,0)">👦 Boy</button>'
+  +'<button class="'+(c.sex==='f'?'up':'')+'" onclick="buyLook(&#39;sex&#39;,&#39;f&#39;,0)">👧 Girl</button></div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Skin <span class=p-note>· free</span></div><div>'+swatch(SKINS,'skin',c.skin)+'</div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Hair colour <span class=p-note>· free</span></div><div>'+swatch(HAIRCOL,'haircol',c.haircol)+'</div>'
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Hair style</div>'+row(HAIRSTYLES,'hair',c.hair)
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Clothes</div>'+row(OUTFITS,'outfit',c.outfit)
+  +'<div class=p-title style="font-size:16px;margin-top:12px">Accessory</div>'+row(ACCESSORIES,'acc',c.acc)
+  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;shop&#39;)">← Back to Money World</button>';
+ $('shop').classList.add('show');}
 const VEHICLES=[
  {id:'feet',e:'👟',n:'Your own two feet',buy:0,monthly:0,depr:0,speed:1.00,
   note:'Free forever. Slow, but nothing has ever repossessed a foot.'},
