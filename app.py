@@ -1163,8 +1163,8 @@ body.bigtext .helpbox{font-size:17px}
 #sidehd .st{font-weight:800;font-size:15px;flex:1;text-align:left}
 #sidehd button{width:36px;height:36px;border-radius:11px;background:#0e1626;border:1px solid #2b3654;color:#cfe0ff;font-size:16px;flex:0 0 auto}
 #sidetabs{display:flex;gap:5px;padding:8px 10px;border-bottom:1px solid #22304e;overflow-x:auto;flex:0 0 auto;-webkit-overflow-scrolling:touch}
-#sidetabs button{white-space:nowrap;padding:8px 12px;font-size:12.5px;font-weight:800;border-radius:11px;
- background:#0e1626;color:#93a1b5;border:1px solid #2b3654}
+#sidetabs button{white-space:nowrap;padding:8px 9px;font-size:12px;font-weight:800;border-radius:11px;
+ background:#0e1626;color:#93a1b5;border:1px solid #2b3654;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 #sidetabs button.on{color:#7fb4ff;border-color:#3d8bff;background:#122038}
 #sidebody{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(28px + env(safe-area-inset-bottom,0px));text-align:left}
 #sidebody .p-title{text-align:left}
@@ -1179,6 +1179,47 @@ body.bigtext .helpbox{font-size:17px}
 .slotit .sc{font-size:10px;font-weight:800;margin-top:3px;color:#f0b429}
 .slotit .sc.free{color:#3fb950}
 .slotit .tick{position:absolute;top:4px;right:5px;font-size:11px;color:#3d8bff}
+/* ---- the story ---- */
+#story{position:fixed;inset:0;z-index:60;display:none;background:#05070d;
+ align-items:center;justify-content:center;padding:20px}
+#story.show{display:flex}
+#storycard{max-width:560px;width:100%;text-align:left;max-height:94vh;overflow-y:auto;
+ -webkit-overflow-scrolling:touch;padding:4px}
+.ch-no{font-size:11px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#7fb4ff;
+ opacity:0;animation:chFade .5s ease .1s forwards}
+.ch-e{font-size:54px;line-height:1;margin:8px 0 6px;opacity:0;animation:chPop .6s cubic-bezier(.2,1.4,.4,1) .18s forwards}
+.ch-t{font-size:31px;font-weight:800;line-height:1.15;margin:0 0 14px;
+ background:linear-gradient(95deg,#eaf1ff,#7fb4ff);-webkit-background-clip:text;background-clip:text;color:transparent;
+ opacity:0;animation:chFade .6s ease .3s forwards}
+.ch-p{font-size:15.5px;line-height:1.62;color:#c6d4e8;margin:0 0 13px;opacity:0;animation:chFade .6s ease forwards}
+.ch-p b{color:#fff}
+.ch-l{border-left:3px solid #f0b429;background:#181405;border-radius:0 12px 12px 0;padding:12px 15px;
+ margin:16px 0;font-size:14.5px;line-height:1.6;color:#f6e6bf;opacity:0;animation:chFade .6s ease .1s forwards}
+.ch-l b{display:block;color:#f0b429;font-size:11px;letter-spacing:.13em;text-transform:uppercase;margin-bottom:5px}
+.ch-do{background:#0e1a2e;border:1px solid #3d8bff;border-radius:14px;padding:14px 16px;margin:16px 0 10px;
+ opacity:0;animation:chFade .6s ease .2s forwards}
+.ch-do .k{font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#7fb4ff;margin-bottom:5px}
+.ch-do .v{font-size:16px;font-weight:700;line-height:1.4;color:#eaf1ff}
+.ch-btns{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px;opacity:0;animation:chFade .5s ease .35s forwards}
+.ch-btns button{flex:1 1 160px;padding:15px;border-radius:14px;font-size:15px;font-weight:800;border:1px solid #2b3654;background:#16223a;color:#dce7f7}
+.ch-btns button.go{background:linear-gradient(160deg,#3d8bff,#2f6fd8);border-color:#3d8bff;color:#fff}
+@keyframes chFade{to{opacity:1}}
+@keyframes chPop{0%{opacity:0;transform:scale(.4) rotate(-12deg)}70%{transform:scale(1.12)}100%{opacity:1;transform:none}}
+.chip-lock{opacity:.42}
+.chrow{display:flex;gap:11px;align-items:flex-start;background:#0d1420;border:1px solid #2b3654;
+ border-radius:13px;padding:11px 12px;margin:7px 0;text-align:left;width:100%;color:#eaf1ff}
+.chrow.on{border-color:#3d8bff}
+.chrow .ce{font-size:24px;flex:0 0 auto;line-height:1.1}
+.chrow .cc{flex:1 1 auto}
+.chrow .cn{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#7fb4ff}
+.chrow .ct{font-size:14px;font-weight:800;line-height:1.3;margin-top:1px;color:#eaf1ff}
+.chrow.chip-lock .ct{color:#7b8aa3}
+.chrow .cd{font-size:12px;color:#93a1b5;line-height:1.4;margin-top:3px}
+@media(max-width:820px){
+ .ch-t{font-size:25px}.ch-e{font-size:44px}.ch-p{font-size:15px}
+ #storycard{max-height:100vh;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}
+ .ch-btns button{flex:1 1 100%}
+}
 /* ---- workbench: the hands-on sims ---- */
 .simhd{display:flex;align-items:center;gap:11px;text-align:left;margin-bottom:10px}
 .simhd .e{font-size:34px;flex:0 0 auto}
@@ -1231,7 +1272,7 @@ body.bigtext .helpbox{font-size:17px}
 .sw.on{border-color:#3d8bff;transform:scale(1.06)}
 #peekbtn{position:fixed;right:14px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:32;display:none;
  padding:12px 18px;border-radius:14px;background:rgba(61,139,255,.92);color:#fff;font-weight:800;font-size:14px;border:none}
-#sidep.show ~ #peekbtn{display:block}
+#sidep.peek ~ #peekbtn{display:block}
 @media(max-width:820px){
  #sidep{width:100%;border-left:none}
  #sideveil{display:none!important}
@@ -1394,6 +1435,7 @@ body.overlay #ctlbar,body.overlay #gesthint,body.overlay #stick{opacity:0;pointe
  <span class="mrow clk" id=hprof>👤 Profile &amp; badges</span>
  <span class="mrow clk" id=hinv>📊 Your investments</span>
  <span class="mrow clk" id=hbuild>🏗️ Your business</span>
+ <span class="mrow clk" id=hstory>📖 Your story <b id=hstn>0</b></span>
  <span class="mrow clk" id=hwork>🛠️ Workbench <i>hands-on, pays</i></span>
  <span class="mrow clk" id=hbench>🤖 Prompt Bench <i>paid jobs</i></span>
  <span class="mrow clk" id=hmkt>📈 Market Desk <i>real prices</i></span>
@@ -1485,6 +1527,7 @@ body.overlay #ctlbar,body.overlay #gesthint,body.overlay #stick{opacity:0;pointe
   Walls: beat them down, climb them, or go round. Push crates. Climb mountains.
  </div>
 </div></div>
+<div id=story><div id=storycard></div></div>
 <div class=ov id=sim><div class='panel wide' style=max-width:620px><button class=tclose onclick="hide('sim')">✕</button><div id=simbody></div></div></div>
 <div class=ov id=secret><div class=panel style=border-color:#f0b429><button class=tclose onclick="hide('secret')">✕</button><div id=secbody></div></div></div>
 <div class=ov id=vault><div class=panel><button class=tclose onclick="hide('vault')">✕</button><div id=vbody></div></div></div>
@@ -2027,7 +2070,7 @@ let G=fresh();
 if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};if(!G.mines)G.mines={};if(!G.opps)G.opps={};if(!G.owned)G.owned={};if(!G.met)G.met={};
 if(!G.furn)G.furn={};if(!G.home)G.home='parents';if(G.equity==null)G.equity=0;if(G.month==null)G.month=0;
 if(G.tmin==null)G.tmin=0;if(G.lastMonth==null)G.lastMonth=0;if(G.lastYear==null)G.lastYear=1;
-if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;if(!G.hidden)G.hidden={};if(!G.sims)G.sims={};if(G.coach==null)G.coach=0;if(G.highCoins==null)G.highCoins=0;
+if(G.skill==null)G.skill=0;if(G.projects==null)G.projects=0;if(G.wasted==null)G.wasted=0;if(G.buildPts==null)G.buildPts=0;if(G.tut==null)G.tut=0;if(!G.acts)G.acts={};if(G.smashed==null)G.smashed=0;if(G.narrate==null)G.narrate=0;if(!G.tries)G.tries={};if(!G.readChecks)G.readChecks={};if(!G.look)G.look={};if(!G.promptJobs)G.promptJobs={};if(G.biz===undefined)G.biz=null;if(!G.port)G.port={};if(G.invested==null)G.invested=0;if(!G.portHist)G.portHist=[];if(G.freedAt===undefined)G.freedAt=null;if(!G.char)G.char={};if(!G.veh)G.veh={};if(!G.vehVal)G.vehVal={};if(!G.riding)G.riding='feet';if(!G.glossary)G.glossary={};if(G.wealth==null)G.wealth=0;if(!G.hidden)G.hidden={};if(!G.sims)G.sims={};if(!G.story)G.story={};if(G.coach==null)G.coach=0;if(G.highCoins==null)G.highCoins=0;
 let _pushT=null,_actedBeforeLoad=false;
 function publicSummary(){
  // Progress only. Never anything that could identify or contact a person.
@@ -2189,7 +2232,9 @@ let actx;function sfx(type){try{if(!actx)actx=new(window.AudioContext||window.we
  o.type=ty;o.frequency.setValueAtTime(f,now);if(type==='secret'||type==='win'||type==='break'||type==='coin')o.frequency.exponentialRampToValueAtTime(f*(type==='coin'?1.5:2),now+d);
  if(type==='bad')o.frequency.exponentialRampToValueAtTime(f*0.5,now+d);
  g.gain.setValueAtTime(0.16,now);g.gain.exponentialRampToValueAtTime(0.001,now+d);o.start(now);o.stop(now+d)}catch(e){}}
-function startGame(){if($('hlvlmax'))$('hlvlmax').textContent=LEVELS.length;$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
+let _storyTick=null;
+function startGame(){if($('hlvlmax'))$('hlvlmax').textContent=LEVELS.length;
+ clearInterval(_storyTick);_storyTick=setInterval(()=>{if(!paused)try{checkStory()}catch(e){}},4000);$('help').classList.remove('show');paused=false;document.body.classList.toggle('bigtext',!!G.narrate);if($('hnarr'))$('hnarr').textContent=G.narrate?'🔊 Read aloud: ON':'🔇 Read aloud: OFF';if(typeof renderQuest==='function')renderQuest();try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}
  setTimeout(()=>{try{showCoach()}catch(e){}},700)}
 function showHelp(){paused=true;$('help').classList.add('show')}
 
@@ -2910,6 +2955,160 @@ function openWorkbench(){
   +'<button class=pbtn style="background:#1b2740;border-color:#2b3654" onclick="hide(&#39;sim&#39;)">← Back to the game</button>';
  $('sim').classList.add('show');
 }
+/* =================================================================
+   THE STORY. Twelve chapters. Nobody has to go looking for them —
+   each one fires the moment your life actually reaches it.
+   ================================================================= */
+const STORY=[
+ {id:'wake',e:'\U0001f305',t:'Eighteen',
+  when:()=>true,
+  p:['You wake up in a bedroom that is not yours, in a house you do not pay for, on the first morning that anything is really up to you.',
+     'You have <b>no money</b>. You have <b>no plan</b>. What you do have is the only thing every single person on this island started with, including the ones in the big houses on the hill: <b>twenty-four hours a day</b>.',
+     'That is the whole game. Not luck, not a rich uncle. What you trade those hours for, and what you do with whatever comes back.'],
+  lesson:'Nobody is coming to sort this out for you. That sounds harsh for about a week, and then it turns into the best news you have ever had — because it means it is yours to steer.',
+  doK:'Start here',doV:'Smash the piggy bank in your bedroom. Walk straight into it.',
+  btn:null},
+
+ {id:'firstpay',e:'\U0001f4b5',t:'The First Hour You Sold',
+  when:()=>((G.acts&&G.acts.work)||0)>=1,
+  p:['You worked. Somebody handed you money for a piece of your life, and the trade felt fair, because it is.',
+     'Remember what just happened though, because almost nobody does: <b>you sold an hour and it is gone.</b> You cannot get it back, resell it, or make a second copy of it.',
+     'This is how most people fund an entire life. It works. It just has a hard ceiling built into it, and the ceiling is twenty-four.'],
+  lesson:'Every hour of work you do is a one-off sale. Every dollar you invest is a worker that never sleeps, never quits, and never asks for a raise. You want as many of the second kind as you can get.',
+  doK:'Do this next',doV:'Study once. It pays nothing today — watch what it does to your wage anyway.',
+  btn:{l:'⏳ Spend your day',f:'openActions'}},
+
+ {id:'gap',e:'\U0001f573️',t:'The Gap',
+  when:()=>((G.acts&&G.acts.work)||0)>=3,
+  p:['Three shifts in. Look at what you have kept, not what you earned — those are two completely different numbers, and only one of them is yours.',
+     'Almost everybody who feels broke on a decent wage is losing it in the gap. Not one enormous mistake. A hundred small, reasonable, forgettable ones.',
+     'The people who get ahead are rarely the ones earning the most. They are the ones with the widest gap between what comes in and what goes out.'],
+  lesson:'Income is what you make. Wealth is what you keep. A person on $40,000 who keeps a fifth of it will quietly overtake a person on $90,000 who keeps nothing.',
+  doK:'Do this next',doV:'Open the Workbench and build a month. It takes two minutes and it pays.',
+  btn:{l:'\U0001f6e0️ Build a Month',f:"()=>openSim('budget')"}},
+
+ {id:'invest',e:'⚙️',t:'The Boring Machine',
+  when:()=>(typeof portVal==='function'&&portVal()>0)||(G.invested||0)>0,
+  p:['You just did something that felt like almost nothing. You moved money somewhere it can grow, and then you walked away.',
+     'No excitement. No skill. No hovering over a screen. And this — this dull, unremarkable act — is the single mechanism behind most of the wealth you have ever been jealous of.',
+     'It works because of time, and it only works if you leave it alone. The urge to check it, tinker with it and outsmart it is the main way people break it.'],
+  lesson:'Money you invest keeps working on the days you are ill, asleep, on holiday, or fed up. That is the entire difference between a wage and wealth.',
+  doK:'Do this next',doV:'Keep adding to it. The same amount, on the same day, every month — that boring habit beats almost every clever one.',
+  btn:{l:'\U0001f4ca Your investments',f:'openInvest'}},
+
+ {id:'ladder',e:'\U0001f3e0',t:'The Ladder Has a Cost',
+  when:()=>(G.home||0)>0,
+  p:['You moved. Your own space, your own door, your own rules. That is worth something real and you should enjoy it.',
+     'Here is the part nobody mentions at the housewarming: <b>you just raised the price of your freedom.</b> Every rung up this ladder increases what your life costs to run each month, and freedom is measured against that number, not against your income.',
+     'Nothing here says stay at your parents forever. It says climb it with your eyes open, on purpose, when you can afford the whole thing.'],
+  lesson:'Freedom is not a pile of money. It is the month your investments cover your bills. Raise the bills and you push that month further away, however much you earn.',
+  doK:'Do this next',doV:'Check your Profile. Look at your monthly burn and what it did to the freedom number.',
+  btn:{l:'\U0001f464 See your profile',f:"()=>openSide('you')"}},
+
+ {id:'secret',e:'\U0001f4dc',t:'The Things Nobody Tells You',
+  when:()=>Object.keys(G.hidden||{}).length>=1,
+  p:['You went somewhere you had no reason to go, and there was something there.',
+     'That is not a coincidence in the design. The genuinely useful financial knowledge is almost never on the path — it is not on the adverts, not in the shop window, not in the thing everybody is shouting about this week.',
+     'It is in the boring documents, the small print, the corner of the room, the conversation with someone who has already done it.'],
+  lesson:'The information that makes people money is quiet, unglamorous and slightly hidden. The information that takes money off people is loud, urgent and everywhere.',
+  doK:'Do this next',doV:'Look up, look behind things, and break what looks solid. There are 36 of these across the islands.',
+  btn:{l:'\U0001f3c6 What you have found',f:"()=>openSide('badges')"}},
+
+ {id:'mine',e:'\U0001f4a5',t:'The Landmine',
+  when:()=>Object.keys(G.mines||{}).length>=1,
+  p:['Something blew up. A bill you had not planned for, a repair, a piece of bad luck with your name on it.',
+     'It was not a punishment and you did not deserve it. Life simply arrives with these in it, at a rate of roughly a few a year, forever, for everyone.',
+     'The only real question is whether one of these ends you or just annoys you. That is decided long before it goes off.'],
+  lesson:'This is what an emergency fund is actually for. Not to earn interest — to turn a catastrophe into an inconvenience. Three months of expenses in boring cash is the highest-return thing most people ever do.',
+  doK:'Do this next',doV:'Build the cushion before you need it. You never get to build it during.',
+  btn:{l:'⏳ Spend your day',f:'openActions'}},
+
+ {id:'resist',e:'\U0001f4aa',t:'The One You Walked Past',
+  when:()=>(G.willpower||0)>=2,
+  p:['Something was dangled in front of you and you kept walking. It probably did not feel heroic. It felt like nothing much at all.',
+     'That is exactly what it is supposed to feel like. Nobody applauds. There is no moment. You simply have money you would otherwise not have.',
+     'Do it enough times and the muscle stops aching. You start spotting the pitch before it finishes — the countdown, the flattery, the just-for-you.'],
+  lesson:'Wealth is built from decisions nobody sees you make. The exciting ones mostly cost money; the invisible ones mostly keep it.',
+  doK:'Do this next',doV:'Try Spot the Scam on the Protect island. Same tricks, out in the open where you can study them.',
+  btn:{l:'\U0001f6a9 Spot the Scam',f:"()=>openSim('scam')"}},
+
+ {id:'tier',e:'\U0001f4c8',t:'Your Hour Changed Price',
+  when:()=>(typeof effSkill==='function'?effSkill():(G.skill||0))>=10,
+  p:['The same hour of your life is now worth more than it was, and nothing about you changed except what you know.',
+     'This is the return on studying, and it is peculiar: it pays nothing on the day, then it pays on every single hour you work for the rest of your life.',
+     'It also cannot be lost in a crash, repossessed, or stolen. Of everything you will ever own, this is the safest asset there is.'],
+  lesson:'Skill is the one investment with no downside. Markets fall, cars rust, businesses close. What you know goes with you into every room you ever walk into.',
+  doK:'Do this next',doV:'Do not stop at one tier. The jump from Junior to In Demand is bigger than the jump from nothing to Junior.',
+  btn:{l:'\U0001f5fa️ Pick a world',f:'openMap'}},
+
+ {id:'biz',e:'\U0001f680',t:'Something That Works Without You',
+  when:()=>!!G.biz,
+  p:['You built a thing. It is small, it is probably a bit rubbish, and it has one property your job will never have: <b>it can earn while you are not there.</b>',
+     'That is the line. On one side is being paid for your time. On the other is owning something that pays regardless — a business, a share of a company, a rental, a piece of software, a back catalogue.',
+     'Almost everybody who got seriously wealthy crossed that line. Very few of them did it by being paid more per hour.'],
+  lesson:'Ask of any work you take on: at the end of this, do I own anything? If the answer is no, you were renting out your hours. That is fine sometimes. It is a trap always.',
+  doK:'Do this next',doV:'Grow it, or start a second one. Owners have more than one thing paying them.',
+  btn:{l:'\U0001f3d7️ Your business',f:'openBuild'}},
+
+ {id:'half',e:'\U0001f306',t:'Halfway',
+  when:()=>{try{return netWorth()/freedomNumber()>=0.5}catch(e){return false}},
+  p:['Your money now covers half your life. Sit with that for a second, because it is genuinely rare — most people never get here, and a lot of them earn far more than you.',
+     'It also means something practical has already changed. You could survive a lost job. You could walk out of a bad room. You could say no.',
+     'The second half arrives faster than the first, because your money is doing more of the lifting now and you are doing less.'],
+  lesson:'Freedom is not a switch, it is a dimmer. Every percentage point buys you a bit more room to choose — long before you reach a hundred.',
+  doK:'Do this next',doV:'Do not raise your spending now. This is the exact point at which most people do, and it resets the clock.',
+  btn:{l:'\U0001f464 See your profile',f:"()=>openSide('you')"}},
+
+ {id:'free',e:'\U0001f5fd',t:'The Morning It Did Not Matter',
+  when:()=>{try{return netWorth()>=freedomNumber()}catch(e){return false}},
+  p:['You wake up and there is nothing you have to do today.',
+     'Your money covers your life. The work you do from here is work you picked. That is the whole thing — not a yacht, not a supercar. <b>The right to spend your own hours.</b>',
+     'Look back at where this started. Same twenty-four hours a day you had at eighteen with nothing. You did not find more of them. You just stopped selling all of them, and bought some back.'],
+  lesson:'This was never about money. It was about who owns your time. You do now — and everything you learned to get here still works, at any size, for anybody you ever choose to teach it to.',
+  doK:'What now',doV:'Keep playing. There are islands you have not seen and lessons still hidden on them.',
+  btn:{l:'\U0001f5fa️ The Map',f:'openMap'}},
+];
+let _storyQ=[],_storyShowing=false;
+function storySeen(id){return !!(G.story&&G.story[id])}
+function storyCount(){return STORY.filter(c=>storySeen(c.id)).length}
+function checkStory(){
+ if(_storyShowing)return;
+ for(const c of STORY){
+  if(storySeen(c.id))continue;
+  let hit=false; try{hit=!!c.when()}catch(e){hit=false}
+  if(!hit)continue;
+  G.story=G.story||{}; G.story[c.id]=Date.now(); save();
+  _storyQ.push(c);
+ }
+ if(_storyQ.length&&!_storyShowing)showChapter(_storyQ.shift());
+}
+function chapterNo(c){return STORY.indexOf(c)+1}
+function showChapter(c,replay){
+ if(!c){_storyShowing=false;return}
+ _storyShowing=true; paused=true;
+ const n=chapterNo(c);
+ $('storycard').innerHTML=
+  '<div class=ch-no>Chapter '+n+' of '+STORY.length+'</div>'
+  +'<div class=ch-e>'+c.e+'</div>'
+  +'<div class=ch-t>'+c.t+'</div>'
+  +c.p.map((x,k)=>'<p class=ch-p style="animation-delay:'+(0.42+k*0.14)+'s">'+x+'</p>').join('')
+  +'<div class=ch-l><b>What this actually means</b>'+c.lesson+'</div>'
+  +(c.doK?'<div class=ch-do><div class=k>'+c.doK+'</div><div class=v>'+c.doV+'</div></div>':'')
+  +'<div class=ch-btns>'
+  +(c.btn?'<button class=go onclick="closeChapter();('+(c.btn.f.indexOf('=>')>=0?c.btn.f:c.btn.f)+')()">'+c.btn.l+'</button>':'')
+  +'<button onclick=closeChapter()>'+(c.btn?'Not now':'Continue →')+'</button>'
+  +'</div>';
+ $('story').classList.add('show');
+ $('storycard').scrollTop=0;
+ sfx('secret');
+ if(G.narrate)try{speak(c.t+'. '+c.p.join(' ').replace(/<[^>]+>/g,'')+' '+c.lesson)}catch(e){}
+}
+function closeChapter(){
+ $('story').classList.remove('show'); _storyShowing=false; paused=false;
+ try{if(typeof syncOverlay==='function')syncOverlay()}catch(e){}
+ if(_storyQ.length)setTimeout(()=>{const nx=_storyQ.shift();if(nx)showChapter(nx)},420);
+}
+function replayChapter(id){const c=STORY.find(x=>x.id===id);if(c&&storySeen(c.id))showChapter(c,true)}
 function themeForLevel(li){for(const t of THEMES)if(t.worlds.indexOf(li)>=0)return t.id;return 'basics'}
 function hiddenFound(){return Object.keys(G.hidden||{}).length}
 function hiddenFor(li){
@@ -3033,6 +3232,7 @@ $('hview').addEventListener('click',()=>setView(camMode+1));$('hvault').addEvent
 $('hhome').addEventListener('click',()=>{if(atHome)goOutside();else goHome()});
 $('hact').addEventListener('click',openActions);
 $('hmkt').addEventListener('click',openMarket);
+$('hstory').addEventListener('click',()=>openSide('life'));
 $('hwork').addEventListener('click',openWorkbench);
 $('hbench').addEventListener('click',()=>openPromptBench(0));
 $('hbuild').addEventListener('click',openBuild);
@@ -4150,6 +4350,8 @@ function buyUpgrade(id){
  G.wealth-=u.cost;b.up=(b.up||[]).concat([id]);save();renderHUD();sfx('hit');buildBiz();openBuild();}
 function openBuild(){
  paused=true;
+ // a save that predates a business type (or a corrupted one) must not crash the panel
+ if(G.biz&&!BIZ_TYPES.find(t=>t.id===G.biz.type)){G.biz=null;save()}
  if(!G.biz){
   $('shopbody').innerHTML='<div class=p-title>🏗️ Build something of your own</div>'
    +'<p class=p-teach>Everything so far has been about money you earn or invest. This is the other way: '
@@ -4603,21 +4805,25 @@ function sideBadges(){
   +(vault.length?vault.map(v=>'<div class=gloss><b>'+v+'</b></div>').join(''):'<div class=p-note>Nothing found yet — explore the far corners.</div>');
 }
 function sideLife(){
- const p=tParts(),nw=netWorth();
- const beats=[];
- beats.push({e:'🏁',t:'Day one',d:'You woke up at Mum and Dad’s with nothing but time. That is the only thing everybody starts with the same amount of.'});
- if((G.acts||{}).work)beats.push({e:'💼',t:'First shift',d:'You traded hours for money for the first time. It works, and it does not scale.'});
- if((G.skill||0)>=5)beats.push({e:'📚',t:'You started learning',d:'Skill '+(G.skill||0)+'. Every point moved your wage, permanently.'});
- if((typeof portVal==='function'?portVal():0)>0)beats.push({e:'📈',t:'Money went to work',d:'You bought your first investment. From here money earns while you sleep.'});
- if(G.biz)beats.push({e:'🚀',t:'You built something',d:'A business pays whether or not you turn up. That is the difference.'});
- if((G.home||0)>0)beats.push({e:'🏠',t:'You moved out',d:'Every rung up the housing ladder raises the number you need for freedom. Worth knowing before you climb.'});
- if(Object.keys(G.done||{}).length>=10)beats.push({e:'🗺️',t:'You have travelled',d:Object.keys(G.done||{}).length+' rooms cleared across the islands.'});
- if(typeof isFree==='function'&&isFree())beats.push({e:'🗽',t:'Free',d:'Your money covers your life. Work became a choice.'});
- return '<p class=p-teach>You are 18 with nothing. Every island on the map is a different way people actually build a life — and they all end at the same place: the month your money covers your bills. This is your run so far.</p>'
-  +beats.map(b=>'<div class=gloss><b>'+b.e+' '+b.t+'</b><div class=gd>'+b.d+'</div></div>').join('')
+ const seen=storyCount();
+ return '<p class=p-teach>You are 18 with nothing. Every island on the map is a different way people actually build a life — '
+  +'and they all end at the same place: the month your money covers your bills. '
+  +'The story writes itself as you get there. <b>'+seen+' of '+STORY.length+' chapters</b> so far.</p>'
+  +'<div class=simbar><i style="width:'+Math.round(seen/STORY.length*100)+'%;background:linear-gradient(90deg,#3d8bff,#3fb950)"></i></div>'
+  +STORY.map((c,i)=>{
+    const got=storySeen(c.id);
+    return '<button class="chrow'+(got?' on':' chip-lock')+'"'
+     +(got?' onclick="closeSide();replayChapter(&#39;'+c.id+'&#39;)"':'')+'>'
+     +'<span class=ce>'+(got?c.e:'\U0001f512')+'</span>'
+     +'<span class=cc><span class=cn>Chapter '+(i+1)+'</span>'
+     +'<div class=ct>'+(got?c.t:'Not yet')+'</div>'
+     +'<div class=cd>'+(got?c.lesson.slice(0,110)+(c.lesson.length>110?'…':''):'Keep playing — this one unlocks itself.')+'</div>'
+     +'</span></button>'}).join('')
   +'<div class=sechd>Where you are</div>'
-  +'<div class=gloss><b>'+dateStr()+'</b><div class=gd>Age '+p.age+' · day '+(p.totalDays+1)+' · net worth '+money(nw)+'</div></div>'
-  +'<button class=pbtn style="margin-top:12px" onclick="hide(&#39;map&#39;);closeSide();openMap()">🗺️ Open the map</button>';
+  +(function(){const p=tParts();
+    return '<div class=gloss><b>'+dateStr()+'</b><div class=gd>Age '+p.age+' · day '+(p.totalDays+1)
+      +' · net worth '+money(netWorth())+'</div></div>'})()
+  +'<button class=pbtn style="margin-top:12px" onclick="closeSide();openMap()">\U0001f5fa️ Open the map</button>';
 }
 /* ---- LOOK tab: the free stuff ---- */
 function sideLook(){
@@ -4809,6 +5015,7 @@ function renderQuest(){
  $('qbar').style.width=Math.round(i/(TUTORIAL.length-1)*100)+'%';
  q.classList.add('show')}
 function checkQuest(){
+ try{checkStory()}catch(e){}
  if(G.tutSkipped)return;
  const i=G.tut||0;if(i>=TUTORIAL.length-1){renderQuest();return}
  let guard=0;
@@ -5554,7 +5761,7 @@ function syncOverlay(){const any=!!document.querySelector('.ov.show')||$('sidep'
  document.body.classList.toggle('overlay',any)}
 // anything that opens a panel goes through classList.add('show'); watch for it rather than patch 40 call sites
 new MutationObserver(syncOverlay).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
-function renderHUD(){$('hnw').textContent=(typeof netWorth==='function'?netWorth():(G.wealth||0)).toLocaleString();$('hwords').textContent=Object.keys(G.glossary).length;let i=0;while(i<STAGES.length&&G.done[i])i++;$('hlvl').textContent=(i>=STAGES.length?LEVELS.length:STAGES[i].level+1)}
+function renderHUD(){try{if($('hstn'))$('hstn').textContent=storyCount()+'/'+STORY.length}catch(e){}$('hnw').textContent=(typeof netWorth==='function'?netWorth():(G.wealth||0)).toLocaleString();$('hwords').textContent=Object.keys(G.glossary).length;let i=0;while(i<STAGES.length&&G.done[i])i++;$('hlvl').textContent=(i>=STAGES.length?LEVELS.length:STAGES[i].level+1)}
 async function resolve(){const due=G.predictions.filter(p=>p.status==='pending'&&Date.now()>=p.due);if(!due.length)return;let q={};try{q=await j('/api/game/quotes')}catch(e){return}
  for(const p of due){const now=q[p.symbol];if(now==null)continue;p.resolved=now;const win=(p.dir==='up'&&now>p.price)||(p.dir==='down'&&now<p.price);p.status=win?'correct':'wrong';if(win){G.streak++;G.bestStreak=Math.max(G.bestStreak,G.streak);addWealth(1500);
   const before=wageTier().n;G.skill=Math.min(SKILL_CAP,(G.skill||0)+1);
